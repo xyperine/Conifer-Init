@@ -1,0 +1,172 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace ProjectSetup.Editor
+{
+    /// <summary>
+    /// Describes a folder in the Assets directory. Paths are relative to the Assets directory. Implements a tree structure.
+    /// </summary>
+    public class FolderStructureEntry : IEquatable<FolderStructureEntry>
+    {
+        private List<FolderStructureEntry> _children;
+            
+        public string Name { get; private set; }
+        public FolderStructureEntry Parent { get; private set; }
+
+        
+        public string FullName =>
+            Path.Combine(Parent == null || Parent.FullName == "Assets" 
+                ? string.Empty 
+                : Parent.FullName
+                , Name);
+
+
+        public FolderStructureEntry(string name, FolderStructureEntry parent)
+        {
+            Name = name;
+            _children = new List<FolderStructureEntry>();
+            Parent = parent;
+        }
+
+
+        public FolderStructureEntry(string name, FolderStructureEntry parent, List<FolderStructureEntry> children)
+        {
+            _children = children;
+            Name = name;
+            Parent = parent;
+
+            children = _children.Distinct().ToList();
+            
+            foreach (FolderStructureEntry child in children)
+            {
+                child.Parent = this;
+            }
+        }
+
+
+        public List<FolderStructureEntry> GetChildren()
+        {
+            return new List<FolderStructureEntry>(_children);
+        }
+
+
+        public void AddChild(FolderStructureEntry folderStructureEntry)
+        {
+            if (!_children.Contains(folderStructureEntry))
+            {
+                folderStructureEntry.Parent = this;
+                _children.Add(folderStructureEntry);
+                _children = _children.OrderBy(c => c.Name).ToList();
+                //Debug.Log($"Added child: {folderStructureEntry.Name}");
+            }
+        }
+
+
+        public void RemoveChild(FolderStructureEntry folderStructureEntry)
+        {
+            if (_children.Contains(folderStructureEntry))
+            {
+                _children.Remove(folderStructureEntry);
+            }
+        }
+
+
+        public string[] ToFolderNames(bool includeRoot = false)
+        {
+            List<string> names = new List<string>();
+
+            if (includeRoot)
+            {
+                names.Add(FullName);
+            }
+
+            foreach (FolderStructureEntry child in _children)
+            {
+                names.AddRange(child.ToFolderNames(true));
+            }
+
+            return names.ToArray();
+        }
+
+
+        /// <summary>
+        /// Renames the folder.
+        /// </summary>
+        /// <param name="newName">Expects valid name.</param>
+        public void Rename(string newName)
+        {
+            Name = newName;
+        }
+
+
+        /// <summary>
+        /// Creates folder along with all the parent folders in the path
+        /// </summary>
+        /// <param name="path">Path relative to the root folder</param>
+        /// <returns>The topmost parent folder</returns>
+        public static void Create(FolderStructureEntry root, string path)
+        {
+            string[] folders = path.Split('/');
+            FolderStructureEntry current = root;
+
+            for (int i = 0; i < folders.Length; i++)
+            {
+                FolderStructureEntry child = new FolderStructureEntry(folders[i], current);
+                if (!current._children.Contains(child))
+                {
+                    current.AddChild(child);
+                    current = child;
+                }
+                else
+                {
+                    current = current._children.Find(c => c.Equals(child));
+                }
+            }
+        }
+
+
+        public bool Equals(FolderStructureEntry other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return FullName == other.FullName;
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((FolderStructureEntry) obj);
+        }
+
+
+        public override int GetHashCode()
+        {
+            return (FullName != null ? FullName.GetHashCode() : 0);
+        }
+    }
+}
