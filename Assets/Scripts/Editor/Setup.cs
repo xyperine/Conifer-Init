@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEditor.SceneManagement;
@@ -127,6 +129,33 @@ namespace ProjectSetup.Editor
             Packages.ImportAsync(packages);
             
             TMP_PackageResourceImporter.ImportResources(true, false, false);
+        }
+
+
+        [MenuItem("Tools/Setup/Project Settings")]
+        public static void SetProjectSettings()
+        {
+            const string companyName = "xyperine";
+            const string initialVersion = "v0.1.0";
+
+            string projectName = Application.dataPath.Split('/')[^2];
+            string defaultNamespace = Regex.Replace(projectName, "\\W|_", "");
+            string productName = projectName;
+            //Debug.Log(defaultNamespace);
+            
+            EditorSettings.projectGenerationRootNamespace = defaultNamespace;
+            EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
+            
+            PlayerSettings.companyName = companyName;
+            PlayerSettings.productName = productName;
+            PlayerSettings.bundleVersion = initialVersion;
+            
+            if (EditorUserBuildSettings.activeBuildTarget is BuildTarget.StandaloneWindows64
+                or BuildTarget.StandaloneWindows or BuildTarget.StandaloneLinux64 or BuildTarget.StandaloneOSX)
+            {
+                PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
+                Debug.Log("Successfully changed scripting backend to IL2CPP!");
+            }
         }
         
         
