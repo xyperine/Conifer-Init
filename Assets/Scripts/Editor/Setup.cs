@@ -165,33 +165,6 @@ namespace ProjectSetup.Editor
                 Debug.Log("Successfully changed scripting backend to IL2CPP!");
             }
         }
-
-
-        [MenuItem("Tools/Setup/Project Settings")]
-        public static void SetProjectSettings()
-        {
-            const string companyName = "xyperine";
-            const string initialVersion = "v0.1.0";
-
-            string projectName = Application.dataPath.Split('/')[^2];
-            string defaultNamespace = Regex.Replace(projectName, "\\W|_", "");
-            string productName = projectName;
-            //Debug.Log(defaultNamespace);
-            
-            EditorSettings.projectGenerationRootNamespace = defaultNamespace;
-            EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
-            
-            PlayerSettings.companyName = companyName;
-            PlayerSettings.productName = productName;
-            PlayerSettings.bundleVersion = initialVersion;
-            
-            if (EditorUserBuildSettings.activeBuildTarget is BuildTarget.StandaloneWindows64
-                or BuildTarget.StandaloneWindows or BuildTarget.StandaloneLinux64 or BuildTarget.StandaloneOSX)
-            {
-                PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
-                Debug.Log("Successfully changed scripting backend to IL2CPP!");
-            }
-        }
         
         
         static class Packages
