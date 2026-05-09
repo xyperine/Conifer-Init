@@ -1,7 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using UnityEditor;
+using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
@@ -9,6 +14,7 @@ namespace ProjectSetup.Editor
     {
         private const float SPACE_SIZE = 4f;
 
+        // Folder structure settings
         private bool _isAddingChild;
         private string _newChildName;
         private string _newChildParentFullName;
@@ -18,6 +24,11 @@ namespace ProjectSetup.Editor
         private string _newEditedName;
 
         private FolderStructureEntry _assetsFolderStructureEntry;
+
+        // Packages settings
+        private SearchRequest _packagesListRequest;
+
+        private List<PackageInfo> _packagesToImport = new List<PackageInfo>();
         
 
         // TODO: Improve/remove the keyboard shortcut
@@ -33,6 +44,8 @@ namespace ProjectSetup.Editor
         private void OnEnable()
         {
             InitializeRootFSE();
+
+            _packagesListRequest = Client.SearchAll();
         }
 
 
@@ -65,6 +78,10 @@ namespace ProjectSetup.Editor
             // - If the ideal option is problematic, just list essential packages and assets and options to import them
             // interactively or not.
 
+            GUILayout.Space(SPACE_SIZE);
+            
+            DrawPackagesSettings();
+            
             // Draw scene settings
             // - Add a list scenes and remove/rename the SampleScene
 
@@ -259,6 +276,76 @@ namespace ProjectSetup.Editor
             bool valid = !string.IsNullOrEmpty(s) && !string.IsNullOrWhiteSpace(s) &&
                          s.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
             return valid;
+        }
+
+
+        private void DrawPackagesSettings()
+        {
+            const int maxEntriesPerPage = 10;
+            int page = 1;
+            
+            if (SuccessfullyRetrievedPackages(_packagesListRequest))
+            {
+                using (new GUILayout.VerticalScope("List", new GUIStyle(GUI.skin.window)))
+                {
+                    int entriesCount = Math.Min(maxEntriesPerPage,
+                        _packagesListRequest.Result.Length - page * maxEntriesPerPage);
+                    for (int i = 0; i < entriesCount; i++)
+                    {
+                        PackageInfo packageInfo = _packagesListRequest.Result[i];
+                        using (EditorGUILayout.HorizontalScope s = new EditorGUILayout.HorizontalScope(new GUIStyle()))
+                        {
+                            Color bgColor = i % 2 == 0 
+                                ? new Color(0f, 0f, 0f, 0.03f)
+                                : new Color(1f, 1f, 1f, 0.03f);
+
+                            Rect rect = new Rect
+                            {
+                                position = s.rect.position,
+                                size = s.rect.size,
+                            };
+                            EditorGUI.DrawRect(rect, bgColor);
+                            
+                            GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f));
+                            if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                            {
+                                _packagesToImport.Add(packageInfo);
+                            }
+
+                            if (GUILayout.Button("Update", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                            {
+                                
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+        private bool SuccessfullyRetrievedPackages(SearchRequest searchRequest)
+        {
+            switch (searchRequest.Status)
+            {
+                case StatusCode.InProgress:
+                    GUILayout.Label("Retrieving packages...");
+                    return false;
+                case StatusCode.Success:
+                    Debug.Log("Successfully retrieved packages.");
+                    // Draw the list
+                    GUIStyle style1 = new GUIStyle(GUI.skin.label)
+                        {normal = new GUIStyleState() {textColor = Color.limeGreen}};
+                    GUILayout.Label($"Retrieved packages: {searchRequest.Result.Length}", style1);
+                    return true;
+                case StatusCode.Failure:
+                    GUIStyle style = new GUIStyle(GUI.skin.label)
+                        {normal = new GUIStyleState() {textColor = Color.crimson}};
+                    GUILayout.Label($"Error while retrieving packages: {searchRequest.Error.message}", style);
+                    return false;
+                default:
+                    Debug.LogError("Invalid request");
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }
