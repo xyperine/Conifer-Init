@@ -13,20 +13,9 @@ namespace ProjectSetup.Editor
 {
     public class SetupWindow : EditorWindow
     {
-        public readonly struct SomeEntry<T>
-        {
-            public int Index { get; }
-            public T Element { get; }
-
-
-            public SomeEntry(int index, T element)
-            {
-                Index = index;
-                Element = element;
-            }
-        }
-        
         private const float SPACE_SIZE = 4f;
+
+        private Vector2 _scrollPosition;
 
         // Folder structure settings
         private bool _isAddingChild;
@@ -44,11 +33,9 @@ namespace ProjectSetup.Editor
         private bool _successfullyRetrievedPackages;
 
         private List<int> _availablePackagesIndices;
-        private List<int> _packagesToImportIndices = new List<int>(); 
-        private int _page = 1;
-        private int _importPage = 1;
-
-        private List<SomeEntry<PackageInfo>> oakdaos = new List<SomeEntry<PackageInfo>>();
+        private readonly List<int> _queuedPackagesIndices = new List<int>(); 
+        private int _availablePage = 1;
+        private int _queuedPage = 1;
         
 
         // TODO: Improve/remove the keyboard shortcut
@@ -99,7 +86,7 @@ namespace ProjectSetup.Editor
             // interactively or not.
 
             GUILayout.Space(SPACE_SIZE);
-            
+
             DrawPackagesSettings();
             
             // Draw scene settings
@@ -117,6 +104,9 @@ namespace ProjectSetup.Editor
             {
                 var s = _assetsFolderStructureEntry.ToFolderNames();
                 Setup.CreateFolders(s);
+
+                var packages = _queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
+                Setup.ImportPackages(packages);
             }
             
             GUILayout.FlexibleSpace();
@@ -298,21 +288,25 @@ namespace ProjectSetup.Editor
             return valid;
         }
 
-
-        // TODO: In the original list find item before the one we are about to add to the available list, and place it after this preceding item in the available list
-        // TODO: Instead of reverse for loops just reduce i by 1 when removing
+        
+        // TODO: Cleanup
         private void DrawPackagesSettings()
         {
             const int maxEntriesPerPage = 10;
             
+            GUILayout.Label("Packages Settings", new GUIStyle(EditorStyles.boldLabel));
+
+            using GUILayout.ScrollViewScope scrollView = new GUILayout.ScrollViewScope(_scrollPosition);
+            _scrollPosition = scrollView.scrollPosition;
+
             if (SuccessfullyRetrievedPackages(_packagesListRequest))
             {
-                using (new GUILayout.VerticalScope("Available", new GUIStyle(GUI.skin.window)))
+                using (new GUILayout.VerticalScope($"Available ({_availablePackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
                 {
-                    int start = (_page - 1) * maxEntriesPerPage;
+                    int start = (_availablePage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        _availablePackagesIndices.Count - (_page - 1) * maxEntriesPerPage);
-                    for (int i = start + entriesCount - 1; i >= start ; i--)
+                        _availablePackagesIndices.Count - (_availablePage - 1) * maxEntriesPerPage);
+                    for (int i = start; i < start + entriesCount; i++)
                     {
                         PackageInfo packageInfo = _packagesListRequest.Result[_availablePackagesIndices[i]];
                         using (EditorGUILayout.HorizontalScope s = new EditorGUILayout.HorizontalScope(new GUIStyle()))
@@ -333,13 +327,10 @@ namespace ProjectSetup.Editor
                             {
                                 int index = _availablePackagesIndices[i];
                                 
-                                _packagesToImportIndices.Add(index);
+                                _queuedPackagesIndices.Add(index);
                                 _availablePackagesIndices.Remove(index);
-                            }
 
-                            if (GUILayout.Button("Update", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
-                            {
-                                
+                                i--;
                             }
                         }
                     }
@@ -349,57 +340,128 @@ namespace ProjectSetup.Editor
                     {
                         GUILayout.FlexibleSpace();
                         
-                        using (new EditorGUI.DisabledGroupScope(_page <= 1))
+                        using (new EditorGUI.DisabledGroupScope(_availablePage <= 1))
                         {
                             if (GUILayout.Button("<"))
                             {
-                                _page--;
+                                _availablePage--;
                             }
                         }
                         
                         int maxPages =
                             Mathf.CeilToInt(_availablePackagesIndices.Count / (float) maxEntriesPerPage);
-                        GUILayout.Label($"{_page}/{maxPages}", new GUIStyle(GUI.skin.label));
+                        GUILayout.Label($"{_availablePage}/{maxPages}", new GUIStyle(GUI.skin.label));
                         
-                        using (new EditorGUI.DisabledGroupScope(_page >= maxPages))
+                        using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
                         {
                             if (GUILayout.Button(">"))
                             {
-                                _page++;
+                                _availablePage++;
                             }
                         }
                     }
                 }
 
-                // To import list
-                using (new GUILayout.VerticalScope("Queued", new GUIStyle(GUI.skin.window)))
+                GUILayout.Space(SPACE_SIZE);
+                
+                // Queued list
+                using (new GUILayout.VerticalScope($"Queued ({_queuedPackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
                 {
-                    int start = (_importPage - 1) * maxEntriesPerPage;
-                    int entriesCount = Math.Min(maxEntriesPerPage,
-                        _packagesToImportIndices.Count - (_importPage - 1) * maxEntriesPerPage);
-                    for (int i = start + entriesCount - 1; i >= start; i--)
+                    if (_queuedPackagesIndices.Count == 0)
                     {
-                        PackageInfo packageInfo = _packagesListRequest.Result[_packagesToImportIndices[i]];
-                        using (EditorGUILayout.HorizontalScope s = new EditorGUILayout.HorizontalScope(new GUIStyle()))
+                        using (new GUILayout.HorizontalScope())
                         {
-                            Color bgColor = i % 2 == 0 
-                                ? new Color(0f, 0f, 0f, 0.03f)
-                                : new Color(1f, 1f, 1f, 0.03f);
-
-                            Rect rect = new Rect
+                            GUILayout.FlexibleSpace();
+                            GUILayout.Label("—");
+                            GUILayout.FlexibleSpace();
+                        }
+                    }
+                    else
+                    {
+                        int start = (_queuedPage - 1) * maxEntriesPerPage;
+                        int entriesCount = Math.Min(maxEntriesPerPage,
+                            _queuedPackagesIndices.Count - (_queuedPage - 1) * maxEntriesPerPage);
+                        for (int i = start; i < start + entriesCount; i++)
+                        {
+                            PackageInfo packageInfo = _packagesListRequest.Result[_queuedPackagesIndices[i]];
+                            using (EditorGUILayout.HorizontalScope s = new EditorGUILayout.HorizontalScope(new GUIStyle()))
                             {
-                                position = s.rect.position,
-                                size = s.rect.size,
-                            };
-                            EditorGUI.DrawRect(rect, bgColor);
-                            
-                            GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f));
+                                Color bgColor = i % 2 == 0 
+                                    ? new Color(0f, 0f, 0f, 0.03f)
+                                    : new Color(1f, 1f, 1f, 0.03f);
 
-                            if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                                Rect rect = new Rect
+                                {
+                                    position = s.rect.position,
+                                    size = s.rect.size,
+                                };
+                                EditorGUI.DrawRect(rect, bgColor);
+                                
+                                GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f));
+                                
+                                if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                                {
+                                    int index = _queuedPackagesIndices[i];
+                                    
+                                    bool found = false;
+                                    int originalPrecedingPackageIndex = int.MinValue;
+                                    int indexOffset = 1;
+                                    while (!found)
+                                    {
+                                        int precedingIndex = Mathf.Max(index - indexOffset, 0);
+                                        
+                                        if (precedingIndex == 0)
+                                        {
+                                            originalPrecedingPackageIndex = -1;
+                                            found = true;
+                                        }
+                                        
+                                        if (_availablePackagesIndices.Contains(precedingIndex))
+                                        {
+                                            originalPrecedingPackageIndex = _availablePackagesIndices.IndexOf(precedingIndex);
+                                            found = true;
+                                        }
+                                        else
+                                        {
+                                            indexOffset++;
+                                        }
+                                    }
+                                    
+                                    _queuedPackagesIndices.Remove(index);
+                                    _availablePackagesIndices.Insert(originalPrecedingPackageIndex + 1, index);
+
+                                    i--;
+                                    entriesCount--;
+                                }
+                            }
+                        }
+                        
+                        // Pages navigation
+                        if (_queuedPackagesIndices.Count > maxEntriesPerPage)
+                        {
+                            using (new GUILayout.HorizontalScope(new GUIStyle()))
                             {
-                                int index = _packagesToImportIndices[i];
-                                _packagesToImportIndices.Remove(index);
-                                _availablePackagesIndices.Add(index);
+                                GUILayout.FlexibleSpace();
+                                
+                                using (new EditorGUI.DisabledGroupScope(_queuedPage <= 1))
+                                {
+                                    if (GUILayout.Button("<"))
+                                    {
+                                        _queuedPage--;
+                                    }
+                                }
+                                
+                                int maxPages =
+                                    Mathf.CeilToInt(_queuedPackagesIndices.Count / (float) maxEntriesPerPage);
+                                GUILayout.Label($"{_queuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                                
+                                using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
+                                {
+                                    if (GUILayout.Button(">"))
+                                    {
+                                        _queuedPage++;
+                                    }
+                                }
                             }
                         }
                     }

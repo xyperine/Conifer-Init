@@ -138,6 +138,14 @@ namespace ProjectSetup.Editor
 
             Packages.ImportAsync(packages);
         }
+        
+        
+        public static void ImportPackages(IEnumerable<string> packages)
+        {
+            TMP_PackageResourceImporter.ImportResources(true, false, false);
+
+            Packages.ImportAsync(packages);
+        }
 
 
         [MenuItem("Tools/Setup/Project Settings")]
@@ -173,7 +181,7 @@ namespace ProjectSetup.Editor
             private static readonly Queue<string> PackagesToInstall = new Queue<string>();
             
             
-            public static async Task ImportAsync(string[] packages)
+            public static async Task ImportAsync(IEnumerable<string> packages)
             {
                 foreach (string package in packages)
                 {
