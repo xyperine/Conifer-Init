@@ -38,6 +38,8 @@ namespace ProjectSetup.Editor
         private readonly List<int> _queuedPackagesIndices = new List<int>(); 
         private int _availablePage = 1;
         private int _queuedPage = 1;
+
+        private string _packagesSearchString;
         
 
         // TODO: Improve/remove the keyboard shortcut
@@ -299,7 +301,6 @@ namespace ProjectSetup.Editor
         }
 
         
-        // TODO: Cleanup
         private void DrawPackagesSettings()
         {
             const int maxEntriesPerPage = 10;
@@ -314,14 +315,28 @@ namespace ProjectSetup.Editor
                 return;
             }
 
-            using (new GUILayout.VerticalScope($"Available ({_availablePackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
+            _packagesSearchString =
+                GUILayout.TextField(_packagesSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
+                    GUILayout.MaxWidth(256f));
+            
+            List<int> packages = _availablePackagesIndices;
+            if (!string.IsNullOrWhiteSpace(_packagesSearchString))
+            {
+                packages = packages.FindAll(index =>
+                    _packagesListRequest.Result[index].displayName.Contains(_packagesSearchString,
+                        StringComparison.OrdinalIgnoreCase));
+
+                _availablePage = 1;
+            }
+            
+            using (new GUILayout.VerticalScope($"Available ({packages.Count})", new GUIStyle(GUI.skin.window)))
             {
                 int start = (_availablePage - 1) * maxEntriesPerPage;
                 int entriesCount = Math.Min(maxEntriesPerPage,
-                    _availablePackagesIndices.Count - (_availablePage - 1) * maxEntriesPerPage);
+                    packages.Count - (_availablePage - 1) * maxEntriesPerPage);
                 for (int i = start; i < start + entriesCount; i++)
                 {
-                    PackageInfo packageInfo = _packagesListRequest.Result[_availablePackagesIndices[i]];
+                    PackageInfo packageInfo = _packagesListRequest.Result[packages[i]];
                     using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                     Color bgColor = i % 2 == 0 
                         ? new Color(0f, 0f, 0f, 0.03f)
@@ -337,7 +352,7 @@ namespace ProjectSetup.Editor
                     GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f));
                     if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                     {
-                        int index = _availablePackagesIndices[i];
+                        int index = packages[i];
                                 
                         _queuedPackagesIndices.Add(index);
                         _availablePackagesIndices.Remove(index);
