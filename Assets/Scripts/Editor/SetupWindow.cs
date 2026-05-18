@@ -34,12 +34,17 @@ namespace ProjectSetup.Editor
         private SearchRequest _packagesListRequest;
         private bool _successfullyRetrievedPackages;
 
-        private List<int> _availablePackagesIndices;
+        //private List<int> _availablePackagesIndices;
         private readonly List<int> _queuedPackagesIndices = new List<int>(); 
         private int _availablePage = 1;
         private int _queuedPage = 1;
 
         private string _packagesSearchString;
+
+        private List<int> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
+            ? _packagesListRequest.Result.Select(p => Array.IndexOf(_packagesListRequest.Result, p)).Where(i =>
+                !_queuedPackagesIndices.Contains(i)).ToList()
+            : new List<int>();
         
 
         // TODO: Improve/remove the keyboard shortcut
@@ -300,7 +305,7 @@ namespace ProjectSetup.Editor
             return valid;
         }
 
-        
+        // TODO: Fix problems when something recompiles
         private void DrawPackagesSettings()
         {
             const int maxEntriesPerPage = 10;
@@ -319,7 +324,7 @@ namespace ProjectSetup.Editor
                 GUILayout.TextField(_packagesSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
             
-            List<int> packages = _availablePackagesIndices;
+            List<int> packages = AvailablePackages;
             if (!string.IsNullOrWhiteSpace(_packagesSearchString))
             {
                 packages = packages.FindAll(index =>
@@ -355,7 +360,6 @@ namespace ProjectSetup.Editor
                         int index = packages[i];
                                 
                         _queuedPackagesIndices.Add(index);
-                        _availablePackagesIndices.Remove(index);
 
                         i--;
                     }
@@ -374,7 +378,7 @@ namespace ProjectSetup.Editor
                 }
                         
                 int maxPages =
-                    Mathf.CeilToInt(_availablePackagesIndices.Count / (float) maxEntriesPerPage);
+                    Mathf.CeilToInt(AvailablePackages.Count / (float) maxEntriesPerPage);
                 GUILayout.Label($"{_availablePage}/{maxPages}", new GUIStyle(GUI.skin.label));
                         
                 using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
@@ -426,33 +430,8 @@ namespace ProjectSetup.Editor
                         {
                             int index = _queuedPackagesIndices[i];
                                     
-                            bool found = false;
-                            int originalPrecedingPackageIndex = int.MinValue;
-                            int indexOffset = 1;
-                            while (!found)
-                            {
-                                int precedingIndex = Mathf.Max(index - indexOffset, 0);
-                                        
-                                if (precedingIndex == 0)
-                                {
-                                    originalPrecedingPackageIndex = -1;
-                                    found = true;
-                                }
-                                        
-                                if (_availablePackagesIndices.Contains(precedingIndex))
-                                {
-                                    originalPrecedingPackageIndex = _availablePackagesIndices.IndexOf(precedingIndex);
-                                    found = true;
-                                }
-                                else
-                                {
-                                    indexOffset++;
-                                }
-                            }
-                                    
                             _queuedPackagesIndices.Remove(index);
-                            _availablePackagesIndices.Insert(originalPrecedingPackageIndex + 1, index);
-
+                            
                             i--;
                             entriesCount--;
                         }
@@ -508,7 +487,6 @@ namespace ProjectSetup.Editor
                     GUIStyle style1 = new GUIStyle(GUI.skin.label)
                         {normal = new GUIStyleState() {textColor = Color.limeGreen}};
                     GUILayout.Label($"Retrieved packages: {searchRequest.Result.Length}", style1);
-                    _availablePackagesIndices = Enumerable.Range(0, searchRequest.Result.Length).ToList();
                     _successfullyRetrievedPackages = true;
                     return true;
                 case StatusCode.Failure:
