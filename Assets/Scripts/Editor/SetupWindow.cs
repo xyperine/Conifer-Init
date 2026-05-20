@@ -33,8 +33,7 @@ namespace ProjectSetup.Editor
         // Packages settings
         private SearchRequest _packagesListRequest;
         private bool _successfullyRetrievedPackages;
-
-        //private List<int> _availablePackagesIndices;
+        
         [SerializeField] private List<int> queuedPackagesIndices = new List<int>(); 
         private int _availablePage = 1;
         private int _queuedPage = 1;
@@ -46,8 +45,7 @@ namespace ProjectSetup.Editor
                 !queuedPackagesIndices.Contains(i)).ToList()
             : new List<int>();
         
-
-        // TODO: Improve/remove the keyboard shortcut
+        
         [MenuItem("Tools/Setup Window")]
         private static void ShowWindow()
         {
@@ -88,12 +86,6 @@ namespace ProjectSetup.Editor
         {
             DrawFolderStructureSettings();
 
-            // Draw packages and plugins settings
-            // - Ideally, browse through the packages list and assets list, queue any asset/package for import and
-            // option to import it interactively or not.
-            // - If the ideal option is problematic, just list essential packages and assets and options to import them
-            // interactively or not.
-
             GUILayout.Space(SPACE_SIZE);
 
             DrawPackagesSettings();
@@ -109,15 +101,7 @@ namespace ProjectSetup.Editor
             
             GUILayout.Space(SPACE_SIZE);
 
-            if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
-            {
-                string[] folders = _assetsFolderStructureEntry.ToFolderNames();
-                Setup.CreateFolders(folders);
-
-                IEnumerable<string> packages =
-                    queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
-                Setup.ImportPackages(packages);
-            }
+            DrawExecuteSetup();
             
             GUILayout.FlexibleSpace();
         }
@@ -483,7 +467,6 @@ namespace ProjectSetup.Editor
                     return false;
                 case StatusCode.Success:
                     Debug.Log("Successfully retrieved packages.");
-                    // Draw the list
                     GUIStyle style1 = new GUIStyle(GUI.skin.label)
                         {normal = new GUIStyleState() {textColor = Color.limeGreen}};
                     GUILayout.Label($"Retrieved packages: {searchRequest.Result.Length}", style1);
@@ -499,6 +482,20 @@ namespace ProjectSetup.Editor
                     Debug.LogError("Invalid request");
                     _successfullyRetrievedPackages = false;
                     throw new ArgumentOutOfRangeException();
+            }
+        }
+
+
+        private void DrawExecuteSetup()
+        {
+            if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
+            {
+                string[] folders = _assetsFolderStructureEntry.ToFolderNames();
+                Setup.CreateFolders(folders);
+
+                IEnumerable<string> packages =
+                    queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
+                Setup.ImportPackages(packages);
             }
         }
     }
