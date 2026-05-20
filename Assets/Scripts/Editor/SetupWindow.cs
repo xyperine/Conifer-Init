@@ -35,7 +35,7 @@ namespace ProjectSetup.Editor
         private bool _successfullyRetrievedPackages;
 
         //private List<int> _availablePackagesIndices;
-        private readonly List<int> _queuedPackagesIndices = new List<int>(); 
+        [SerializeField] private List<int> queuedPackagesIndices = new List<int>(); 
         private int _availablePage = 1;
         private int _queuedPage = 1;
 
@@ -43,7 +43,7 @@ namespace ProjectSetup.Editor
 
         private List<int> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
             ? _packagesListRequest.Result.Select(p => Array.IndexOf(_packagesListRequest.Result, p)).Where(i =>
-                !_queuedPackagesIndices.Contains(i)).ToList()
+                !queuedPackagesIndices.Contains(i)).ToList()
             : new List<int>();
         
 
@@ -115,7 +115,7 @@ namespace ProjectSetup.Editor
                 Setup.CreateFolders(folders);
 
                 IEnumerable<string> packages =
-                    _queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
+                    queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
                 Setup.ImportPackages(packages);
             }
             
@@ -305,7 +305,7 @@ namespace ProjectSetup.Editor
             return valid;
         }
 
-        // TODO: Fix problems when something recompiles
+
         private void DrawPackagesSettings()
         {
             const int maxEntriesPerPage = 10;
@@ -359,7 +359,7 @@ namespace ProjectSetup.Editor
                     {
                         int index = packages[i];
                                 
-                        _queuedPackagesIndices.Add(index);
+                        queuedPackagesIndices.Add(index);
 
                         i--;
                     }
@@ -393,9 +393,9 @@ namespace ProjectSetup.Editor
             GUILayout.Space(SPACE_SIZE);
                 
             // Queued list
-            using (new GUILayout.VerticalScope($"Queued ({_queuedPackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
+            using (new GUILayout.VerticalScope($"Queued ({queuedPackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
             {
-                if (_queuedPackagesIndices.Count == 0)
+                if (queuedPackagesIndices.Count == 0)
                 {
                     using (new GUILayout.HorizontalScope())
                     {
@@ -408,10 +408,10 @@ namespace ProjectSetup.Editor
                 {
                     int start = (_queuedPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        _queuedPackagesIndices.Count - (_queuedPage - 1) * maxEntriesPerPage);
+                        queuedPackagesIndices.Count - (_queuedPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _packagesListRequest.Result[_queuedPackagesIndices[i]];
+                        PackageInfo packageInfo = _packagesListRequest.Result[queuedPackagesIndices[i]];
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0 
                             ? new Color(0f, 0f, 0f, 0.03f)
@@ -428,9 +428,9 @@ namespace ProjectSetup.Editor
                                 
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
-                            int index = _queuedPackagesIndices[i];
+                            int index = queuedPackagesIndices[i];
                                     
-                            _queuedPackagesIndices.Remove(index);
+                            queuedPackagesIndices.Remove(index);
                             
                             i--;
                             entriesCount--;
@@ -438,7 +438,7 @@ namespace ProjectSetup.Editor
                     }
                         
                     // Pages navigation
-                    if (_queuedPackagesIndices.Count > maxEntriesPerPage)
+                    if (queuedPackagesIndices.Count > maxEntriesPerPage)
                     {
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                         GUILayout.FlexibleSpace();
@@ -452,7 +452,7 @@ namespace ProjectSetup.Editor
                         }
                                 
                         int maxPages =
-                            Mathf.CeilToInt(_queuedPackagesIndices.Count / (float) maxEntriesPerPage);
+                            Mathf.CeilToInt(queuedPackagesIndices.Count / (float) maxEntriesPerPage);
                         GUILayout.Label($"{_queuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
                                 
                         using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
@@ -472,7 +472,7 @@ namespace ProjectSetup.Editor
         {
             if (_successfullyRetrievedPackages)
             {
-                return true;
+                return searchRequest.Result != null;
             }
             
             switch (searchRequest.Status)
