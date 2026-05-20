@@ -16,7 +16,7 @@ namespace ProjectSetup.Editor
         private const float SPACE_SIZE = 4f;
 
         private Vector2 _scrollPosition;
-
+        
         // Folder structure settings
         private int _elementIndex;
         
@@ -39,10 +39,30 @@ namespace ProjectSetup.Editor
         private int _queuedPage = 1;
 
         private string _packagesSearchString;
+        
+        private Vector2 _packagesScrollPosition;
 
         private List<int> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
             ? _packagesListRequest.Result.Select(p => Array.IndexOf(_packagesListRequest.Result, p)).Where(i =>
                 !queuedPackagesIndices.Contains(i)).ToList()
+            : new List<int>();
+
+
+        // Assets settings
+
+        private bool _successfullyRetrievedAssets = false;
+        private List<AssetInfo> _assets = new List<AssetInfo>();
+        [SerializeField] private List<int> queuedAssetsIndices = new List<int>();
+        private int _assetsAvailablePage = 1;
+        private int _assetsQueuedPage = 1;
+
+        private string _assetsSearchString;
+        
+        private Vector2 _assetsScrollPosition;
+
+        private List<int> AvailableAssets => _successfullyRetrievedAssets && _assets != null
+            ? _assets.Select(a => _assets.IndexOf(a)).Where(i =>
+                !queuedAssetsIndices.Contains(i)).ToList()
             : new List<int>();
         
         
@@ -60,6 +80,31 @@ namespace ProjectSetup.Editor
             InitializeRootFSE();
 
             _packagesListRequest = Client.SearchAll();
+
+            _successfullyRetrievedAssets = false;
+            if (!_successfullyRetrievedAssets)
+            {
+                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                path = Path.Combine(path, "Unity", "Asset Store-5.x");
+                if (Directory.Exists(path))
+                {
+                    string[] assetPaths = Directory.GetFiles(path, "*.unitypackage", SearchOption.AllDirectories);
+
+                    _assets.Clear();
+                    foreach (string assetPath in assetPaths)
+                    {
+                        _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath), false));
+                    }
+
+                    _successfullyRetrievedAssets = true;
+                }
+                else
+                {
+                    throw new DirectoryNotFoundException($"Couldn't find {path}");
+                }
+                
+                return;
+            }
         }
 
 
@@ -84,11 +129,20 @@ namespace ProjectSetup.Editor
 
         private void OnGUI()
         {
+            using GUILayout.ScrollViewScope scrollViewScope = new GUILayout.ScrollViewScope(_scrollPosition);
+            _scrollPosition = scrollViewScope.scrollPosition;
+            
             DrawFolderStructureSettings();
 
             GUILayout.Space(SPACE_SIZE);
 
             DrawPackagesSettings();
+            
+            GUILayout.Space(SPACE_SIZE);
+            
+            DrawAssetsSettings();
+
+            GUILayout.Space(SPACE_SIZE);
             
             // Draw scene settings
             // - Add a list scenes and remove/rename the SampleScene
@@ -99,8 +153,7 @@ namespace ProjectSetup.Editor
             // - Default namespace
             // - Scripting backend
             
-            GUILayout.Space(SPACE_SIZE);
-
+            
             DrawExecuteSetup();
             
             GUILayout.FlexibleSpace();
@@ -296,8 +349,8 @@ namespace ProjectSetup.Editor
             
             GUILayout.Label("Packages Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            using GUILayout.ScrollViewScope scrollView = new GUILayout.ScrollViewScope(_scrollPosition);
-            _scrollPosition = scrollView.scrollPosition;
+            using GUILayout.ScrollViewScope scrollView = new GUILayout.ScrollViewScope(_packagesScrollPosition);
+            _packagesScrollPosition = scrollView.scrollPosition;
 
             if (!SuccessfullyRetrievedPackages(_packagesListRequest))
             {
@@ -486,6 +539,192 @@ namespace ProjectSetup.Editor
         }
 
 
+        private void DrawAssetsSettings()
+        { 
+            const int maxEntriesPerPage = 10;
+            
+            GUILayout.Label("Assets Settings", new GUIStyle(EditorStyles.boldLabel));
+
+            using GUILayout.ScrollViewScope scrollView = new GUILayout.ScrollViewScope(_assetsScrollPosition);
+            _assetsScrollPosition = scrollView.scrollPosition;
+
+            if (!_successfullyRetrievedAssets)
+            {
+                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                path = Path.Combine(path, "Unity", "Asset Store-5.x");
+                if (Directory.Exists(path))
+                {
+                    string[] assetPaths = Directory.GetFiles(path, "*.unitypackage", SearchOption.AllDirectories);
+
+                    _assets.Clear();
+                    foreach (string assetPath in assetPaths)
+                    {
+                        _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath), false));
+                    }
+
+                    _successfullyRetrievedAssets = true;
+                }
+                else
+                {
+                    throw new DirectoryNotFoundException($"Couldn't find {path}");
+                }
+                
+                return;
+            }
+            
+            _assetsSearchString =
+                GUILayout.TextField(_assetsSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
+                    GUILayout.MaxWidth(256f));
+            
+            List<int> assets = AvailableAssets;
+            if (!string.IsNullOrWhiteSpace(_assetsSearchString))
+            {
+                assets = assets.FindAll(index =>
+                    _assets[index].Name.Contains(_assetsSearchString,
+                        StringComparison.OrdinalIgnoreCase));
+
+                _assetsAvailablePage = 1;
+            }
+            
+            using (new GUILayout.VerticalScope($"Available ({assets.Count})", new GUIStyle(GUI.skin.window)))
+            {
+                int start = (_assetsAvailablePage - 1) * maxEntriesPerPage;
+                int entriesCount = Math.Min(maxEntriesPerPage,
+                    assets.Count - (_assetsAvailablePage - 1) * maxEntriesPerPage);
+                for (int i = start; i < start + entriesCount; i++)
+                {
+                    string assetName = _assets[assets[i]].Name;
+                    using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
+                    Color bgColor = i % 2 == 0 
+                        ? new Color(0f, 0f, 0f, 0.03f)
+                        : new Color(1f, 1f, 1f, 0.03f);
+
+                    Rect rect = new Rect
+                    {
+                        position = entryScope.rect.position,
+                        size = entryScope.rect.size,
+                    };
+                    EditorGUI.DrawRect(rect, bgColor);
+                            
+                    GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f));
+                    if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                    {
+                        int index = assets[i];
+                                
+                        queuedAssetsIndices.Add(index);
+
+                        i--;
+                    }
+                }
+
+                // Pages navigation
+                using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
+                GUILayout.FlexibleSpace();
+                        
+                using (new EditorGUI.DisabledGroupScope(_assetsAvailablePage <= 1))
+                {
+                    if (GUILayout.Button("<"))
+                    {
+                        _assetsAvailablePage--;
+                    }
+                }
+                        
+                int maxPages =
+                    Mathf.CeilToInt(AvailableAssets.Count / (float) maxEntriesPerPage);
+                GUILayout.Label($"{_assetsAvailablePage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                        
+                using (new EditorGUI.DisabledGroupScope(_assetsAvailablePage >= maxPages))
+                {
+                    if (GUILayout.Button(">"))
+                    {
+                        _assetsAvailablePage++;
+                    }
+                }
+            }
+
+            GUILayout.Space(SPACE_SIZE);
+                
+            // Queued list
+            using (new GUILayout.VerticalScope($"Queued ({queuedAssetsIndices.Count})", new GUIStyle(GUI.skin.window)))
+            {
+                if (queuedAssetsIndices.Count == 0)
+                {
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.FlexibleSpace();
+                        GUILayout.Label("—");
+                        GUILayout.FlexibleSpace();
+                    }
+                }
+                else
+                {
+                    int start = (_assetsQueuedPage - 1) * maxEntriesPerPage;
+                    int entriesCount = Math.Min(maxEntriesPerPage,
+                        queuedAssetsIndices.Count - (_assetsQueuedPage - 1) * maxEntriesPerPage);
+                    for (int i = start; i < start + entriesCount; i++)
+                    {
+                        AssetInfo assetInfo = _assets[queuedAssetsIndices[i]];
+                        using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
+                        Color bgColor = i % 2 == 0 
+                            ? new Color(0f, 0f, 0f, 0.03f)
+                            : new Color(1f, 1f, 1f, 0.03f);
+
+                        Rect rect = new Rect
+                        {
+                            position = entryScope.rect.position,
+                            size = entryScope.rect.size,
+                        };
+                        EditorGUI.DrawRect(rect, bgColor);
+                                
+                        GUILayout.Label(assetInfo.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(16f));
+
+                        GUILayout.FlexibleSpace();
+                        
+                        bool interactive = GUILayout.Toggle(assetInfo.Interactive, "Interactive");
+                        _assets[queuedAssetsIndices[i]] = new AssetInfo(assetInfo.Path, assetInfo.Name, interactive);
+                        
+                        if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                        {
+                            int index = queuedAssetsIndices[i];
+                                    
+                            queuedAssetsIndices.Remove(index);
+                            
+                            i--;
+                            entriesCount--;
+                        }
+                    }
+                        
+                    // Pages navigation
+                    if (queuedAssetsIndices.Count > maxEntriesPerPage)
+                    {
+                        using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
+                        GUILayout.FlexibleSpace();
+                                
+                        using (new EditorGUI.DisabledGroupScope(_assetsQueuedPage <= 1))
+                        {
+                            if (GUILayout.Button("<"))
+                            {
+                                _assetsQueuedPage--;
+                            }
+                        }
+                                
+                        int maxPages =
+                            Mathf.CeilToInt(queuedAssetsIndices.Count / (float) maxEntriesPerPage);
+                        GUILayout.Label($"{_assetsQueuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                                
+                        using (new EditorGUI.DisabledGroupScope(_assetsQueuedPage >= maxPages))
+                        {
+                            if (GUILayout.Button(">"))
+                            {
+                                _assetsQueuedPage++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+
         private void DrawExecuteSetup()
         {
             if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
@@ -496,6 +735,9 @@ namespace ProjectSetup.Editor
                 IEnumerable<string> packages =
                     queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
                 Setup.ImportPackages(packages);
+
+                IEnumerable<AssetInfo> assets = queuedAssetsIndices.Select(i => _assets[i]);
+                Setup.ImportAssets(assets);
             }
         }
     }

@@ -115,14 +115,23 @@ namespace ProjectSetup.Editor
         [MenuItem("Tools/Setup/Import Essential Assets")]
         public static void ImportEssentialAssets()
         {
-            Assets.Import("Asset Usage Detector.unitypackage", "yasirkula/Editor ExtensionsUtilities");
-            Assets.Import("Graphy - Ultimate FPS Counter - Stats Monitor Debugger.unitypackage", "Tayx/ScriptingGUI");
-            Assets.Import("Mulligan Renamer.unitypackage", "Red Blue Games/Editor ExtensionsUtilities");
-            Assets.Import("NaughtyAttributes.unitypackage", "Denis Rizov/Editor ExtensionsUtilities");
-            Assets.Import("Serialized Dictionary.unitypackage", "ayellowpaper/Editor ExtensionsUtilities");
-            Assets.Import("Serialize Interfaces.unitypackage", "ayellowpaper/Editor ExtensionsUtilities");
-            Assets.Import("Extenject Dependency Injection IOC.unitypackage", "Mathijs Bakker/Editor ExtensionsUtilities");
-            Assets.Import("Rainbow Folders 2.unitypackage", "Borodar/Editor ExtensionsUtilities");
+            Assets.Import("Asset Usage Detector.unitypackage", "yasirkula/Editor ExtensionsUtilities", false);
+            Assets.Import("Graphy - Ultimate FPS Counter - Stats Monitor Debugger.unitypackage", "Tayx/ScriptingGUI", false);
+            Assets.Import("Mulligan Renamer.unitypackage", "Red Blue Games/Editor ExtensionsUtilities", false);
+            Assets.Import("NaughtyAttributes.unitypackage", "Denis Rizov/Editor ExtensionsUtilities", false);
+            Assets.Import("Serialized Dictionary.unitypackage", "ayellowpaper/Editor ExtensionsUtilities", false);
+            Assets.Import("Serialize Interfaces.unitypackage", "ayellowpaper/Editor ExtensionsUtilities", false);
+            Assets.Import("Extenject Dependency Injection IOC.unitypackage", "Mathijs Bakker/Editor ExtensionsUtilities", false);
+            Assets.Import("Rainbow Folders 2.unitypackage", "Borodar/Editor ExtensionsUtilities", false);
+        }
+
+
+        public static void ImportAssets(IEnumerable<AssetInfo> assets)
+        {
+            foreach (AssetInfo assetInfo in assets)
+            {
+                Assets.Import(assetInfo.Path, assetInfo.Interactive);
+            }
         }
 
         
@@ -233,7 +242,7 @@ namespace ProjectSetup.Editor
             private const string UNITY_PACKAGE_FILE_EXTENSION = ".unitypackage";
             
             
-            public static void Import(string assetName, string folder)
+            public static void Import(string assetName, string folder, bool interactive)
             {
                 string basePath;
                 if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
@@ -255,12 +264,18 @@ namespace ProjectSetup.Editor
 
                 string fullPath = Path.Combine(basePath, folder, assetName);
 
+                Import(fullPath, interactive);
+            }
+
+
+            public static void Import(string fullPath, bool interactive)
+            {
                 if (!File.Exists(fullPath))
                 {
                     throw new FileNotFoundException($"The asset package was not found at the path: {fullPath}");
                 }
                 
-                AssetDatabase.ImportPackage(fullPath, false);
+                AssetDatabase.ImportPackage(fullPath, interactive);
             }
         }
         
