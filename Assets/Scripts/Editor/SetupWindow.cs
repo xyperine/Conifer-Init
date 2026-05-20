@@ -455,7 +455,7 @@ namespace ProjectSetup.Editor
                             Mathf.CeilToInt(queuedPackagesIndices.Count / (float) maxEntriesPerPage);
                         GUILayout.Label($"{_queuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
                                 
-                        using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPage >= maxPages))
                         {
                             if (GUILayout.Button(">"))
                             {
