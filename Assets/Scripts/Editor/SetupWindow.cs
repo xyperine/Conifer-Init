@@ -11,6 +11,9 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
+    /// <summary>
+    /// Handles drawing logic and user inputs
+    /// </summary>
     public class SetupWindow : EditorWindow
     {
         private const float SPACE_SIZE = 4f;

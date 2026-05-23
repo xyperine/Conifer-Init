@@ -174,10 +174,10 @@ namespace ProjectSetup.Editor
 
         private static bool IsTheQueuedPackage(string packageName)
         {
+            AssetInfo asset = _assets.Peek();
+            
             //Debug.Log(packageName);
-            //Debug.Log(_assets.Peek().Path);
-
-            var asset = _assets.Peek();
+            //Debug.Log(asset.Path);
             
             Assert.IsTrue(asset.Path.EndsWith(UnityPackageUtility.UNITY_PACKAGE_FILE_EXTENSION));
             

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
@@ -23,9 +24,7 @@ namespace ProjectSetup.Editor
             using GZipInputStream gzipStream = new GZipInputStream(fileStream);
             using TarInputStream tarStream = new TarInputStream(gzipStream, Encoding.UTF8);
 
-            TarEntry entry;
-
-            while ((entry = tarStream.GetNextEntry()) != null)
+            while (tarStream.GetNextEntry() is { } entry)
             {
                 if (!entry.Name.EndsWith("/pathname"))
                 {
@@ -36,7 +35,7 @@ namespace ProjectSetup.Editor
 
                 string pathname = reader.ReadLine();
                 
-                paths.Add(pathname.Trim());
+                paths.Add(pathname?.Trim());
             }
             
             return paths;
@@ -46,15 +45,7 @@ namespace ProjectSetup.Editor
         public static bool AllPluginAssetsAlreadyImported(string packagePath)
         {
             List<string> paths = GetPathNames(packagePath);
-            foreach (string path in paths)
-            {
-                if (!AssetDatabase.AssetPathExists(path))
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return paths.All(AssetDatabase.AssetPathExists);
         }
     }
 }

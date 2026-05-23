@@ -1,16 +1,10 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using Application = UnityEngine.Application;
@@ -24,6 +18,9 @@ namespace ProjectSetup.Editor
     // TODO: Rename the sample scene to Main
     // TODO: Create Zenject project context and scene context if it is imported
     // TODO: Import my own helpers
+    /// <summary>
+    /// Handles high-level logic coordinating other components.
+    /// </summary>
     public static class Setup
     {
         [MenuItem("Tools/Setup/Folder Structure")]
@@ -194,171 +191,6 @@ namespace ProjectSetup.Editor
             {
                 PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
                 Debug.Log("Successfully changed scripting backend to IL2CPP!");
-            }
-        }
-        
-        
-        static class Packages
-        {
-            private static AddRequest _request;
-            private static readonly Queue<string> PackagesToInstall = new Queue<string>();
-            
-            
-            public static async Task ImportAsync(IEnumerable<string> packages)
-            {
-                foreach (string package in packages)
-                {
-                    PackagesToInstall.Enqueue(package);
-                }
-
-                while (PackagesToInstall.Count >= 1)
-                {
-                    await ImportAsync(PackagesToInstall.Dequeue());
-                    await Task.Delay(1000);
-                }
-                
-                Debug.Log("All packages imported!");
-            }
-
-
-            public static async Task ImportAsync(string package)
-            {
-                _request = Client.Add(package);
-
-                while (!_request.IsCompleted)
-                {
-                    await Task.Delay(10);
-                }
-
-                switch (_request.Status)
-                {
-                    case StatusCode.InProgress:
-                        Debug.LogError("The import is considered to be in progress!");
-                        break;
-                    case StatusCode.Success:
-                        Debug.Log($"Successfully installed: {_request.Result.packageId}");
-                        break;
-                    case StatusCode.Failure:
-                        Debug.LogError(_request.Error.message);
-                        break;
-                    default:
-                        Debug.LogError("Invalid status!");
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
-        
-        
-        // TODO: Add support for interactive import
-        // TODO: Automatically move imported assets to the plugins folder
-        static class Assets
-        {
-            private const string UNITY_PACKAGE_FILE_EXTENSION = ".unitypackage";
-            
-            
-            public static void Import(string assetName, string folder, bool interactive)
-            {
-                string basePath;
-                if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
-                {
-                    string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                    basePath = Path.Combine(homeDirectory, "Library/Unity/Asset Store-5.x");
-                }
-                else
-                {
-                    string defaultPath =
-                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Unity");
-                    basePath = Path.Combine(EditorPrefs.GetString("AssetStoreCacheRootPath", defaultPath),
-                        "Asset Store-5.x");
-                }
-
-                assetName = assetName.EndsWith(UNITY_PACKAGE_FILE_EXTENSION)
-                    ? assetName
-                    : assetName + UNITY_PACKAGE_FILE_EXTENSION;
-
-                string fullPath = Path.Combine(basePath, folder, assetName);
-
-                Import(fullPath, interactive);
-            }
-
-
-            public static void Import(string fullPath, bool interactive)
-            {
-                if (!File.Exists(fullPath))
-                {
-                    throw new FileNotFoundException($"The asset package was not found at the path: {fullPath}");
-                }
-                
-                AssetDatabase.ImportPackage(fullPath, interactive);
-            }
-            
-            
-            public static void Import(IEnumerable<AssetInfo> assets)
-            {
-                AssetsImporter.Begin(assets);
-            }
-        }
-        
-        
-        // TODO: Create assembly definition files
-        static class Folders
-        {
-            public static void Create(string destination, string[] folders)
-            {
-                string fullPath = Path.Combine(Application.dataPath, destination);
-                if (!Directory.Exists(fullPath))
-                {
-                    Directory.CreateDirectory(fullPath);
-                }
-                
-                foreach (string folder in folders)
-                {
-                    CreateSubFolders(fullPath, folder);
-                }
-                
-            }
-            
-            
-            static void CreateSubFolders(string rootPath, string folderHierarchy) 
-            {
-                string[] folders = folderHierarchy.Split('/');
-                string currentPath = rootPath;
-
-                foreach (string folder in folders) 
-                {
-                    currentPath = Path.Combine(currentPath, folder);
-                    if (!Directory.Exists(currentPath))
-                    {
-                        Directory.CreateDirectory(currentPath);
-                    }
-                }
-            }
-            
-            
-            public static void Delete(string folderName)
-            {
-                string path = $"Assets/{folderName}";
-                if (AssetDatabase.IsValidFolder(path))
-                {
-                    AssetDatabase.DeleteAsset(path);
-                }
-            }
-
-
-            // TODO: Consider checking with AssetDatabase.ValidateMoveAsset()
-            public static void Move(string newParent, string folderName)
-            {
-                string sourcePath = $"Assets/{folderName}";
-                if (AssetDatabase.IsValidFolder(sourcePath))
-                {
-                    string destinationPath = $"Assets/{newParent}/{folderName}";
-                    string moveResult = AssetDatabase.MoveAsset(sourcePath, destinationPath);
-                    bool movedSuccessfully = string.IsNullOrEmpty(moveResult);
-                    if (!movedSuccessfully)
-                    {
-                        Debug.LogError($"Failed to move {folderName} under {newParent}: {moveResult}");
-                    }
-                }
             }
         }
     }
