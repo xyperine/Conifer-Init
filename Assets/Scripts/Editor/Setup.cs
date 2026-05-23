@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using Application = UnityEngine.Application;
 using Object = UnityEngine.Object;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
@@ -126,19 +129,30 @@ namespace ProjectSetup.Editor
         }
 
 
+        // First, sort the array by interactiveness
+        // Then, perform non-interactive imports
+        // Then, perform interactive imports. Chain them, waiting for the completion of each one.
         public static void ImportAssets(IEnumerable<AssetInfo> assets)
         {
-            foreach (AssetInfo assetInfo in assets)
+            var nonInteractive = assets.Where(a => !a.Interactive);
+            var interactive = assets.Where(a => a.Interactive);
+            
+            foreach (AssetInfo assetInfo in nonInteractive)
             {
                 Assets.Import(assetInfo.Path, assetInfo.Interactive);
             }
+
+            Assets.Import(interactive);
         }
 
         
         [MenuItem("Tools/Setup/Import Packages")]
         public static void ImportPackages()
         {
-            TMP_PackageResourceImporter.ImportResources(true, false, false);
+            if (PackageInfo.FindForAssetPath("Packages/com.unity.textmeshpro") == null)
+            {
+                TMP_PackageResourceImporter.ImportResources(true, false, false);
+            }
             
             string[] packages =
             {
@@ -277,6 +291,12 @@ namespace ProjectSetup.Editor
                 
                 AssetDatabase.ImportPackage(fullPath, interactive);
             }
+            
+            
+            public static void Import(IEnumerable<AssetInfo> assets)
+            {
+                AssetsImporter.Begin(assets);
+            }
         }
         
         
@@ -295,7 +315,9 @@ namespace ProjectSetup.Editor
                 {
                     CreateSubFolders(fullPath, folder);
                 }
+                
             }
+            
             
             static void CreateSubFolders(string rootPath, string folderHierarchy) 
             {

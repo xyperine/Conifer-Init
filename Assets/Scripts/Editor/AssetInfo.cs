@@ -1,12 +1,14 @@
 ﻿using System;
+using UnityEngine;
 
 namespace ProjectSetup.Editor
 {
-    public readonly struct AssetInfo : IEquatable<AssetInfo>
+    [Serializable]
+    public struct AssetInfo : IEquatable<AssetInfo>
     {
-        public string Path { get; }
-        public string Name { get; }
-        public bool Interactive { get; }
+        [field: SerializeField] public string Path { get; private set; }
+        [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField] public bool Interactive { get; private set; }
 
 
         public AssetInfo(string path, string name, bool interactive)
