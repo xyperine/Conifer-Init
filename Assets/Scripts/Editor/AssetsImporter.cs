@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -7,23 +8,22 @@ using UnityEngine.Assertions;
 namespace ProjectSetup.Editor
 {
     /// <summary>
-    /// Handles sequential interactive assets import
+    /// Handles sequential interactive assets import.
     /// </summary>
     public static class AssetsImporter
     {
-        private static bool _isStable;
-        private static bool _isImporting;
-        private static Queue<AssetInfo> _assets;
-        
-        
-        public static void Begin(IEnumerable<AssetInfo> assets)
-        {
-            _isStable = false;
-            _isImporting = false;
-            
-            EditorApplication.delayCall += WaitForStability;
+        private static ProjectSetupData _data;
 
-            _assets = new Queue<AssetInfo>(assets);
+
+        [InitializeOnLoadMethod]
+        private static void SubscribeToEvents()
+        {
+            _data = ProjectSetupData.instance;
+
+            if (!_data.IsImportRequested)
+            {
+                return;
+            }
             
             AssetDatabase.importPackageCompleted += OnAssetImported;
             AssetDatabase.importPackageCancelled += OnAssetImportCancelled;
@@ -31,16 +31,39 @@ namespace ProjectSetup.Editor
             
             EditorApplication.update += Update;
         }
+        
+        
+        public static void Begin(IEnumerable<AssetInfo> assets)
+        {
+            _data = ProjectSetupData.instance;
+            _data.AssetsToImport = assets.ToList();
+            _data.IsImportRequested = true;
+            
+            _data.IsImporting = false;
+
+            WaitForStability();
+            
+            SubscribeToEvents();
+        }
 
 
         private static void WaitForStability()
         {
-            _isStable = true;
+            _data.IsStable = false;
+            EditorApplication.delayCall += SetStable;
+        }
+
+
+        private static void SetStable()
+        {
+            _data.IsStable = true;
         }
 
 
         public static void End()
         {
+            _data.IsImportRequested = false;
+            
             AssetDatabase.importPackageCompleted -= OnAssetImported;
             AssetDatabase.importPackageCancelled -= OnAssetImportCancelled;
             AssetDatabase.importPackageFailed -= OnAssetImportFailed;
@@ -53,7 +76,7 @@ namespace ProjectSetup.Editor
 
         private static void Update()
         {
-            if (!_isStable)
+            if (!_data.IsStable)
             {
                 Debug.Log("Unstable");
                 return;
@@ -66,7 +89,7 @@ namespace ProjectSetup.Editor
             }
             
             // Halt the importer if there are no more assets to import
-            if (_assets.Count == 0)
+            if (_data.AssetsToImport.Count == 0)
             {
                 Debug.Log("Nothing to import");
                 
@@ -81,23 +104,23 @@ namespace ProjectSetup.Editor
 
         private static void Import()
         {
-            if (_isImporting)
+            if (_data.IsImporting)
             {
                 Debug.Log("Already importing");
                 
                 return;
             }
             
-            _isImporting = true;
+            _data.IsImporting = true;
 
-            AssetInfo asset = _assets.Peek();
+            AssetInfo asset = _data.AssetsToImport.First();
             Debug.Log($"Importing: {asset.Name}");
             try
             {
                 if (UnityPackageUtility.AllPluginAssetsAlreadyImported(asset.Path))
                 {
-                    _isImporting = false;
-                    _assets.Dequeue();
+                    _data.IsImporting = false;
+                    _data.AssetsToImport.RemoveAt(0);
                 
                     Debug.Log($"{asset.Name} is fully imported already");
                 
@@ -108,8 +131,8 @@ namespace ProjectSetup.Editor
             {
                 Debug.LogError(e);
                 
-                _isImporting = false;
-                _assets.Dequeue();
+                _data.IsImporting = false;
+                _data.AssetsToImport.RemoveAt(0);
                 
                 return;
             }
@@ -127,12 +150,10 @@ namespace ProjectSetup.Editor
             
             Debug.Log($"Canceled: {packageName}");
             
-            _isImporting = false;
-            _assets.Dequeue();
+            _data.IsImporting = false;
+            _data.AssetsToImport.RemoveAt(0);
             
-            _isStable = false;
-            
-            EditorApplication.delayCall += WaitForStability;
+            WaitForStability();
         }
 
 
@@ -145,12 +166,10 @@ namespace ProjectSetup.Editor
             
             Debug.Log($"Imported: {packageName}");
             
-            _isImporting = false;
-            _assets.Dequeue();
+            _data.IsImporting = false;
+            _data.AssetsToImport.RemoveAt(0);
             
-            _isStable = false;
-            
-            EditorApplication.delayCall += WaitForStability;
+            WaitForStability();
         }
 
 
@@ -163,25 +182,23 @@ namespace ProjectSetup.Editor
             
             Debug.LogError(errorMessage);
 
-            _isImporting = false;
-            _assets.Dequeue();
+            _data.IsImporting = false;
+            _data.AssetsToImport.RemoveAt(0);
 
-            _isStable = false;
-            
-            EditorApplication.delayCall += WaitForStability;
+            WaitForStability();
         }
 
 
         private static bool IsTheQueuedPackage(string packageName)
         {
-            AssetInfo asset = _assets.Peek();
+            AssetInfo asset = _data.AssetsToImport.First();
             
             //Debug.Log(packageName);
             //Debug.Log(asset.Path);
             
             Assert.IsTrue(asset.Path.EndsWith(UnityPackageUtility.UNITY_PACKAGE_FILE_EXTENSION));
             
-            // Because different asset import events return different strings
+            // Because different asset import events return different strings🤪
             return asset.Name == packageName || asset.Path ==
                 packageName + UnityPackageUtility.UNITY_PACKAGE_FILE_EXTENSION;
         }
