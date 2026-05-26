@@ -553,11 +553,23 @@ namespace ProjectSetup.Editor
 
             if (!_successfullyRetrievedAssets)
             {
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                path = Path.Combine(path, "Unity", "Asset Store-5.x");
-                if (Directory.Exists(path))
+                string cachedAssetsPath;
+                if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
                 {
-                    string[] assetPaths = Directory.GetFiles(path, "*.unitypackage", SearchOption.AllDirectories);
+                    string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                    cachedAssetsPath = Path.Combine(homeDirectory, "Library", "Unity", "Asset Store-5.x");
+                }
+                else
+                {
+                    string defaultPath =
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Unity");
+                    cachedAssetsPath = Path.Combine(EditorPrefs.GetString("AssetStoreCacheRootPath", defaultPath),
+                        "Asset Store-5.x");
+                }
+                
+                if (Directory.Exists(cachedAssetsPath))
+                {
+                    string[] assetPaths = Directory.GetFiles(cachedAssetsPath, "*.unitypackage", SearchOption.AllDirectories);
 
                     _assets.Clear();
                     foreach (string assetPath in assetPaths)
@@ -569,7 +581,7 @@ namespace ProjectSetup.Editor
                 }
                 else
                 {
-                    throw new DirectoryNotFoundException($"Couldn't find {path}");
+                    throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
                 }
                 
                 return;
