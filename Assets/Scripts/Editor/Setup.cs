@@ -193,5 +193,21 @@ namespace ProjectSetup.Editor
                 Debug.Log("Successfully changed scripting backend to IL2CPP!");
             }
         }
+
+
+        public static void SetProjectSettings(ProjectSettings projectSettings)
+        {
+            EditorSettings.projectGenerationRootNamespace = projectSettings.DefaultNamespace;
+            EditorSettings.gameObjectNamingScheme = projectSettings.GameobjectNamingScheme;
+            
+            PlayerSettings.companyName = projectSettings.CompanyName;
+            PlayerSettings.productName = projectSettings.ProductName;
+            PlayerSettings.bundleVersion = projectSettings.Version;
+
+            foreach (ProjectSettings.ScriptingBackendEntry entry in projectSettings.ScriptingBackend)
+            {
+                PlayerSettings.SetScriptingBackend(entry.BuildTarget, entry.ScriptingImplementation);
+            }
+        }
     }
 }
