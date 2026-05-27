@@ -16,8 +16,6 @@ namespace ProjectSetup.Editor
     /// </summary>
     public class SetupWindow : EditorWindow
     {
-        private const float SPACE_SIZE = 4f;
-
         private Vector2 _scrollPosition;
         
         // Folder structure settings
@@ -52,7 +50,6 @@ namespace ProjectSetup.Editor
 
 
         // Assets settings
-
         private bool _successfullyRetrievedAssets = false;
         private List<AssetInfo> _assets = new List<AssetInfo>();
         [SerializeField] private List<int> queuedAssetsIndices = new List<int>();
@@ -84,29 +81,41 @@ namespace ProjectSetup.Editor
 
             _packagesListRequest = Client.SearchAll();
 
-            _successfullyRetrievedAssets = false;
-            if (!_successfullyRetrievedAssets)
+            RetrieveCachedAssets();
+        }
+
+
+        private void RetrieveCachedAssets()
+        {
+            string cachedAssetsPath;
+            if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
             {
-                string path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                path = Path.Combine(path, "Unity", "Asset Store-5.x");
-                if (Directory.Exists(path))
-                {
-                    string[] assetPaths = Directory.GetFiles(path, "*.unitypackage", SearchOption.AllDirectories);
-
-                    _assets.Clear();
-                    foreach (string assetPath in assetPaths)
-                    {
-                        _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath), false));
-                    }
-
-                    _successfullyRetrievedAssets = true;
-                }
-                else
-                {
-                    throw new DirectoryNotFoundException($"Couldn't find {path}");
-                }
+                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
+                cachedAssetsPath = Path.Combine(homeDirectory, "Library", "Unity", "Asset Store-5.x");
+            }
+            else
+            {
+                string defaultPath =
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Unity");
+                cachedAssetsPath = Path.Combine(EditorPrefs.GetString("AssetStoreCacheRootPath", defaultPath),
+                    "Asset Store-5.x");
+            }
                 
-                return;
+            if (Directory.Exists(cachedAssetsPath))
+            {
+                string[] assetPaths = Directory.GetFiles(cachedAssetsPath, "*.unitypackage", SearchOption.AllDirectories);
+
+                _assets.Clear();
+                foreach (string assetPath in assetPaths)
+                {
+                    _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath), false));
+                }
+
+                _successfullyRetrievedAssets = true;
+            }
+            else
+            {
+                throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
             }
         }
 
@@ -137,15 +146,15 @@ namespace ProjectSetup.Editor
             
             DrawFolderStructureSettings();
 
-            GUILayout.Space(SPACE_SIZE);
+            SetupWindowElements.DrawRegularSpace();
 
             DrawPackagesSettings();
             
-            GUILayout.Space(SPACE_SIZE);
+            SetupWindowElements.DrawRegularSpace();
             
             DrawAssetsSettings();
 
-            GUILayout.Space(SPACE_SIZE);
+            SetupWindowElements.DrawRegularSpace();
             
             // Draw scene settings
             // - Add a list scenes and remove/rename the SampleScene
@@ -172,7 +181,7 @@ namespace ProjectSetup.Editor
                 InitializeRootFSE();
             }
             
-            GUILayout.Space(SPACE_SIZE);
+            SetupWindowElements.DrawRegularSpace();
 
             _elementIndex = -1;
             GUIStyle foldersSectionStyle = new GUIStyle(GUI.skin.FindStyle("Window"));
@@ -360,6 +369,7 @@ namespace ProjectSetup.Editor
                 return;
             }
 
+            // Search feature
             _packagesSearchString =
                 GUILayout.TextField(_packagesSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
@@ -374,6 +384,7 @@ namespace ProjectSetup.Editor
                 _availablePage = 1;
             }
             
+            // Available list
             using (new GUILayout.VerticalScope($"Available ({packages.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (packages.Count > 0)
@@ -433,16 +444,11 @@ namespace ProjectSetup.Editor
                 }
                 else
                 {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label("—");
-                        GUILayout.FlexibleSpace();
-                    }
+                    SetupWindowElements.DrawEmptyListElement();
                 }
             }
 
-            GUILayout.Space(SPACE_SIZE);
+            SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
             using (new GUILayout.VerticalScope($"Queued ({queuedPackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
@@ -512,12 +518,7 @@ namespace ProjectSetup.Editor
                 }
                 else
                 {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label("—");
-                        GUILayout.FlexibleSpace();
-                    }
+                    SetupWindowElements.DrawEmptyListElement();
                 }
             }
         }
@@ -568,40 +569,12 @@ namespace ProjectSetup.Editor
 
             if (!_successfullyRetrievedAssets)
             {
-                string cachedAssetsPath;
-                if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
-                {
-                    string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                    cachedAssetsPath = Path.Combine(homeDirectory, "Library", "Unity", "Asset Store-5.x");
-                }
-                else
-                {
-                    string defaultPath =
-                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Unity");
-                    cachedAssetsPath = Path.Combine(EditorPrefs.GetString("AssetStoreCacheRootPath", defaultPath),
-                        "Asset Store-5.x");
-                }
-                
-                if (Directory.Exists(cachedAssetsPath))
-                {
-                    string[] assetPaths = Directory.GetFiles(cachedAssetsPath, "*.unitypackage", SearchOption.AllDirectories);
-
-                    _assets.Clear();
-                    foreach (string assetPath in assetPaths)
-                    {
-                        _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath), false));
-                    }
-
-                    _successfullyRetrievedAssets = true;
-                }
-                else
-                {
-                    throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
-                }
+                RetrieveCachedAssets();
                 
                 return;
             }
             
+            // Search feature
             _assetsSearchString =
                 GUILayout.TextField(_assetsSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
@@ -616,6 +589,7 @@ namespace ProjectSetup.Editor
                 _assetsAvailablePage = 1;
             }
             
+            // Available list
             using (new GUILayout.VerticalScope($"Available ({assets.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (assets.Count > 0)
@@ -675,16 +649,11 @@ namespace ProjectSetup.Editor
                 }
                 else
                 {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label("—");
-                        GUILayout.FlexibleSpace();
-                    }
+                    SetupWindowElements.DrawEmptyListElement();
                 }
             }
 
-            GUILayout.Space(SPACE_SIZE);
+            SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
             using (new GUILayout.VerticalScope($"Queued ({queuedAssetsIndices.Count})", new GUIStyle(GUI.skin.window)))
@@ -759,12 +728,7 @@ namespace ProjectSetup.Editor
                 }
                 else
                 {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.FlexibleSpace();
-                        GUILayout.Label("—");
-                        GUILayout.FlexibleSpace();
-                    }
+                    SetupWindowElements.DrawEmptyListElement();
                 }
             }
         }
