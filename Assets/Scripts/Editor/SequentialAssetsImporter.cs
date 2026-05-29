@@ -10,7 +10,7 @@ namespace ProjectSetup.Editor
     /// <summary>
     /// Handles sequential interactive assets import.
     /// </summary>
-    public static class AssetsImporter
+    public static class SequentialAssetsImporter
     {
         private static ProjectSetupData _data;
 
@@ -35,6 +35,8 @@ namespace ProjectSetup.Editor
         
         public static void Begin(IEnumerable<AssetInfo> assets)
         {
+            Assert.IsTrue(assets.Any());
+            
             _data = ProjectSetupData.instance;
             _data.AssetsToImport = assets.ToList();
             _data.IsImportRequested = true;

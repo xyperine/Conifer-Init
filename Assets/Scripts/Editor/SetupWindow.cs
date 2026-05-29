@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.IMGUI.Controls;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
@@ -88,8 +86,7 @@ namespace ProjectSetup.Editor
 
             RetrieveCachedAssets();
 
-            _projectSettings = new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
-                "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
+            InitializeProjectSettings();
         }
 
 
@@ -144,6 +141,17 @@ namespace ProjectSetup.Editor
             FolderStructureEntry.Create(_assetsFolderStructureEntry, "Scripts/Tests/Editor");
             FolderStructureEntry.Create(_assetsFolderStructureEntry, "Scripts/Tests/Runtime");
             FolderStructureEntry.Create(_assetsFolderStructureEntry, "Textures");
+        }
+
+
+        private void InitializeProjectSettings()
+        {
+            //_projectSettings = new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
+            //    "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
+
+            // For simplicity
+            _projectSettings = new ProjectSettings("ProjectSetup", EditorSettings.NamingScheme.Underscore, "xyperine",
+                "Project Setup", "v0.1.0", ScriptingImplementation.IL2CPP);
         }
 
 

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
+using UnityEngine.Assertions;
 
 namespace ProjectSetup.Editor
 {
@@ -49,9 +51,11 @@ namespace ProjectSetup.Editor
         }
             
             
-        public static void Import(IEnumerable<AssetInfo> assets)
+        public static void ImportInteractive(IEnumerable<AssetInfo> assets)
         {
-            AssetsImporter.Begin(assets);
+            Assert.IsTrue(assets.Any());
+            
+            SequentialAssetsImporter.Begin(assets);
         }
     }
 }

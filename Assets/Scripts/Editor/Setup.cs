@@ -139,7 +139,10 @@ namespace ProjectSetup.Editor
                 Assets.Import(assetInfo.Path, assetInfo.Interactive);
             }
 
-            Assets.Import(interactive);
+            if (interactive.Any())
+            {
+                Assets.ImportInteractive(interactive);
+            }
         }
 
         
@@ -198,7 +201,7 @@ namespace ProjectSetup.Editor
         public static void SetProjectSettings(ProjectSettings projectSettings)
         {
             EditorSettings.projectGenerationRootNamespace = projectSettings.DefaultNamespace;
-            EditorSettings.gameObjectNamingScheme = projectSettings.GameobjectNamingScheme;
+            EditorSettings.gameObjectNamingScheme = projectSettings.GameObjectNamingScheme;
             
             PlayerSettings.companyName = projectSettings.CompanyName;
             PlayerSettings.productName = projectSettings.ProductName;
