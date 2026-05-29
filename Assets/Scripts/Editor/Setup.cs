@@ -204,10 +204,32 @@ namespace ProjectSetup.Editor
             PlayerSettings.productName = projectSettings.ProductName;
             PlayerSettings.bundleVersion = projectSettings.Version;
 
-            foreach (ProjectSettings.ScriptingBackendEntry entry in projectSettings.ScriptingBackend)
+            NamedBuildTarget[] buildTargets =
             {
-                PlayerSettings.SetScriptingBackend(entry.BuildTarget, entry.ScriptingImplementation);
+                NamedBuildTarget.Android,
+                NamedBuildTarget.EmbeddedLinux,
+                NamedBuildTarget.iOS,
+                NamedBuildTarget.LinuxHeadlessSimulation,
+                NamedBuildTarget.NintendoSwitch,
+                NamedBuildTarget.NintendoSwitch2,
+                NamedBuildTarget.PS4,
+                NamedBuildTarget.PS5,
+                NamedBuildTarget.QNX,
+                NamedBuildTarget.Server,
+                NamedBuildTarget.Standalone,
+                NamedBuildTarget.tvOS,
+                NamedBuildTarget.VisionOS,
+                NamedBuildTarget.WebGL,
+                NamedBuildTarget.WindowsStoreApps,
+                NamedBuildTarget.XboxOne,
+            };
+
+            foreach (NamedBuildTarget buildTarget in buildTargets)
+            {
+                PlayerSettings.SetScriptingBackend(buildTarget, projectSettings.ScriptingBackend);
             }
+            
+            Debug.Log("Project settings set");
         }
     }
 }

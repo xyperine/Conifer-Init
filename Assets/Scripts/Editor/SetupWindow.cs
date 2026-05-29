@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.IMGUI.Controls;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
@@ -88,7 +89,7 @@ namespace ProjectSetup.Editor
             RetrieveCachedAssets();
 
             _projectSettings = new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
-                "DefaultCompany", "DefaultProduct", "0.1.0", new List<ProjectSettings.ScriptingBackendEntry>());
+                "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
         }
 
 
@@ -736,77 +737,22 @@ namespace ProjectSetup.Editor
                 }
             }
         }
-
-
+        
+        
         private void DrawProjectSettings()
         {
-            // Draw project settings
-            // - Default namespace
-            // - Game object naming
-            // - Player settings
-            // - Scripting backend
-            
             GUILayout.Label("Project Settings", new GUIStyle(EditorStyles.boldLabel));
 
             _projectSettings.DefaultNamespace =
                 EditorGUILayout.TextField("Default Namespace", _projectSettings.DefaultNamespace);
-            _projectSettings.GameobjectNamingScheme =
+            _projectSettings.GameObjectNamingScheme =
                 (EditorSettings.NamingScheme) EditorGUILayout.EnumPopup("Gameobject Naming Scheme",
-                    _projectSettings.GameobjectNamingScheme);
+                    _projectSettings.GameObjectNamingScheme);
             _projectSettings.CompanyName = EditorGUILayout.TextField("Company Name", _projectSettings.CompanyName);
             _projectSettings.ProductName = EditorGUILayout.TextField("Product Name", _projectSettings.ProductName);
             _projectSettings.Version = EditorGUILayout.TextField("Version", _projectSettings.Version);
-
-            using (new GUILayout.VerticalScope("Scripting Backends", new GUIStyle(GUI.skin.window)))
-            {
-                using (var s = new EditorGUILayout.HorizontalScope(new GUIStyle()))
-                {
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Label("Build Target");
-                    GUILayout.FlexibleSpace();
-                    GUILayout.Label("Scripting Backend");
-                    GUILayout.FlexibleSpace();
-                }
-                
-                for (int i = 0; i < _projectSettings.ScriptingBackend.Count; i++)
-                {
-                    ProjectSettings.ScriptingBackendEntry entry = _projectSettings.ScriptingBackend[i];
-                    using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
-                    Color bgColor = i % 2 == 0 
-                        ? new Color(0f, 0f, 0f, 0.03f)
-                        : new Color(1f, 1f, 1f, 0.03f);
-
-                    Rect rect = new Rect
-                    {
-                        position = entryScope.rect.position,
-                        size = entryScope.rect.size,
-                    };
-                    
-                    EditorGUI.DrawRect(rect, bgColor);
-                    var buildTargetIndex = EditorGUILayout.Popup(
-                        Array.IndexOf(ProjectSettings.BuildTargets, entry.BuildTarget),
-                        ProjectSettings.BuildTargets.Select(t => t.TargetName).ToArray());
-                    Debug.Log(buildTargetIndex);
-                    entry.BuildTarget = ProjectSettings.BuildTargets[buildTargetIndex];
-                    entry.ScriptingImplementation =
-                        (ScriptingImplementation) EditorGUILayout.EnumPopup(entry.ScriptingImplementation);
-                }
-
-                using (new EditorGUILayout.HorizontalScope(new GUIStyle()))
-                {
-                    if (GUILayout.Button("+"))
-                    {
-                        _projectSettings.ScriptingBackend.Add(
-                            new ProjectSettings.ScriptingBackendEntry(NamedBuildTarget.Standalone,
-                                ScriptingImplementation.IL2CPP));
-                    }
-
-                    if (GUILayout.Button("-"))
-                    {
-                        _projectSettings.ScriptingBackend.RemoveAt(_projectSettings.ScriptingBackend.Count - 1);
-                    }
-                }
-            }
+            _projectSettings.ScriptingBackend =
+                (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", _projectSettings.ScriptingBackend);
         }
         
 
@@ -823,6 +769,8 @@ namespace ProjectSetup.Editor
 
                 IEnumerable<AssetInfo> assets = queuedAssetsIndices.Select(i => _assets[i]);
                 Setup.ImportAssets(assets);
+                
+                Setup.SetProjectSettings(_projectSettings);
             }
         }
     }
