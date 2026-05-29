@@ -40,15 +40,12 @@ namespace ProjectSetup.Editor
         private int _queuedPage = 1;
 
         private string _packagesSearchString;
-        
-        private Vector2 _packagesScrollPosition;
 
         private List<int> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
             ? _packagesListRequest.Result.Select(p => Array.IndexOf(_packagesListRequest.Result, p)).Where(i =>
                 !queuedPackagesIndices.Contains(i)).ToList()
             : new List<int>();
-
-
+        
         // Assets settings
         private bool _successfullyRetrievedAssets = false;
         private List<AssetInfo> _assets = new List<AssetInfo>();
@@ -58,8 +55,6 @@ namespace ProjectSetup.Editor
 
         private string _assetsSearchString;
         
-        private Vector2 _assetsScrollPosition;
-
         private List<int> AvailableAssets => _successfullyRetrievedAssets && _assets != null
             ? _assets.Select(a => _assets.IndexOf(a)).Where(i =>
                 !queuedAssetsIndices.Contains(i)).ToList()
@@ -374,9 +369,6 @@ namespace ProjectSetup.Editor
             
             GUILayout.Label("Packages Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            using GUILayout.ScrollViewScope scrollView = new GUILayout.ScrollViewScope(_packagesScrollPosition);
-            _packagesScrollPosition = scrollView.scrollPosition;
-
             if (!SuccessfullyRetrievedPackages(_packagesListRequest))
             {
                 return;
@@ -576,9 +568,6 @@ namespace ProjectSetup.Editor
             const int maxEntriesPerPage = 10;
             
             GUILayout.Label("Assets Settings", new GUIStyle(EditorStyles.boldLabel));
-
-            using GUILayout.ScrollViewScope scrollView = new GUILayout.ScrollViewScope(_assetsScrollPosition);
-            _assetsScrollPosition = scrollView.scrollPosition;
 
             if (!_successfullyRetrievedAssets)
             {
