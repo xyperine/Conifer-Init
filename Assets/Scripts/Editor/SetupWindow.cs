@@ -54,7 +54,7 @@ namespace ProjectSetup.Editor
         private int _assetsQueuedPage = 1;
 
         private string _assetsSearchString;
-        
+
         private List<int> AvailableAssets => _successfullyRetrievedAssets && _assets != null
             ? _assets.Select(a => _assets.IndexOf(a)).Where(i =>
                 !queuedAssetsIndices.Contains(i)).ToList()
@@ -62,6 +62,11 @@ namespace ProjectSetup.Editor
         
         // Project settings
         private ProjectSettings _projectSettings;
+        
+        // Misc settings
+        private bool _needToDeleteTutorial = false;
+        private bool _configureScene = true;
+        private string _sceneName;
         
         
         [MenuItem("Tools/Setup Window")]
@@ -171,8 +176,9 @@ namespace ProjectSetup.Editor
             
             SetupWindowElements.DrawRegularSpace();
             
-            // Draw scene settings
-            // - Add a list scenes and remove/rename the SampleScene
+            DrawMiscSettings();
+            
+            SetupWindowElements.DrawRegularSpace();
             
             DrawExecuteSetup();
             
@@ -751,6 +757,22 @@ namespace ProjectSetup.Editor
             _projectSettings.ScriptingBackend =
                 (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", _projectSettings.ScriptingBackend);
         }
+
+
+        private void DrawMiscSettings()
+        {
+            GUILayout.Label("Misc Settings", new GUIStyle(EditorStyles.boldLabel));
+
+            using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
+            
+            _needToDeleteTutorial = GUILayout.Toggle(_needToDeleteTutorial, "Delete tutorial");
+            
+            _configureScene = GUILayout.Toggle(_configureScene, "Configure Scene");
+            if (_configureScene)
+            {
+                _sceneName = EditorGUILayout.TextField("Scene Name", _sceneName);
+            }
+        }
         
 
         private void DrawExecuteSetup()
@@ -768,6 +790,8 @@ namespace ProjectSetup.Editor
                 Setup.ImportAssets(assets);
                 
                 Setup.SetProjectSettings(_projectSettings);
+                
+                Setup.ExecuteMisc(_needToDeleteTutorial, _configureScene, _sceneName);
             }
         }
     }

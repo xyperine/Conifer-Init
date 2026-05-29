@@ -13,11 +13,6 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
-    // TODO: Make it a separate window where you can customize the setup
-    // TODO: Tweak project settings and preferences
-    // TODO: Rename the sample scene to Main
-    // TODO: Create Zenject project context and scene context if it is imported
-    // TODO: Import my own helpers
     /// <summary>
     /// Handles high-level logic coordinating other components.
     /// </summary>
@@ -29,9 +24,7 @@ namespace ProjectSetup.Editor
             CreateFolders();
             
             DeleteTutorialAssets();
-            
-            MoveDataAssets();
-            
+
             SetupScene();
         }
 
@@ -70,32 +63,6 @@ namespace ProjectSetup.Editor
         }
         
 
-        private static void MoveDataAssets()
-        {
-            AssetDatabase.MoveAsset("Assets/InputSystem_Actions.inputactions", "Assets/Data/Inputs/InputSystem_Actions.inputactions");
-
-            const string urpAssetsPath = "Assets/Data/URP";
-            if (!AssetDatabase.IsValidFolder(urpAssetsPath))
-            {
-                Directory.CreateDirectory(Path.Combine(Application.dataPath, urpAssetsPath));
-            }
-            AssetDatabase.MoveAsset("Assets/Settings/DefaultVolumeProfile.asset", Path.Combine(urpAssetsPath, "DefaultVolumeProfile.asset"));
-            AssetDatabase.MoveAsset("Assets/Settings/Mobile_Renderer.asset", Path.Combine(urpAssetsPath, "Mobile_Renderer.asset"));
-            AssetDatabase.MoveAsset("Assets/Settings/Mobile_RPAsset.asset", Path.Combine(urpAssetsPath, "Mobile_RPAsset.asset"));
-            AssetDatabase.MoveAsset("Assets/Settings/PC_Renderer.asset", Path.Combine(urpAssetsPath, "PC_Renderer.asset"));
-            AssetDatabase.MoveAsset("Assets/Settings/PC_RPAsset.asset", Path.Combine(urpAssetsPath, "PC_RPAsset.asset"));
-            AssetDatabase.MoveAsset("Assets/Settings/SampleSceneProfile.asset", Path.Combine(urpAssetsPath, "SampleSceneProfile.asset"));
-            AssetDatabase.MoveAsset("Assets/Settings/UniversalRenderPipelineGlobalSettings.asset", Path.Combine(urpAssetsPath, "UniversalRenderPipelineGlobalSettings.asset"));
-            
-            AssetDatabase.Refresh();
-            
-            FileUtil.DeleteFileOrDirectory("Assets/Settings");
-            FileUtil.DeleteFileOrDirectory("Assets/Settings" + ".meta");
-            
-            AssetDatabase.Refresh();
-        }
-        
-
         private static void SetupScene()
         {
             AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", "Main.unity");
@@ -103,12 +70,6 @@ namespace ProjectSetup.Editor
             AssetDatabase.Refresh();
             
             EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
-            GameObject[] allObjects = Object.FindObjectsByType<Transform>(FindObjectsSortMode.None)
-                .Select(t => t.gameObject).ToArray();
-            foreach (GameObject go in allObjects)
-            {
-                go.name = go.name.Replace(' ', '_');
-            }
         }
 
 
@@ -236,6 +197,20 @@ namespace ProjectSetup.Editor
             }
             
             Debug.Log("Project settings set");
+        }
+
+
+        public static void ExecuteMisc(bool deleteTutorial, bool configureScene, string sceneName)
+        {
+            if (deleteTutorial)
+            {
+                DeleteTutorialAssets();
+            }
+
+            if (configureScene)
+            {
+                SetupScene();
+            }
         }
     }
 }
