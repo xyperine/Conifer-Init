@@ -754,7 +754,7 @@ namespace ProjectSetup.Editor
             _projectSettings.DefaultNamespace =
                 EditorGUILayout.TextField("Default Namespace", _projectSettings.DefaultNamespace);
             _projectSettings.GameObjectNamingScheme =
-                (EditorSettings.NamingScheme) EditorGUILayout.EnumPopup("Gameobject Naming Scheme",
+                (EditorSettings.NamingScheme) EditorGUILayout.EnumPopup("Game Object Naming",
                     _projectSettings.GameObjectNamingScheme);
             _projectSettings.CompanyName = EditorGUILayout.TextField("Company Name", _projectSettings.CompanyName);
             _projectSettings.ProductName = EditorGUILayout.TextField("Product Name", _projectSettings.ProductName);
