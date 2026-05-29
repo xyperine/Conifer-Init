@@ -167,7 +167,10 @@ namespace ProjectSetup.Editor
         {
             TMP_PackageResourceImporter.ImportResources(true, false, false);
 
-            Packages.ImportAsync(packages);
+            if (packages.Any())
+            {
+                Packages.ImportAsync(packages);
+            }
         }
 
 

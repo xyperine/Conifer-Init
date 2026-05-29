@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
@@ -15,6 +16,13 @@ namespace ProjectSetup.Editor
             
         public static async Task ImportAsync(IEnumerable<string> packages)
         {
+            //Assert
+            if (!packages.Any())
+            {
+                Debug.LogError("Empty package list!");
+                return;
+            }
+            
             foreach (string package in packages)
             {
                 PackagesToInstall.Enqueue(package);
@@ -25,7 +33,7 @@ namespace ProjectSetup.Editor
                 await ImportAsync(PackagesToInstall.Dequeue());
                 await Task.Delay(1000);
             }
-                
+            
             Debug.Log("All packages imported!");
         }
 
