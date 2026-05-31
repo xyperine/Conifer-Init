@@ -90,6 +90,12 @@ namespace ProjectSetup.Editor
         }
 
 
+        private void InitializeRootFSE()
+        {
+            _assetsFolderStructureEntry = FolderStructureEntry.Default();
+        }
+
+
         private void RetrieveCachedAssets()
         {
             string cachedAssetsPath;
@@ -125,33 +131,9 @@ namespace ProjectSetup.Editor
         }
 
 
-        private void InitializeRootFSE()
-        {
-            _assetsFolderStructureEntry = new FolderStructureEntry("Assets", null);
-            
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Animations");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Audio");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Data/Inputs");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Data/URP");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Materials");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Meshes");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Plugins");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Prefabs");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Shaders");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Scripts/Tests/Editor");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Scripts/Tests/Runtime");
-            FolderStructureEntry.Create(_assetsFolderStructureEntry, "Textures");
-        }
-
-
         private void InitializeProjectSettings()
         {
-            //_projectSettings = new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
-            //    "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
-
-            // For simplicity
-            _projectSettings = new ProjectSettings("ProjectSetup", EditorSettings.NamingScheme.Underscore, "xyperine",
-                "Project Setup", "v0.1.0", ScriptingImplementation.IL2CPP);
+            _projectSettings = ProjectSettings.Default();
         }
 
 

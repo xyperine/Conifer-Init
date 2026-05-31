@@ -23,6 +23,27 @@ namespace ProjectSetup.Editor
                 , Name);
 
 
+        public static FolderStructureEntry Default()
+        {
+            FolderStructureEntry assetsFolderStructureEntry = new FolderStructureEntry("Assets", null);
+            
+            Create(assetsFolderStructureEntry, "Animations");
+            Create(assetsFolderStructureEntry, "Audio");
+            Create(assetsFolderStructureEntry, "Data/Inputs");
+            Create(assetsFolderStructureEntry, "Data/URP");
+            Create(assetsFolderStructureEntry, "Materials");
+            Create(assetsFolderStructureEntry, "Meshes");
+            Create(assetsFolderStructureEntry, "Plugins");
+            Create(assetsFolderStructureEntry, "Prefabs");
+            Create(assetsFolderStructureEntry, "Shaders");
+            Create(assetsFolderStructureEntry, "Scripts/Tests/Editor");
+            Create(assetsFolderStructureEntry, "Scripts/Tests/Runtime");
+            Create(assetsFolderStructureEntry, "Textures");
+
+            return assetsFolderStructureEntry;
+        }
+        
+        
         public FolderStructureEntry(string name, FolderStructureEntry parent)
         {
             Name = name;
