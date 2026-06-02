@@ -2,19 +2,21 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
+using UnityEngine;
 
 namespace ProjectSetup.Editor
 {
     /// <summary>
     /// Describes a folder in the Assets directory. Paths are relative to the Assets directory. Implements a tree structure.
     /// </summary>
+    [Serializable]
     public class FolderStructureEntry : IEquatable<FolderStructureEntry>
     {
-        private List<FolderStructureEntry> _children;
+        [JsonProperty] private List<FolderStructureEntry> _children;
             
-        public string Name { get; private set; }
-        public FolderStructureEntry Parent { get; private set; }
-
+        [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField] public FolderStructureEntry Parent { get; private set; }
         
         public string FullName =>
             Path.Combine(Parent == null || Parent.FullName == "Assets" 
@@ -25,7 +27,7 @@ namespace ProjectSetup.Editor
 
         public static FolderStructureEntry Default()
         {
-            FolderStructureEntry assetsFolderStructureEntry = new FolderStructureEntry("Assets", null);
+            FolderStructureEntry assetsFolderStructureEntry = new FolderStructureEntry("Assets", (FolderStructureEntry) null);
             
             Create(assetsFolderStructureEntry, "Animations");
             Create(assetsFolderStructureEntry, "Audio");
@@ -42,13 +44,32 @@ namespace ProjectSetup.Editor
 
             return assetsFolderStructureEntry;
         }
-        
-        
+
+
         public FolderStructureEntry(string name, FolderStructureEntry parent)
         {
             Name = name;
             _children = new List<FolderStructureEntry>();
             Parent = parent;
+        }
+
+
+        [JsonConstructor]
+        public FolderStructureEntry(string name, List<FolderStructureEntry> children)
+        {
+            Name = name;
+
+            if (children == null)
+            {
+                children = new List<FolderStructureEntry>();
+            }
+            
+            _children = children;
+
+            foreach (FolderStructureEntry child in children)
+            {
+                child.Parent = this;
+            }
         }
 
 

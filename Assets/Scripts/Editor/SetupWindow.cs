@@ -16,7 +16,13 @@ namespace ProjectSetup.Editor
     /// </summary>
     public class SetupWindow : EditorWindow
     {
+        private ProjectSetupSettingsProfile _settingsProfile;
+        private List<ProjectSetupSettingsProfile> _profiles;
+        
         private Vector2 _scrollPosition;
+
+        private bool _isTypingProfileName;
+        private string _newProfileName;
         
         // Folder structure settings
         private int _elementIndex;
@@ -80,16 +86,53 @@ namespace ProjectSetup.Editor
 
         private void OnEnable()
         {
-            InitializeRootFSE();
+            FetchSettingsProfiles();
+            
+            //InitializeRootFSE();
 
             _packagesListRequest = Client.SearchAll();
 
             RetrieveCachedAssets();
 
-            InitializeProjectSettings();
+            //InitializeProjectSettings();
         }
 
 
+        private void FetchSettingsProfiles()
+        {
+            if (!Directory.Exists(PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath))
+            {
+                Directory.CreateDirectory(PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath);
+            }
+            
+            var profilePaths =
+                Directory.EnumerateFiles(PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath,
+                    "*.json");
+            _profiles = profilePaths
+                .Select(pp => PersistenceSerializer<ProjectSetupSettingsProfile>.ReadFile(Path.GetFileName(pp)))
+                .ToList();
+            
+            // If there is no default settings profile create one
+            const string defaultProfileName = "Default_Profile";
+            if (!_profiles.Any(p => p.Name == defaultProfileName))
+            {
+                ProjectSetupSettingsProfile defaultProfile = new ProjectSetupSettingsProfile()
+                {
+                    Name = defaultProfileName,
+                    AssetsFolderStructureEntry = FolderStructureEntry.Default(),
+                    QueuedPackagesIndices = new List<int>(),
+                    QueuedAssetIndices = new List<int>(),
+                    ProjectSettings = ProjectSettings.Default(),
+                };
+                SaveProfile(defaultProfile);
+                
+                _profiles.Add(defaultProfile);
+            }
+            
+            ApplyProfile(_profiles.Find(p => p.Name == defaultProfileName));
+        }
+        
+        
         private void InitializeRootFSE()
         {
             _assetsFolderStructureEntry = FolderStructureEntry.Default();
@@ -142,6 +185,10 @@ namespace ProjectSetup.Editor
             using GUILayout.ScrollViewScope scrollViewScope = new GUILayout.ScrollViewScope(_scrollPosition);
             _scrollPosition = scrollViewScope.scrollPosition;
             
+            DrawSettingsProfileSelection();
+            
+            SetupWindowElements.DrawRegularSpace();
+            
             DrawFolderStructureSettings();
 
             SetupWindowElements.DrawRegularSpace();
@@ -166,7 +213,141 @@ namespace ProjectSetup.Editor
             
             GUILayout.FlexibleSpace();
         }
+        
+        
+        private void DrawSettingsProfileSelection()
+        {
+            GUILayout.Label("Profile", new GUIStyle(EditorStyles.boldLabel));
 
+            using (new GUILayout.HorizontalScope(new GUIStyle()))
+            {
+                using (var changeScope = new EditorGUI.ChangeCheckScope())
+                {
+                    string[] profileNames = _profiles.Select(p => p.Name).ToArray();
+                    int selectedIndex = Array.IndexOf(profileNames, _settingsProfile.Name);
+                    selectedIndex = EditorGUILayout.Popup(selectedIndex, profileNames);
+
+                    if (changeScope.changed)
+                    {
+                        var profile = _profiles.Single(p => p.Name == profileNames[selectedIndex]);
+                        ApplyProfile(profile);
+                    }
+                }
+
+                if (GUILayout.Button("Save"))
+                {
+                    // Save in the current settings profile
+                    ShowSaveProfileDialog(_settingsProfile);
+                }
+
+                if (GUILayout.Button("Save as..."))
+                {
+                    // Prompt with naming the new settings profile
+                    //_isTypingProfileName = true
+                    EditorApplication.delayCall += () => InputWindow.Show(SaveAsProfile);
+                    //GUIUtility.ExitGUI();
+                }
+
+
+                if (GUILayout.Button("New"))
+                {
+                    // Initialize with default settings and a placeholder name
+                }
+
+            }
+
+            if (_isTypingProfileName)
+            {
+                DrawProfileNameThing();
+            }
+        }
+
+
+        private void ApplyProfile(ProjectSetupSettingsProfile profile)
+        {
+            _settingsProfile = profile;
+
+            _assetsFolderStructureEntry = _settingsProfile.AssetsFolderStructureEntry;
+            queuedPackagesIndices = new List<int>(_settingsProfile.QueuedPackagesIndices);
+            queuedAssetsIndices = new List<int>(_settingsProfile.QueuedAssetIndices);
+            _projectSettings = _settingsProfile.ProjectSettings;
+        }
+
+
+        private void ShowSaveProfileDialog(ProjectSetupSettingsProfile profile)
+        {
+            if (EditorDialog.DisplayDecisionDialog("Save Profile?",
+                    "This will override the current profile. Proceed?",
+                    "Yes", "No"))
+            {
+                SaveProfile(profile);
+            }
+        }
+        
+
+        private void SaveProfile(ProjectSetupSettingsProfile profile)
+        {
+            profile.AssetsFolderStructureEntry = _assetsFolderStructureEntry;
+            profile.QueuedPackagesIndices = new List<int>(queuedPackagesIndices);
+            profile.QueuedAssetIndices = new List<int>(queuedAssetsIndices);
+            profile.ProjectSettings = _projectSettings;
+            
+            PersistenceSerializer<ProjectSetupSettingsProfile>.SaveFile(profile, profile.Name);
+            
+            Debug.Log($"Saved {profile.Name} profile");
+        }
+
+
+        private void SaveAsProfile(string newProfileName)
+        {
+            Debug.Log($"Saving as {newProfileName} profile");
+            
+            if (newProfileName == "")
+            {
+                return;
+            }
+            
+            var p = new ProjectSetupSettingsProfile()
+            {
+                Name = newProfileName,
+            };
+            
+            ShowSaveProfileDialog(p);
+        }
+        
+
+        private void DrawProfileNameThing()
+        {
+            using var s = new GUILayout.HorizontalScope(new GUIStyle());
+                
+            _newProfileName = GUILayout.TextField(_newProfileName, GUILayout.MaxWidth(256f), GUILayout.Height(16f));
+
+            if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(16f)) ||
+                 Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newEditedName)) // if done typing name
+            {
+                var p = new ProjectSetupSettingsProfile()
+                {
+                    Name = _newProfileName,
+                    AssetsFolderStructureEntry = _assetsFolderStructureEntry,
+                    QueuedPackagesIndices = new List<int>(queuedPackagesIndices),
+                    QueuedAssetIndices = new List<int>(queuedAssetsIndices),
+                    ProjectSettings = _projectSettings,
+                };
+                
+                SaveProfile(p);
+
+                _isTypingProfileName = false;
+                _newProfileName = string.Empty;
+            }
+            
+            if (GUILayout.Button("Cancel", GUILayout.Width(64f), GUILayout.Height(16f)) ||
+                Event.current.keyCode == KeyCode.Escape)
+            {
+                _isTypingProfileName = false;
+                _newProfileName = string.Empty;
+            }
+        }
+        
 
         private void DrawFolderStructureSettings()
         {

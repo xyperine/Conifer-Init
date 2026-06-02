@@ -13,5 +13,10 @@ namespace ProjectSetup.Editor
         [field: SerializeField] public bool IsImporting { get; set; }
         [field: SerializeField] public bool IsStable { get; set; }
         [field: SerializeField] public bool IsImportRequested { get; set; }
+        [field: SerializeField] public FolderStructureEntry AssetsFolderStructureEntry { get; set; }
+        [field: SerializeField] public List<int> QueuedPackagesIndices { get; set; }
+        [field: SerializeField] public List<int> QueuedAssetIndices { get; set; }
+        [field: SerializeField] public ProjectSettings ProjectSettings { get; set; }
+        // misc settings
     }
 }
