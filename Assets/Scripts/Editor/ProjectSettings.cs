@@ -1,15 +1,18 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
+using UnityEngine;
 
 namespace ProjectSetup.Editor
 {
+    [Serializable]
     public struct ProjectSettings
     {
-        public string DefaultNamespace { get; set; }
-        public EditorSettings.NamingScheme GameObjectNamingScheme { get; set; }
-        public string CompanyName { get; set; }
-        public string ProductName { get; set; }
-        public string Version { get; set; }
-        public ScriptingImplementation ScriptingBackend { get; set; }
+        [field: SerializeField] public string DefaultNamespace { get; set; }
+        [field: SerializeField] public EditorSettings.NamingScheme GameObjectNamingScheme { get; set; }
+        [field: SerializeField] public string CompanyName { get; set; }
+        [field: SerializeField] public string ProductName { get; set; }
+        [field: SerializeField] public string Version { get; set; }
+        [field: SerializeField] public ScriptingImplementation ScriptingBackend { get; set; }
 
 
         /// <summary>
