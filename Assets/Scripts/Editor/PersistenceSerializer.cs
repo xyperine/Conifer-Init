@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Newtonsoft.Json;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace ProjectSetup.Editor
