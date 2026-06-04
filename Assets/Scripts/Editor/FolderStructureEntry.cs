@@ -13,10 +13,10 @@ namespace ProjectSetup.Editor
     [Serializable]
     public class FolderStructureEntry : IEquatable<FolderStructureEntry>
     {
-        [JsonProperty] private List<FolderStructureEntry> _children;
+        [JsonProperty, SerializeReference] private List<FolderStructureEntry> children;
             
         [field: SerializeField] public string Name { get; private set; }
-        [field: SerializeField] public FolderStructureEntry Parent { get; private set; }
+        [field: SerializeReference] public FolderStructureEntry Parent { get; private set; }
         
         public string FullName =>
             Path.Combine(Parent == null || Parent.FullName == "Assets" 
@@ -29,7 +29,7 @@ namespace ProjectSetup.Editor
         {
             Name = name;
             Parent = parent;
-            _children = new List<FolderStructureEntry>();
+            children = new List<FolderStructureEntry>();
         }
 
 
@@ -43,7 +43,7 @@ namespace ProjectSetup.Editor
                 children = new List<FolderStructureEntry>();
             }
             
-            _children = children;
+            this.children = children;
 
             foreach (FolderStructureEntry child in children)
             {
@@ -56,9 +56,9 @@ namespace ProjectSetup.Editor
         {
             Name = name;
             Parent = parent;
-            _children = children;
+            this.children = children;
 
-            children = _children.Distinct().ToList();
+            children = this.children.Distinct().ToList();
             
             foreach (FolderStructureEntry child in children)
             {
@@ -69,17 +69,17 @@ namespace ProjectSetup.Editor
 
         public List<FolderStructureEntry> GetChildren()
         {
-            return new List<FolderStructureEntry>(_children);
+            return new List<FolderStructureEntry>(children);
         }
 
 
         public void AddChild(FolderStructureEntry folderStructureEntry)
         {
-            if (!_children.Contains(folderStructureEntry))
+            if (!children.Contains(folderStructureEntry))
             {
                 folderStructureEntry.Parent = this;
-                _children.Add(folderStructureEntry);
-                _children = _children.OrderBy(c => c.Name).ToList();
+                children.Add(folderStructureEntry);
+                children = children.OrderBy(c => c.Name).ToList();
                 //Debug.Log($"Added child: {folderStructureEntry.Name}");
             }
         }
@@ -87,9 +87,9 @@ namespace ProjectSetup.Editor
 
         public void RemoveChild(FolderStructureEntry folderStructureEntry)
         {
-            if (_children.Contains(folderStructureEntry))
+            if (children.Contains(folderStructureEntry))
             {
-                _children.Remove(folderStructureEntry);
+                children.Remove(folderStructureEntry);
             }
         }
 
@@ -108,7 +108,7 @@ namespace ProjectSetup.Editor
                 names.Add(FullName);
             }
 
-            foreach (FolderStructureEntry child in _children)
+            foreach (FolderStructureEntry child in children)
             {
                 names.AddRange(child.ToFolderNames(true));
             }
@@ -229,14 +229,14 @@ namespace ProjectSetup.Editor
             for (int i = 0; i < folders.Length; i++)
             {
                 FolderStructureEntry child = new FolderStructureEntry(folders[i], current);
-                if (!current._children.Contains(child))
+                if (!current.children.Contains(child))
                 {
                     current.AddChild(child);
                     current = child;
                 }
                 else
                 {
-                    current = current._children.Find(c => c.Equals(child));
+                    current = current.children.Find(c => c.Equals(child));
                 }
             }
         }
