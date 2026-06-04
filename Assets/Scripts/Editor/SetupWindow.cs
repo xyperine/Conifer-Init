@@ -37,13 +37,10 @@ namespace ProjectSetup.Editor
         private string _editingNameOf;
         private string _newEditedName;
 
-        private FolderStructureEntry _assetsFolderStructureEntry;
-
         // Packages settings
         private SearchRequest _packagesListRequest;
         private bool _successfullyRetrievedPackages;
-        
-        [SerializeField] private List<int> queuedPackagesIndices = new List<int>(); 
+
         private int _availablePage = 1;
         private int _queuedPage = 1;
 
@@ -51,13 +48,12 @@ namespace ProjectSetup.Editor
 
         private List<int> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
             ? _packagesListRequest.Result.Select(p => Array.IndexOf(_packagesListRequest.Result, p)).Where(i =>
-                !queuedPackagesIndices.Contains(i)).ToList()
+                !ProjectSetupData.instance.QueuedPackagesIndices.Contains(i)).ToList()
             : new List<int>();
         
         // Assets settings
         private bool _successfullyRetrievedAssets = false;
         private List<AssetInfo> _assets = new List<AssetInfo>();
-        [SerializeField] private List<int> queuedAssetsIndices = new List<int>();
         private int _assetsAvailablePage = 1;
         private int _assetsQueuedPage = 1;
 
@@ -65,14 +61,8 @@ namespace ProjectSetup.Editor
 
         private List<int> AvailableAssets => _successfullyRetrievedAssets && _assets != null
             ? _assets.Select(a => _assets.IndexOf(a)).Where(i =>
-                !queuedAssetsIndices.Contains(i)).ToList()
+                !ProjectSetupData.instance.QueuedAssetIndices.Contains(i)).ToList()
             : new List<int>();
-        
-        // Project settings
-        private ProjectSettings _projectSettings;
-        
-        // Misc settings
-        private MiscSettings _miscSettings;
         
         
         [MenuItem("Tools/Setup Window")]
@@ -87,14 +77,10 @@ namespace ProjectSetup.Editor
         private void OnEnable()
         {
             LoadSettingsProfiles();
-            
-            //InitializeRootFSE();
 
             _packagesListRequest = Client.SearchAll();
 
             RetrieveCachedAssets();
-
-            //InitializeProjectSettings();
         }
 
 
@@ -112,7 +98,6 @@ namespace ProjectSetup.Editor
                 .Select(pp => PersistenceSerializer<ProjectSetupSettingsProfile>.ReadFile(Path.GetFileName(pp)))
                 .ToList();
             
-            // If there is no default settings profile create one
             string activeProfileName = ProjectSetupData.instance.ActiveSettingsProfileName;
             Debug.Log(activeProfileName);
             if (!string.IsNullOrEmpty(activeProfileName))
@@ -120,7 +105,7 @@ namespace ProjectSetup.Editor
                 var p = _profiles.Find(p => p.Name == activeProfileName);
                 if (p != null)
                 {
-                    ApplyProfile(p);
+                    _settingsProfile = p;
                 }
                 else
                 {
@@ -172,19 +157,13 @@ namespace ProjectSetup.Editor
             _settingsProfile = profile;
             ProjectSetupData.instance.ActiveSettingsProfileName = _settingsProfile.Name;
             
-            _assetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
-            queuedPackagesIndices = new List<int>(_settingsProfile.QueuedPackagesIndices);
-            queuedAssetsIndices = new List<int>(_settingsProfile.QueuedAssetIndices);
-            _projectSettings = _settingsProfile.ProjectSettings;
-            _miscSettings = _settingsProfile.MiscSettings;
+            ProjectSetupData.instance.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
+            ProjectSetupData.instance.QueuedPackagesIndices = new List<int>(_settingsProfile.QueuedPackagesIndices);
+            ProjectSetupData.instance.QueuedAssetIndices = new List<int>(_settingsProfile.QueuedAssetIndices);
+            ProjectSetupData.instance.ProjectSettings = _settingsProfile.ProjectSettings;
+            ProjectSetupData.instance.MiscSettings = _settingsProfile.MiscSettings;
         }
-
-
-        private void InitializeRootFSE()
-        {
-            _assetsFolderStructureEntry = FolderStructureEntry.Default();
-        }
-
+        
 
         private void RetrieveCachedAssets()
         {
@@ -219,14 +198,8 @@ namespace ProjectSetup.Editor
                 throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
             }
         }
-
-
-        private void InitializeProjectSettings()
-        {
-            _projectSettings = ProjectSettings.Default();
-        }
-
-
+        
+        
         private void OnGUI()
         {
             using GUILayout.ScrollViewScope scrollViewScope = new GUILayout.ScrollViewScope(_scrollPosition);
@@ -366,11 +339,11 @@ namespace ProjectSetup.Editor
 
         private void SaveProfile(ProjectSetupSettingsProfile profile)
         {
-            profile.AssetsFolderStructureEntry = _assetsFolderStructureEntry;
-            profile.QueuedPackagesIndices = new List<int>(queuedPackagesIndices);
-            profile.QueuedAssetIndices = new List<int>(queuedAssetsIndices);
-            profile.ProjectSettings = _projectSettings;
-            profile.MiscSettings = _miscSettings;
+            profile.AssetsFolderStructureEntry = ProjectSetupData.instance.AssetsFolderStructureEntry;
+            profile.QueuedPackagesIndices = new List<int>(ProjectSetupData.instance.QueuedPackagesIndices);
+            profile.QueuedAssetIndices = new List<int>(ProjectSetupData.instance.QueuedAssetIndices);
+            profile.ProjectSettings = ProjectSetupData.instance.ProjectSettings;
+            profile.MiscSettings = ProjectSetupData.instance.MiscSettings;
             
             PersistenceSerializer<ProjectSetupSettingsProfile>.SaveFile(profile, profile.Name);
             
@@ -456,7 +429,8 @@ namespace ProjectSetup.Editor
 
             if (GUILayout.Button("Reset Structure", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
-                InitializeRootFSE();
+                ProjectSetupData.instance.AssetsFolderStructureEntry =
+                    FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
             }
             
             SetupWindowElements.DrawRegularSpace();
@@ -465,7 +439,7 @@ namespace ProjectSetup.Editor
             GUIStyle foldersSectionStyle = new GUIStyle(GUI.skin.FindStyle("Window"));
             using (new GUILayout.VerticalScope("Hierarchy", foldersSectionStyle))
             {
-                DrawHierarchyRecursively(_assetsFolderStructureEntry);
+                DrawHierarchyRecursively(ProjectSetupData.instance.AssetsFolderStructureEntry);
             }
         }
 
@@ -618,7 +592,7 @@ namespace ProjectSetup.Editor
                 }
             }
             
-            foreach (FolderStructureEntry directoryProjection in entry.GetChildren())
+            foreach (FolderStructureEntry directoryProjection in entry.Children)
             {
                 DrawHierarchyRecursively(directoryProjection, depth + 1);
             }
@@ -660,6 +634,7 @@ namespace ProjectSetup.Editor
             }
             
             // Available list
+            List<int> queuedPackagesIndices = ProjectSetupData.instance.QueuedPackagesIndices;
             using (new GUILayout.VerticalScope($"Available ({packages.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (packages.Count > 0)
@@ -862,6 +837,7 @@ namespace ProjectSetup.Editor
             }
             
             // Available list
+            List<int> queuedAssetsIndices = ProjectSetupData.instance.QueuedAssetIndices;
             using (new GUILayout.VerticalScope($"Available ({assets.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (assets.Count > 0)
@@ -1010,16 +986,19 @@ namespace ProjectSetup.Editor
         {
             GUILayout.Label("Project Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            _projectSettings.DefaultNamespace =
-                EditorGUILayout.TextField("Default Namespace", _projectSettings.DefaultNamespace);
-            _projectSettings.GameObjectNamingScheme =
+            ProjectSettings projectSettings = ProjectSetupData.instance.ProjectSettings;
+            projectSettings.DefaultNamespace =
+                EditorGUILayout.TextField("Default Namespace", projectSettings.DefaultNamespace);
+            projectSettings.GameObjectNamingScheme =
                 (EditorSettings.NamingScheme) EditorGUILayout.EnumPopup("Game Object Naming",
-                    _projectSettings.GameObjectNamingScheme);
-            _projectSettings.CompanyName = EditorGUILayout.TextField("Company Name", _projectSettings.CompanyName);
-            _projectSettings.ProductName = EditorGUILayout.TextField("Product Name", _projectSettings.ProductName);
-            _projectSettings.Version = EditorGUILayout.TextField("Version", _projectSettings.Version);
-            _projectSettings.ScriptingBackend =
-                (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", _projectSettings.ScriptingBackend);
+                    projectSettings.GameObjectNamingScheme);
+            projectSettings.CompanyName = EditorGUILayout.TextField("Company Name", projectSettings.CompanyName);
+            projectSettings.ProductName = EditorGUILayout.TextField("Product Name", projectSettings.ProductName);
+            projectSettings.Version = EditorGUILayout.TextField("Version", projectSettings.Version);
+            projectSettings.ScriptingBackend =
+                (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", projectSettings.ScriptingBackend);
+
+            ProjectSetupData.instance.ProjectSettings = projectSettings;
         }
 
 
@@ -1028,14 +1007,17 @@ namespace ProjectSetup.Editor
             GUILayout.Label("Misc Settings", new GUIStyle(EditorStyles.boldLabel));
 
             using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
+
+            MiscSettings miscSettings = ProjectSetupData.instance.MiscSettings;
+            miscSettings.DeleteTutorial = GUILayout.Toggle(miscSettings.DeleteTutorial, "Delete tutorial");
             
-            _miscSettings.DeleteTutorial = GUILayout.Toggle(_miscSettings.DeleteTutorial, "Delete tutorial");
-            
-            _miscSettings.ConfigureScene = GUILayout.Toggle(_miscSettings.ConfigureScene, "Configure Scene");
-            if (_miscSettings.ConfigureScene)
+            miscSettings.ConfigureScene = GUILayout.Toggle(miscSettings.ConfigureScene, "Configure Scene");
+            if (miscSettings.ConfigureScene)
             {
-                _miscSettings.SceneName = EditorGUILayout.TextField("Scene Name", _miscSettings.SceneName);
+                miscSettings.SceneName = EditorGUILayout.TextField("Scene Name", miscSettings.SceneName);
             }
+
+            ProjectSetupData.instance.MiscSettings = miscSettings;
         }
         
 
@@ -1043,19 +1025,19 @@ namespace ProjectSetup.Editor
         {
             if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
-                string[] folders = _assetsFolderStructureEntry.ToFolderNames();
+                string[] folders = ProjectSetupData.instance.AssetsFolderStructureEntry.ToFolderNames();
                 Setup.CreateFolders(folders);
 
                 IEnumerable<string> packages =
-                    queuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
+                    ProjectSetupData.instance.QueuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
                 Setup.ImportPackages(packages);
 
-                IEnumerable<AssetInfo> assets = queuedAssetsIndices.Select(i => _assets[i]);
+                IEnumerable<AssetInfo> assets = ProjectSetupData.instance.QueuedAssetIndices.Select(i => _assets[i]);
                 Setup.ImportAssets(assets);
                 
-                Setup.SetProjectSettings(_projectSettings);
+                Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
                 
-                Setup.ExecuteMisc(_miscSettings);
+                Setup.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
             }
         }
     }

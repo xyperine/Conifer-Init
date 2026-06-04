@@ -5,19 +5,68 @@ using UnityEngine;
 namespace ProjectSetup.Editor
 {
     /// <summary>
-    /// Contains all the tool data that needs to survive domain reloads.
+    /// Contains all the tool data that needs to survive domain reloads and even persist across sessions.
     /// </summary>
     [FilePath("Library/ProjectSetupTool/Data.txt", FilePathAttribute.Location.ProjectFolder)]
     public class ProjectSetupData : ScriptableSingleton<ProjectSetupData>
     {
         [SerializeField] private string activeSettingsProfileName;
-
-        [field: SerializeField] public FolderStructureEntry AssetsFolderStructureEntry { get; set; }
-        [field: SerializeField] public List<int> QueuedPackagesIndices { get; set; }
-        [field: SerializeField] public List<int> QueuedAssetIndices { get; set; }
-        [field: SerializeField] public ProjectSettings ProjectSettings { get; set; }
-        [field: SerializeField] public MiscSettings MiscSettings { get; set; }
+        [SerializeField] private MiscSettings miscSettings;
+        [SerializeField] private ProjectSettings projectSettings;
+        [SerializeField] private List<int> queuedAssetIndices;
+        [SerializeField] private List<int> queuedPackagesIndices;
+        [SerializeField] private FolderStructureEntry assetsFolderStructureEntry;
         
+        public FolderStructureEntry AssetsFolderStructureEntry
+        {
+            get => assetsFolderStructureEntry;
+            set
+            {
+                assetsFolderStructureEntry = value;
+                Save(true);
+            }
+        }
+
+        public List<int> QueuedPackagesIndices
+        {
+            get => queuedPackagesIndices;
+            set
+            {
+                queuedPackagesIndices = value;
+                Save(true);
+            }
+        }
+        
+        public List<int> QueuedAssetIndices
+        {
+            get => queuedAssetIndices;
+            set
+            {
+                queuedAssetIndices = value;
+                Save(true);
+            }
+        }
+
+        public ProjectSettings ProjectSettings
+        {
+            get => projectSettings;
+            set
+            {
+                projectSettings = value;
+                Save(true);
+            }
+        }
+
+        public MiscSettings MiscSettings
+        {
+            get => miscSettings;
+            set
+            {
+                miscSettings = value;
+                Save(true);
+            }
+        }
+
         public string ActiveSettingsProfileName
         {
             get => activeSettingsProfileName;
@@ -28,6 +77,7 @@ namespace ProjectSetup.Editor
             }
         }
         
+        // For sequential interactive assets import
         [field: SerializeField] public List<AssetInfo> AssetsToImport { get; set; }
         [field: SerializeField] public bool IsImporting { get; set; }
         [field: SerializeField] public bool IsStable { get; set; }
