@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using UnityEngine.Assertions;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
@@ -16,13 +17,14 @@ namespace ProjectSetup.Editor
     /// </summary>
     public class SetupWindow : EditorWindow
     {
+        private const string DEFAULT_PROFILE_NAME = "Default_Profile";
+        
         private ProjectSetupSettingsProfile _settingsProfile;
         private List<ProjectSetupSettingsProfile> _profiles;
+
+        private ProjectSetupSettingsProfile DefaultProfile => _profiles.Find(p => p.Name == DEFAULT_PROFILE_NAME);
         
         private Vector2 _scrollPosition;
-
-        private bool _isTypingProfileName;
-        private string _newProfileName;
         
         // Folder structure settings
         private int _elementIndex;
@@ -70,9 +72,7 @@ namespace ProjectSetup.Editor
         private ProjectSettings _projectSettings;
         
         // Misc settings
-        private bool _needToDeleteTutorial = false;
-        private bool _configureScene = true;
-        private string _sceneName;
+        private MiscSettings _miscSettings;
         
         
         [MenuItem("Tools/Setup Window")]
@@ -86,7 +86,7 @@ namespace ProjectSetup.Editor
 
         private void OnEnable()
         {
-            FetchSettingsProfiles();
+            LoadSettingsProfiles();
             
             //InitializeRootFSE();
 
@@ -98,14 +98,14 @@ namespace ProjectSetup.Editor
         }
 
 
-        private void FetchSettingsProfiles()
+        private void LoadSettingsProfiles()
         {
             if (!Directory.Exists(PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath))
             {
                 Directory.CreateDirectory(PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath);
             }
             
-            var profilePaths =
+            IEnumerable<string> profilePaths =
                 Directory.EnumerateFiles(PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath,
                     "*.json");
             _profiles = profilePaths
@@ -113,26 +113,73 @@ namespace ProjectSetup.Editor
                 .ToList();
             
             // If there is no default settings profile create one
-            const string defaultProfileName = "Default_Profile";
-            if (!_profiles.Any(p => p.Name == defaultProfileName))
+            string activeProfileName = ProjectSetupData.instance.ActiveSettingsProfileName;
+            Debug.Log(activeProfileName);
+            if (!string.IsNullOrEmpty(activeProfileName))
+            {
+                var p = _profiles.Find(p => p.Name == activeProfileName);
+                if (p != null)
+                {
+                    ApplyProfile(p);
+                }
+                else
+                {
+                    LoadDefaultProfile();
+                }
+            }
+            else
+            {
+                LoadDefaultProfile();
+            }
+        }
+
+
+        private void LoadDefaultProfile()
+        {
+            if (DefaultProfile == null)
             {
                 ProjectSetupSettingsProfile defaultProfile = new ProjectSetupSettingsProfile()
                 {
-                    Name = defaultProfileName,
+                    Name = DEFAULT_PROFILE_NAME,
                     AssetsFolderStructureEntry = FolderStructureEntry.Default(),
                     QueuedPackagesIndices = new List<int>(),
                     QueuedAssetIndices = new List<int>(),
                     ProjectSettings = ProjectSettings.Default(),
+                    MiscSettings = MiscSettings.Default(),
                 };
-                SaveProfile(defaultProfile);
+                    
+                PersistenceSerializer<ProjectSetupSettingsProfile>.SaveFile(defaultProfile, defaultProfile.Name);
                 
                 _profiles.Add(defaultProfile);
             }
             
-            ApplyProfile(_profiles.Find(p => p.Name == defaultProfileName));
+            ApplyProfile(DefaultProfile);
         }
-        
-        
+
+
+        private void ApplyProfile(ProjectSetupSettingsProfile profile)
+        {
+            // Reset process data
+            _isAddingChild = false;
+            _newChildName = string.Empty;
+            _newChildParentFullName = string.Empty;
+            _isEditingName = false;
+            _editingNameOf = string.Empty;
+            _newEditedName = string.Empty;
+            _packagesSearchString = string.Empty;
+            _assetsSearchString = string.Empty;
+            
+            _settingsProfile = profile;
+            ProjectSetupData.instance.ActiveSettingsProfileName = _settingsProfile.Name;
+            
+            _assetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
+            queuedPackagesIndices = new List<int>(_settingsProfile.QueuedPackagesIndices);
+            queuedAssetsIndices = new List<int>(_settingsProfile.QueuedAssetIndices);
+            _projectSettings = _settingsProfile.ProjectSettings;
+            _miscSettings = _settingsProfile.MiscSettings;
+        }
+
+
         private void InitializeRootFSE()
         {
             _assetsFolderStructureEntry = FolderStructureEntry.Default();
@@ -213,77 +260,109 @@ namespace ProjectSetup.Editor
             
             GUILayout.FlexibleSpace();
         }
-        
-        
+
+
         private void DrawSettingsProfileSelection()
         {
             GUILayout.Label("Profile", new GUIStyle(EditorStyles.boldLabel));
 
+            using (EditorGUI.ChangeCheckScope changeScope = new EditorGUI.ChangeCheckScope())
+            {
+                string[] profileNames = _profiles.Select(p => p.Name).ToArray();
+                int selectedIndex = Array.IndexOf(profileNames, _settingsProfile.Name);
+                selectedIndex = EditorGUILayout.Popup("Active Profile", selectedIndex, profileNames,
+                    new GUIStyle(EditorStyles.popup),GUILayout.Height(16f));
+
+                if (changeScope.changed)
+                {
+                    ProjectSetupSettingsProfile profile = _profiles.Single(p => p.Name == profileNames[selectedIndex]);
+                    ApplyProfile(profile);
+                }
+            }
+            
             using (new GUILayout.HorizontalScope(new GUIStyle()))
             {
-                using (var changeScope = new EditorGUI.ChangeCheckScope())
+                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_settingsProfile.Name == DefaultProfile.Name))
                 {
-                    string[] profileNames = _profiles.Select(p => p.Name).ToArray();
-                    int selectedIndex = Array.IndexOf(profileNames, _settingsProfile.Name);
-                    selectedIndex = EditorGUILayout.Popup(selectedIndex, profileNames);
-
-                    if (changeScope.changed)
+                    if (GUILayout.Button("Save"))
                     {
-                        var profile = _profiles.Single(p => p.Name == profileNames[selectedIndex]);
-                        ApplyProfile(profile);
+                        ConfirmSaveProfileDialog(_settingsProfile);
                     }
-                }
-
-                if (GUILayout.Button("Save"))
-                {
-                    // Save in the current settings profile
-                    ShowSaveProfileDialog(_settingsProfile);
                 }
 
                 if (GUILayout.Button("Save as..."))
                 {
-                    // Prompt with naming the new settings profile
-                    //_isTypingProfileName = true
-                    EditorApplication.delayCall += () => InputWindow.Show(SaveAsProfile);
-                    //GUIUtility.ExitGUI();
+                    ShowSaveProfileFilePanel(path => SaveAsProfile(Path.GetFileNameWithoutExtension(path)));
                 }
-
-
+                
                 if (GUILayout.Button("New"))
                 {
-                    // Initialize with default settings and a placeholder name
+                    ShowSaveProfileFilePanel(path => CreateNewProfile(Path.GetFileNameWithoutExtension(path)));
                 }
 
-            }
+                
+                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_settingsProfile.Name == DefaultProfile.Name))
+                {
+                    if (GUILayout.Button("Delete"))
+                    {
+                        ConfirmDeleteProfileDialog(_settingsProfile);
+                    }
+                }
 
-            if (_isTypingProfileName)
-            {
-                DrawProfileNameThing();
+                if (GUILayout.Button("Restore"))
+                {
+                    ApplyProfile(_settingsProfile);
+                }
             }
         }
 
 
-        private void ApplyProfile(ProjectSetupSettingsProfile profile)
+        private void ConfirmDeleteProfileDialog(ProjectSetupSettingsProfile profile)
         {
-            _settingsProfile = profile;
-
-            _assetsFolderStructureEntry = _settingsProfile.AssetsFolderStructureEntry;
-            queuedPackagesIndices = new List<int>(_settingsProfile.QueuedPackagesIndices);
-            queuedAssetsIndices = new List<int>(_settingsProfile.QueuedAssetIndices);
-            _projectSettings = _settingsProfile.ProjectSettings;
-        }
-
-
-        private void ShowSaveProfileDialog(ProjectSetupSettingsProfile profile)
-        {
-            if (EditorDialog.DisplayDecisionDialog("Save Profile?",
-                    "This will override the current profile. Proceed?",
+            Assert.IsFalse(profile.Name == DEFAULT_PROFILE_NAME);
+            
+            if (EditorDialog.DisplayDecisionDialog("Delete Profile?",
+                    $"{profile.Name} profile will be irreversibly deleted. Proceed?",
                     "Yes", "No"))
+            {
+                DeleteProfile(profile);
+            }
+        }
+
+
+        private void DeleteProfile(ProjectSetupSettingsProfile profile)
+        {
+            ApplyProfile(DefaultProfile);
+            
+            PersistenceSerializer<ProjectSetupSettingsProfile>.DeleteFile(profile.Name);
+            
+            Debug.Log($"Deleted {profile.Name} profile");
+            
+            LoadSettingsProfiles();
+            
+            ApplyProfile(DefaultProfile);
+        }
+
+
+        private void ConfirmSaveProfileDialog(ProjectSetupSettingsProfile profile)
+        {
+            Assert.IsFalse(profile.Name == DEFAULT_PROFILE_NAME);
+            
+            if (_profiles.Exists(p => p.Name == profile.Name))
+            {
+                if (EditorDialog.DisplayDecisionDialog("Save Profile?",
+                        $"This will override the existing {profile.Name} profile. Proceed?",
+                        "Yes", "No"))
+                {
+                    SaveProfile(profile);
+                }
+            }
+            else
             {
                 SaveProfile(profile);
             }
         }
-        
+
 
         private void SaveProfile(ProjectSetupSettingsProfile profile)
         {
@@ -291,10 +370,58 @@ namespace ProjectSetup.Editor
             profile.QueuedPackagesIndices = new List<int>(queuedPackagesIndices);
             profile.QueuedAssetIndices = new List<int>(queuedAssetsIndices);
             profile.ProjectSettings = _projectSettings;
+            profile.MiscSettings = _miscSettings;
             
             PersistenceSerializer<ProjectSetupSettingsProfile>.SaveFile(profile, profile.Name);
             
             Debug.Log($"Saved {profile.Name} profile");
+            
+            LoadSettingsProfiles();
+            
+            ApplyProfile(profile);
+        }
+
+
+        private void ShowSaveProfileFilePanel(Action<string> onSuccess)
+        {
+            string newName = "New_Profile";
+            if (_profiles.Exists(p => p.Name == newName))
+            {
+                int i = 1;
+                while (_profiles.Any(p => p.Name == newName))
+                {
+                    newName = "New_Profile" + $"_{i}"; 
+                    i++;
+                }
+            }
+            
+            string savedPath = EditorUtility.SaveFilePanel("New Profile",
+                PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath, newName, "json");
+            if (savedPath != string.Empty)
+            {
+                bool insideProfileStorage = Directory.GetParent(savedPath).FullName ==
+                             PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath;
+                bool hasRightExtension = Path.GetExtension(savedPath) == ".json";
+                bool isNotDefaultProfile = Path.GetFileNameWithoutExtension(savedPath) != DEFAULT_PROFILE_NAME;
+                bool valid = insideProfileStorage && hasRightExtension && isNotDefaultProfile;
+                if (valid)
+                {
+                    onSuccess?.Invoke(savedPath);
+                }
+                else if (!insideProfileStorage)
+                {
+                    Debug.LogError(
+                        $"Must be inside the profiles storage directory!: {PersistenceSerializer<ProjectSetupSettingsProfile>.ProfilesStoragePath}");
+                }
+                else if (!hasRightExtension)
+                {
+                    Debug.LogError("The profile file must have .json extension!");
+                }
+                else if (!isNotDefaultProfile)
+                {
+                    Debug.LogError("Can't override the default profile!");
+                }
+            }
         }
 
 
@@ -302,52 +429,26 @@ namespace ProjectSetup.Editor
         {
             Debug.Log($"Saving as {newProfileName} profile");
             
-            if (newProfileName == "")
+            if (newProfileName == string.Empty)
             {
                 return;
             }
             
-            var p = new ProjectSetupSettingsProfile()
+            ProjectSetupSettingsProfile profile = new ProjectSetupSettingsProfile()
             {
                 Name = newProfileName,
             };
             
-            ShowSaveProfileDialog(p);
+            ConfirmSaveProfileDialog(profile);
         }
-        
 
-        private void DrawProfileNameThing()
+
+        private void CreateNewProfile(string newProfileName)
         {
-            using var s = new GUILayout.HorizontalScope(new GUIStyle());
-                
-            _newProfileName = GUILayout.TextField(_newProfileName, GUILayout.MaxWidth(256f), GUILayout.Height(16f));
-
-            if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(16f)) ||
-                 Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newEditedName)) // if done typing name
-            {
-                var p = new ProjectSetupSettingsProfile()
-                {
-                    Name = _newProfileName,
-                    AssetsFolderStructureEntry = _assetsFolderStructureEntry,
-                    QueuedPackagesIndices = new List<int>(queuedPackagesIndices),
-                    QueuedAssetIndices = new List<int>(queuedAssetsIndices),
-                    ProjectSettings = _projectSettings,
-                };
-                
-                SaveProfile(p);
-
-                _isTypingProfileName = false;
-                _newProfileName = string.Empty;
-            }
-            
-            if (GUILayout.Button("Cancel", GUILayout.Width(64f), GUILayout.Height(16f)) ||
-                Event.current.keyCode == KeyCode.Escape)
-            {
-                _isTypingProfileName = false;
-                _newProfileName = string.Empty;
-            }
+            ApplyProfile(DefaultProfile);
+            SaveAsProfile(newProfileName);
         }
-        
+
 
         private void DrawFolderStructureSettings()
         {
@@ -928,12 +1029,12 @@ namespace ProjectSetup.Editor
 
             using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
             
-            _needToDeleteTutorial = GUILayout.Toggle(_needToDeleteTutorial, "Delete tutorial");
+            _miscSettings.DeleteTutorial = GUILayout.Toggle(_miscSettings.DeleteTutorial, "Delete tutorial");
             
-            _configureScene = GUILayout.Toggle(_configureScene, "Configure Scene");
-            if (_configureScene)
+            _miscSettings.ConfigureScene = GUILayout.Toggle(_miscSettings.ConfigureScene, "Configure Scene");
+            if (_miscSettings.ConfigureScene)
             {
-                _sceneName = EditorGUILayout.TextField("Scene Name", _sceneName);
+                _miscSettings.SceneName = EditorGUILayout.TextField("Scene Name", _miscSettings.SceneName);
             }
         }
         
@@ -954,7 +1055,7 @@ namespace ProjectSetup.Editor
                 
                 Setup.SetProjectSettings(_projectSettings);
                 
-                Setup.ExecuteMisc(_needToDeleteTutorial, _configureScene, _sceneName);
+                Setup.ExecuteMisc(_miscSettings);
             }
         }
     }

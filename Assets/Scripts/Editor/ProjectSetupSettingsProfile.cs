@@ -13,5 +13,6 @@ namespace ProjectSetup.Editor
         [field: SerializeField] public List<int> QueuedPackagesIndices { get; set; }
         [field: SerializeField] public List<int> QueuedAssetIndices { get; set; }
         [field: SerializeField] public ProjectSettings ProjectSettings { get; set; }
+        [field: SerializeField] public MiscSettings MiscSettings { get; set; }
     }
 }

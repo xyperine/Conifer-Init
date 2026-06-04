@@ -213,5 +213,11 @@ namespace ProjectSetup.Editor
                 SetupScene();
             }
         }
+
+
+        public static void ExecuteMisc(MiscSettings miscSettings)
+        {
+            ExecuteMisc(miscSettings.DeleteTutorial, miscSettings.ConfigureScene, miscSettings.SceneName);
+        }
     }
 }
