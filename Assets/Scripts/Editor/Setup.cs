@@ -25,7 +25,7 @@ namespace ProjectSetup.Editor
             
             DeleteTutorialAssets();
 
-            SetupScene();
+            SetupScene("Main");
         }
 
 
@@ -63,13 +63,18 @@ namespace ProjectSetup.Editor
         }
         
 
-        private static void SetupScene()
+        private static void SetupScene(string sceneName)
         {
-            AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", "Main.unity");
+            if (!sceneName.EndsWith(".unity"))
+            {
+                sceneName += ".unity";
+            }
+            
+            AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", sceneName);
             
             AssetDatabase.Refresh();
             
-            EditorSceneManager.OpenScene("Assets/Scenes/Main.unity");
+            EditorSceneManager.OpenScene($"Assets/Scenes/{sceneName}");
         }
 
 
@@ -199,8 +204,7 @@ namespace ProjectSetup.Editor
             Debug.Log("Project settings set");
         }
 
-
-        // TODO: Use sceneName
+        
         public static void ExecuteMisc(bool deleteTutorial, bool configureScene, string sceneName)
         {
             if (deleteTutorial)
@@ -210,7 +214,7 @@ namespace ProjectSetup.Editor
 
             if (configureScene)
             {
-                SetupScene();
+                SetupScene(sceneName);
             }
         }
 
