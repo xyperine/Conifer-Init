@@ -25,32 +25,11 @@ namespace ProjectSetup.Editor
                 , Name);
 
 
-        public static FolderStructureEntry Default()
-        {
-            FolderStructureEntry assetsFolderStructureEntry = new FolderStructureEntry("Assets", (FolderStructureEntry) null);
-            
-            Create(assetsFolderStructureEntry, "Animations");
-            Create(assetsFolderStructureEntry, "Audio");
-            Create(assetsFolderStructureEntry, "Data/Inputs");
-            Create(assetsFolderStructureEntry, "Data/URP");
-            Create(assetsFolderStructureEntry, "Materials");
-            Create(assetsFolderStructureEntry, "Meshes");
-            Create(assetsFolderStructureEntry, "Plugins");
-            Create(assetsFolderStructureEntry, "Prefabs");
-            Create(assetsFolderStructureEntry, "Shaders");
-            Create(assetsFolderStructureEntry, "Scripts/Tests/Editor");
-            Create(assetsFolderStructureEntry, "Scripts/Tests/Runtime");
-            Create(assetsFolderStructureEntry, "Textures");
-
-            return assetsFolderStructureEntry;
-        }
-
-
         public FolderStructureEntry(string name, FolderStructureEntry parent)
         {
             Name = name;
-            _children = new List<FolderStructureEntry>();
             Parent = parent;
+            _children = new List<FolderStructureEntry>();
         }
 
 
@@ -75,9 +54,9 @@ namespace ProjectSetup.Editor
 
         public FolderStructureEntry(string name, FolderStructureEntry parent, List<FolderStructureEntry> children)
         {
-            _children = children;
             Name = name;
             Parent = parent;
+            _children = children;
 
             children = _children.Distinct().ToList();
             
@@ -115,6 +94,11 @@ namespace ProjectSetup.Editor
         }
 
 
+        /// <summary>
+        /// Converts the entire structure into a list of paths.
+        /// </summary>
+        /// <param name="includeRoot">Include the root folder in the list?</param>
+        /// <returns>A list of paths relative to the Assets directory.</returns>
         public string[] ToFolderNames(bool includeRoot = false)
         {
             List<string> names = new List<string>();
@@ -140,32 +124,6 @@ namespace ProjectSetup.Editor
         public void Rename(string newName)
         {
             Name = newName;
-        }
-
-
-        /// <summary>
-        /// Creates folder along with all the parent folders in the path
-        /// </summary>
-        /// <param name="path">Path relative to the root folder</param>
-        /// <returns>The topmost parent folder</returns>
-        public static void Create(FolderStructureEntry root, string path)
-        {
-            string[] folders = path.Split('/');
-            FolderStructureEntry current = root;
-
-            for (int i = 0; i < folders.Length; i++)
-            {
-                FolderStructureEntry child = new FolderStructureEntry(folders[i], current);
-                if (!current._children.Contains(child))
-                {
-                    current.AddChild(child);
-                    current = child;
-                }
-                else
-                {
-                    current = current._children.Find(c => c.Equals(child));
-                }
-            }
         }
 
 
@@ -209,6 +167,78 @@ namespace ProjectSetup.Editor
         public override int GetHashCode()
         {
             return (FullName != null ? FullName.GetHashCode() : 0);
+        }
+
+
+        /// <summary>
+        /// Creates a default configuration for FolderStructureEntry.
+        /// </summary>
+        /// <returns>Root of the created default structure.</returns>
+        public static FolderStructureEntry Default()
+        {
+            FolderStructureEntry assetsFolderStructureEntry = new FolderStructureEntry("Assets", (FolderStructureEntry) null);
+            
+            Create(assetsFolderStructureEntry, "Animations");
+            Create(assetsFolderStructureEntry, "Audio");
+            Create(assetsFolderStructureEntry, "Data/Inputs");
+            Create(assetsFolderStructureEntry, "Data/URP");
+            Create(assetsFolderStructureEntry, "Materials");
+            Create(assetsFolderStructureEntry, "Meshes");
+            Create(assetsFolderStructureEntry, "Plugins");
+            Create(assetsFolderStructureEntry, "Prefabs");
+            Create(assetsFolderStructureEntry, "Shaders");
+            Create(assetsFolderStructureEntry, "Scripts/Tests/Editor");
+            Create(assetsFolderStructureEntry, "Scripts/Tests/Runtime");
+            Create(assetsFolderStructureEntry, "Textures");
+
+            return assetsFolderStructureEntry;
+        }
+
+
+        /// <summary>
+        /// Creates a deep copy of the given entry.
+        /// </summary>
+        /// <param name="original">Entry to copy.</param>
+        /// <param name="parent">Parent of the passed entry.</param>
+        /// <returns>Copied entry.</returns>
+        public static FolderStructureEntry DeepCopy(FolderStructureEntry original, FolderStructureEntry parent)
+        {
+            string name = original.Name;
+            List<FolderStructureEntry> children = new List<FolderStructureEntry>();
+            FolderStructureEntry copy = new FolderStructureEntry(name, parent, children);
+            
+            foreach (FolderStructureEntry child in original.GetChildren())
+            {
+                children.Add(DeepCopy(child, copy));
+            }
+
+            return copy;
+        }
+
+
+        /// <summary>
+        /// Creates folder along with all the parent folders in the path.
+        /// </summary>
+        /// <param name="path">Path relative to the root folder.</param>
+        /// <returns>The topmost parent folder.</returns>
+        public static void Create(FolderStructureEntry root, string path)
+        {
+            string[] folders = path.Split('/');
+            FolderStructureEntry current = root;
+
+            for (int i = 0; i < folders.Length; i++)
+            {
+                FolderStructureEntry child = new FolderStructureEntry(folders[i], current);
+                if (!current._children.Contains(child))
+                {
+                    current.AddChild(child);
+                    current = child;
+                }
+                else
+                {
+                    current = current._children.Find(c => c.Equals(child));
+                }
+            }
         }
     }
 }
