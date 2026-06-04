@@ -13,7 +13,7 @@ namespace ProjectSetup.Editor
     [Serializable]
     public class FolderStructureEntry : IEquatable<FolderStructureEntry>
     {
-        [JsonProperty, SerializeReference] private List<FolderStructureEntry> children;
+        [field: JsonProperty, SerializeReference] public List<FolderStructureEntry> Children { get; private set; }
             
         [field: SerializeField] public string Name { get; private set; }
         [field: SerializeReference] public FolderStructureEntry Parent { get; private set; }
@@ -29,7 +29,7 @@ namespace ProjectSetup.Editor
         {
             Name = name;
             Parent = parent;
-            children = new List<FolderStructureEntry>();
+            Children = new List<FolderStructureEntry>();
         }
 
 
@@ -43,7 +43,7 @@ namespace ProjectSetup.Editor
                 children = new List<FolderStructureEntry>();
             }
             
-            this.children = children;
+            Children = children;
 
             foreach (FolderStructureEntry child in children)
             {
@@ -56,9 +56,9 @@ namespace ProjectSetup.Editor
         {
             Name = name;
             Parent = parent;
-            this.children = children;
+            Children = children;
 
-            children = this.children.Distinct().ToList();
+            children = Children.Distinct().ToList();
             
             foreach (FolderStructureEntry child in children)
             {
@@ -67,19 +67,13 @@ namespace ProjectSetup.Editor
         }
 
 
-        public List<FolderStructureEntry> GetChildren()
-        {
-            return new List<FolderStructureEntry>(children);
-        }
-
-
         public void AddChild(FolderStructureEntry folderStructureEntry)
         {
-            if (!children.Contains(folderStructureEntry))
+            if (!Children.Contains(folderStructureEntry))
             {
                 folderStructureEntry.Parent = this;
-                children.Add(folderStructureEntry);
-                children = children.OrderBy(c => c.Name).ToList();
+                Children.Add(folderStructureEntry);
+                Children = Children.OrderBy(c => c.Name).ToList();
                 //Debug.Log($"Added child: {folderStructureEntry.Name}");
             }
         }
@@ -87,9 +81,9 @@ namespace ProjectSetup.Editor
 
         public void RemoveChild(FolderStructureEntry folderStructureEntry)
         {
-            if (children.Contains(folderStructureEntry))
+            if (Children.Contains(folderStructureEntry))
             {
-                children.Remove(folderStructureEntry);
+                Children.Remove(folderStructureEntry);
             }
         }
 
@@ -108,7 +102,7 @@ namespace ProjectSetup.Editor
                 names.Add(FullName);
             }
 
-            foreach (FolderStructureEntry child in children)
+            foreach (FolderStructureEntry child in Children)
             {
                 names.AddRange(child.ToFolderNames(true));
             }
@@ -207,7 +201,7 @@ namespace ProjectSetup.Editor
             List<FolderStructureEntry> children = new List<FolderStructureEntry>();
             FolderStructureEntry copy = new FolderStructureEntry(name, parent, children);
             
-            foreach (FolderStructureEntry child in original.GetChildren())
+            foreach (FolderStructureEntry child in original.Children)
             {
                 children.Add(DeepCopy(child, copy));
             }
@@ -229,14 +223,14 @@ namespace ProjectSetup.Editor
             for (int i = 0; i < folders.Length; i++)
             {
                 FolderStructureEntry child = new FolderStructureEntry(folders[i], current);
-                if (!current.children.Contains(child))
+                if (!current.Children.Contains(child))
                 {
                     current.AddChild(child);
                     current = child;
                 }
                 else
                 {
-                    current = current.children.Find(c => c.Equals(child));
+                    current = current.Children.Find(c => c.Equals(child));
                 }
             }
         }
