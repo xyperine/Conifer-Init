@@ -11,6 +11,10 @@ namespace ProjectSetup.Editor
         [field: SerializeField] public string SceneName { get; set; }
 
 
+        /// <summary>
+        /// Creates a default configuration for MiscSettings.
+        /// </summary>
+        /// <returns>Configured MiscSettings instance.</returns>
         public static MiscSettings Default()
         {
             return new MiscSettings

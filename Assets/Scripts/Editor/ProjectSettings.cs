@@ -12,6 +12,10 @@ namespace ProjectSetup.Editor
         public ScriptingImplementation ScriptingBackend { get; set; }
 
 
+        /// <summary>
+        /// Creates a default configuration for ProjectSettings.
+        /// </summary>
+        /// <returns>Configured ProjectSettings instance.</returns>
         public static ProjectSettings Default()
         {
             // Actual default
