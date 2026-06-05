@@ -10,7 +10,7 @@ namespace ProjectSetup.Editor
         
         public FolderStructureEntry AssetsFolderStructureEntry { get; set; }
         public List<int> QueuedPackagesIndices { get; set; }
-        public List<int> QueuedAssetIndices { get; set; }
+        public List<string> QueuedAssetIDs { get; set; }
         public ProjectSettings ProjectSettings { get; set; }
         public MiscSettings MiscSettings { get; set; }
     }

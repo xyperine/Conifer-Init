@@ -8,20 +8,22 @@ namespace ProjectSetup.Editor
     {
         [field: SerializeField] public string Path { get; private set; }
         [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField] public string ID { get; private set; }
         [field: SerializeField] public bool Interactive { get; private set; }
 
 
-        public AssetInfo(string path, string name, bool interactive)
+        public AssetInfo(string path, string name, string id, bool interactive)
         {
             Path = path;
             Name = name;
+            ID = id;
             Interactive = interactive;
         }
 
 
         public bool Equals(AssetInfo other)
         {
-            return Path == other.Path && Name == other.Name && Interactive == other.Interactive;
+            return Path == other.Path && Name == other.Name && Interactive == other.Interactive && ID == other.ID;
         }
 
 
@@ -33,7 +35,7 @@ namespace ProjectSetup.Editor
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Path, Name, Interactive);
+            return HashCode.Combine(Path, Name, ID, Interactive);
         }
     }
 }
