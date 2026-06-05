@@ -46,10 +46,10 @@ namespace ProjectSetup.Editor
 
         private string _packagesSearchString;
 
-        private List<int> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
-            ? _packagesListRequest.Result.Select(p => Array.IndexOf(_packagesListRequest.Result, p)).Where(i =>
-                !ProjectSetupData.instance.QueuedPackagesIndices.Contains(i)).ToList()
-            : new List<int>();
+        private List<string> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
+            ? _packagesListRequest.Result.Select(p => p.name).Where(id =>
+                !ProjectSetupData.instance.QueuedPackagesIDs.Contains(id)).ToList()
+            : new List<string>();
         
         // Assets settings
         private bool _successfullyRetrievedAssets = false;
@@ -127,7 +127,7 @@ namespace ProjectSetup.Editor
                 {
                     Name = DEFAULT_PROFILE_NAME,
                     AssetsFolderStructureEntry = FolderStructureEntry.Default(),
-                    QueuedPackagesIndices = new List<int>(),
+                    QueuedPackagesIDs = new List<string>(),
                     QueuedAssetIDs = new List<string>(),
                     ProjectSettings = ProjectSettings.Default(),
                     MiscSettings = MiscSettings.Default(),
@@ -158,7 +158,7 @@ namespace ProjectSetup.Editor
             ProjectSetupData.instance.ActiveSettingsProfileName = _settingsProfile.Name;
             
             ProjectSetupData.instance.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
-            ProjectSetupData.instance.QueuedPackagesIndices = new List<int>(_settingsProfile.QueuedPackagesIndices);
+            ProjectSetupData.instance.QueuedPackagesIDs = new List<string>(_settingsProfile.QueuedPackagesIDs);
             ProjectSetupData.instance.QueuedAssetIDs = new List<string>(_settingsProfile.QueuedAssetIDs);
             ProjectSetupData.instance.ProjectSettings = _settingsProfile.ProjectSettings;
             ProjectSetupData.instance.MiscSettings = _settingsProfile.MiscSettings;
@@ -341,7 +341,7 @@ namespace ProjectSetup.Editor
         private void SaveProfile(SettingsProfile profile)
         {
             profile.AssetsFolderStructureEntry = ProjectSetupData.instance.AssetsFolderStructureEntry;
-            profile.QueuedPackagesIndices = new List<int>(ProjectSetupData.instance.QueuedPackagesIndices);
+            profile.QueuedPackagesIDs = new List<string>(ProjectSetupData.instance.QueuedPackagesIDs);
             profile.QueuedAssetIDs = new List<string>(ProjectSetupData.instance.QueuedAssetIDs);
             profile.ProjectSettings = ProjectSetupData.instance.ProjectSettings;
             profile.MiscSettings = ProjectSetupData.instance.MiscSettings;
@@ -624,28 +624,28 @@ namespace ProjectSetup.Editor
                 GUILayout.TextField(_packagesSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
             
-            List<int> packages = AvailablePackages;
+            List<string> availablePackageIDs = AvailablePackages;
             if (!string.IsNullOrWhiteSpace(_packagesSearchString))
             {
-                packages = packages.FindAll(index =>
-                    _packagesListRequest.Result[index].displayName.Contains(_packagesSearchString,
+                availablePackageIDs = availablePackageIDs.FindAll(id =>
+                    _packagesListRequest.Result.First(p => p.name == id).displayName.Contains(_packagesSearchString,
                         StringComparison.OrdinalIgnoreCase));
 
                 _availablePage = 1;
             }
             
             // Available list
-            List<int> queuedPackagesIndices = ProjectSetupData.instance.QueuedPackagesIndices;
-            using (new GUILayout.VerticalScope($"Available ({packages.Count})", new GUIStyle(GUI.skin.window)))
+            List<string> queuedPackageIDs = ProjectSetupData.instance.QueuedPackagesIDs;
+            using (new GUILayout.VerticalScope($"Available ({availablePackageIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
-                if (packages.Count > 0)
+                if (availablePackageIDs.Count > 0)
                 {
                     int start = (_availablePage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        packages.Count - (_availablePage - 1) * maxEntriesPerPage);
+                        availablePackageIDs.Count - (_availablePage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _packagesListRequest.Result[packages[i]];
+                        PackageInfo packageInfo = _packagesListRequest.Result.First(p => p.name == availablePackageIDs[i]);
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0 
                             ? new Color(0f, 0f, 0f, 0.03f)
@@ -661,9 +661,8 @@ namespace ProjectSetup.Editor
                         GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
-                            int index = packages[i];
-                                    
-                            queuedPackagesIndices.Add(index);
+                            string id = availablePackageIDs[i];
+                            queuedPackageIDs.Add(id);
 
                             i--;
                         }
@@ -702,16 +701,16 @@ namespace ProjectSetup.Editor
             SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
-            using (new GUILayout.VerticalScope($"Queued ({queuedPackagesIndices.Count})", new GUIStyle(GUI.skin.window)))
+            using (new GUILayout.VerticalScope($"Queued ({queuedPackageIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
-                if (queuedPackagesIndices.Count > 0)
+                if (queuedPackageIDs.Count > 0)
                 {
                     int start = (_queuedPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        queuedPackagesIndices.Count - (_queuedPage - 1) * maxEntriesPerPage);
+                        queuedPackageIDs.Count - (_queuedPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _packagesListRequest.Result[queuedPackagesIndices[i]];
+                        PackageInfo packageInfo = _packagesListRequest.Result.First(p => p.name == queuedPackageIDs[i]);
                         using EditorGUILayout.HorizontalScope entryScope =
                             new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0
@@ -731,9 +730,8 @@ namespace ProjectSetup.Editor
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
                                 GUILayout.Height(16f)))
                         {
-                            int index = queuedPackagesIndices[i];
-
-                            queuedPackagesIndices.Remove(index);
+                            string id = queuedPackageIDs[i];
+                            queuedPackageIDs.Remove(id);
 
                             i--;
                             entriesCount--;
@@ -741,7 +739,7 @@ namespace ProjectSetup.Editor
                     }
 
                     // Pages navigation
-                    if (queuedPackagesIndices.Count > maxEntriesPerPage)
+                    if (queuedPackageIDs.Count > maxEntriesPerPage)
                     {
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                         GUILayout.FlexibleSpace();
@@ -755,7 +753,7 @@ namespace ProjectSetup.Editor
                         }
 
                         int maxPages =
-                            Mathf.CeilToInt(queuedPackagesIndices.Count / (float) maxEntriesPerPage);
+                            Mathf.CeilToInt(queuedPackageIDs.Count / (float) maxEntriesPerPage);
                         GUILayout.Label($"{_queuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
 
                         using (new EditorGUI.DisabledGroupScope(_queuedPage >= maxPages))
@@ -1029,10 +1027,12 @@ namespace ProjectSetup.Editor
                 Setup.CreateFolders(folders);
 
                 IEnumerable<string> packages =
-                    ProjectSetupData.instance.QueuedPackagesIndices.Select(i => _packagesListRequest.Result[i].packageId);
+                    ProjectSetupData.instance.QueuedPackagesIDs.Select(id =>
+                        _packagesListRequest.Result.First(p => p.name == id).packageId);
                 Setup.ImportPackages(packages);
 
-                IEnumerable<AssetInfo> assets = ProjectSetupData.instance.QueuedAssetIDs.Select(id => _assets.Find(a => a.ID == id));
+                IEnumerable<AssetInfo> assets =
+                    ProjectSetupData.instance.QueuedAssetIDs.Select(id => _assets.Find(a => a.ID == id));
                 Setup.ImportAssets(assets);
                 
                 Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);

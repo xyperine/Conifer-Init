@@ -14,7 +14,7 @@ namespace ProjectSetup.Editor
         [SerializeField] private MiscSettings miscSettings;
         [SerializeField] private ProjectSettings projectSettings;
         [SerializeField] private List<string> queuedAssetIDs;
-        [SerializeField] private List<int> queuedPackagesIndices;
+        [SerializeField] private List<string> queuedPackagesIDs;
         [SerializeField] private FolderStructureEntry assetsFolderStructureEntry;
         
         public FolderStructureEntry AssetsFolderStructureEntry
@@ -27,12 +27,12 @@ namespace ProjectSetup.Editor
             }
         }
 
-        public List<int> QueuedPackagesIndices
+        public List<string> QueuedPackagesIDs
         {
-            get => queuedPackagesIndices;
+            get => queuedPackagesIDs;
             set
             {
-                queuedPackagesIndices = value;
+                queuedPackagesIDs = value;
                 Save(true);
             }
         }
