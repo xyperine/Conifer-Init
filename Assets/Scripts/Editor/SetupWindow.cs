@@ -512,7 +512,7 @@ namespace ProjectSetup.Editor
                         GUIStyle labelStyle = new GUIStyle(GUI.skin.label);
                         // Really slow to detect the hover for some reason
                         labelStyle.hover = new GUIStyleState() {textColor = Color.cornflowerBlue};
-                        if (GUILayout.Button(indentedName.ToString(), labelStyle))
+                        if (GUILayout.Button(indentedName.ToString(), labelStyle) && !_isAddingChild)
                         {
                             _isEditingName = true;
                             _editingNameOf = entry.FullName;
@@ -526,7 +526,7 @@ namespace ProjectSetup.Editor
                     }
 
                     GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) {fixedWidth = 16, fixedHeight = 16};
-                    if (GUILayout.Button("+", buttonStyle))
+                    if (GUILayout.Button("+", buttonStyle) && !_isEditingName)
                     {
                         _isAddingChild = true;
                         _newChildParentFullName = entry.FullName;
