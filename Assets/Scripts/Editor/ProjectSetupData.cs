@@ -77,10 +77,17 @@ namespace ProjectSetup.Editor
             }
         }
         
-        // For sequential interactive assets import
+        [field: SerializeField] public bool PreInteractiveOperationsInProgress { get; set; }
+        [field: SerializeField] public bool PreInteractiveOperationsFinished { get; set; }
+        
+        [field: SerializeField] public bool InteractiveOperationsInProgress { get; set; }
         [field: SerializeField] public List<AssetInfo> AssetsToImport { get; set; }
-        [field: SerializeField] public bool IsImporting { get; set; }
-        [field: SerializeField] public bool IsStable { get; set; }
-        [field: SerializeField] public bool IsImportRequested { get; set; }
+        [field: SerializeField] public bool SetupInProgress { get; set; }
+        [field: SerializeField] public bool Importing { get; set; }
+        [field: SerializeField] public bool Stable { get; set; }
+        [field: SerializeField] public bool ImportRequested { get; set; }
+        [field: SerializeField] public bool InteractiveOperationsFinished { get; set; }
+        
+        [field: SerializeField] public bool NonInteractiveOperationsInProgress { get; set; }
     }
 }

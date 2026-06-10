@@ -20,7 +20,7 @@ namespace ProjectSetup.Editor
         {
             _data = ProjectSetupData.instance;
 
-            if (!_data.IsImportRequested)
+            if (!_data.ImportRequested)
             {
                 return;
             }
@@ -28,7 +28,6 @@ namespace ProjectSetup.Editor
             AssetDatabase.importPackageCompleted += OnAssetImported;
             AssetDatabase.importPackageCancelled += OnAssetImportCancelled;
             AssetDatabase.importPackageFailed += OnAssetImportFailed;
-            
             EditorApplication.update += Update;
         }
         
@@ -39,9 +38,10 @@ namespace ProjectSetup.Editor
             
             _data = ProjectSetupData.instance;
             _data.AssetsToImport = assets.ToList();
-            _data.IsImportRequested = true;
+            _data.ImportRequested = true;
+            _data.InteractiveOperationsFinished = false;
             
-            _data.IsImporting = false;
+            _data.Importing = false;
 
             WaitForStability();
             
@@ -51,26 +51,28 @@ namespace ProjectSetup.Editor
 
         private static void WaitForStability()
         {
-            _data.IsStable = false;
+            _data.Stable = false;
             EditorApplication.delayCall += SetStable;
         }
 
 
         private static void SetStable()
         {
-            _data.IsStable = true;
+            _data.Stable = true;
         }
 
 
         public static void End()
         {
-            _data.IsImportRequested = false;
+            _data.ImportRequested = false;
             
             AssetDatabase.importPackageCompleted -= OnAssetImported;
             AssetDatabase.importPackageCancelled -= OnAssetImportCancelled;
             AssetDatabase.importPackageFailed -= OnAssetImportFailed;
             
             EditorApplication.update -= Update;
+
+            _data.InteractiveOperationsFinished = true;
             
             Debug.Log("All assets imported!");
         }
@@ -78,7 +80,7 @@ namespace ProjectSetup.Editor
 
         private static void Update()
         {
-            if (!_data.IsStable)
+            if (!_data.Stable)
             {
                 Debug.Log("Unstable");
                 return;
@@ -106,14 +108,14 @@ namespace ProjectSetup.Editor
 
         private static void Import()
         {
-            if (_data.IsImporting)
+            if (_data.Importing)
             {
                 Debug.Log("Already importing");
                 
                 return;
             }
             
-            _data.IsImporting = true;
+            _data.Importing = true;
 
             AssetInfo asset = _data.AssetsToImport.First();
             Debug.Log($"Importing: {asset.Name}");
@@ -121,7 +123,7 @@ namespace ProjectSetup.Editor
             {
                 if (UnityPackageUtility.AllPluginAssetsAlreadyImported(asset.Path))
                 {
-                    _data.IsImporting = false;
+                    _data.Importing = false;
                     _data.AssetsToImport.RemoveAt(0);
                 
                     Debug.Log($"{asset.Name} is fully imported already");
@@ -133,7 +135,7 @@ namespace ProjectSetup.Editor
             {
                 Debug.LogError(e);
                 
-                _data.IsImporting = false;
+                _data.Importing = false;
                 _data.AssetsToImport.RemoveAt(0);
                 
                 return;
@@ -152,7 +154,7 @@ namespace ProjectSetup.Editor
             
             Debug.Log($"Canceled: {packageName}");
             
-            _data.IsImporting = false;
+            _data.Importing = false;
             _data.AssetsToImport.RemoveAt(0);
             
             WaitForStability();
@@ -168,7 +170,7 @@ namespace ProjectSetup.Editor
             
             Debug.Log($"Imported: {packageName}");
             
-            _data.IsImporting = false;
+            _data.Importing = false;
             _data.AssetsToImport.RemoveAt(0);
             
             WaitForStability();
@@ -184,7 +186,7 @@ namespace ProjectSetup.Editor
             
             Debug.LogError(errorMessage);
 
-            _data.IsImporting = false;
+            _data.Importing = false;
             _data.AssetsToImport.RemoveAt(0);
 
             WaitForStability();

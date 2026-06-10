@@ -163,7 +163,7 @@ namespace ProjectSetup.Editor
             ProjectSetupData.instance.ProjectSettings = _settingsProfile.ProjectSettings;
             ProjectSetupData.instance.MiscSettings = _settingsProfile.MiscSettings;
         }
-        
+
 
         private void RetrieveCachedAssets()
         {
@@ -199,8 +199,8 @@ namespace ProjectSetup.Editor
                 throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
             }
         }
-        
-        
+
+
         private void OnGUI()
         {
             using GUILayout.ScrollViewScope scrollViewScope = new GUILayout.ScrollViewScope(_scrollPosition);
@@ -978,8 +978,8 @@ namespace ProjectSetup.Editor
                 }
             }
         }
-        
-        
+
+
         private void DrawProjectSettings()
         {
             GUILayout.Label("Project Settings", new GUIStyle(EditorStyles.boldLabel));
@@ -1017,27 +1017,83 @@ namespace ProjectSetup.Editor
 
             ProjectSetupData.instance.MiscSettings = miscSettings;
         }
-        
+
 
         private void DrawExecuteSetup()
         {
             if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
+                ProjectSetupData.instance.SetupInProgress = true;
+            }
+
+            // Debug
+            if (GUILayout.Button("Reset", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
+            {
+                ProjectSetupData.instance.SetupInProgress = false;
+                ProjectSetupData.instance.InteractiveOperationsInProgress = false;
+                ProjectSetupData.instance.InteractiveOperationsFinished = false;
+                ProjectSetupData.instance.NonInteractiveOperationsInProgress = false;
+            }
+        }
+
+
+        private void Update()
+        {
+            if (ProjectSetupData.instance.SetupInProgress)
+            {
+                PerformSetup();
+            }
+        }
+
+
+        private void PerformSetup()
+        {
+            if (!ProjectSetupData.instance.SetupInProgress)
+            {
+                return;
+            }
+
+            if (!ProjectSetupData.instance.PreInteractiveOperationsInProgress)
+            {
+                ProjectSetupData.instance.PreInteractiveOperationsInProgress = true;
+                
                 string[] folders = ProjectSetupData.instance.AssetsFolderStructureEntry.ToFolderNames();
                 Setup.CreateFolders(folders);
 
+                ProjectSetupData.instance.PreInteractiveOperationsFinished = true;
+            }
+
+            if (!ProjectSetupData.instance.InteractiveOperationsInProgress)
+            {
+                ProjectSetupData.instance.InteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting interactive operations...");
+                
+                IEnumerable<AssetInfo> assets =
+                    ProjectSetupData.instance.QueuedAssetIDs.Select(id => _assets.Find(a => a.ID == id));
+                Setup.ImportAssets(assets);
+            }
+                
+            if (!ProjectSetupData.instance.NonInteractiveOperationsInProgress && ProjectSetupData.instance.InteractiveOperationsFinished)
+            {
+                ProjectSetupData.instance.NonInteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting non-interactive operations...");
+                
                 IEnumerable<string> packages =
                     ProjectSetupData.instance.QueuedPackagesIDs.Select(id =>
                         _packagesListRequest.Result.First(p => p.name == id).packageId);
                 Setup.ImportPackages(packages);
-
-                IEnumerable<AssetInfo> assets =
-                    ProjectSetupData.instance.QueuedAssetIDs.Select(id => _assets.Find(a => a.ID == id));
-                Setup.ImportAssets(assets);
-                
+                    
                 Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
-                
+                    
                 Setup.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
+
+                ProjectSetupData.instance.SetupInProgress = false;
+                ProjectSetupData.instance.InteractiveOperationsInProgress = false;
+                ProjectSetupData.instance.InteractiveOperationsFinished = false;
+                ProjectSetupData.instance.NonInteractiveOperationsInProgress = false;
+                Debug.Log("Setup finished");
             }
         }
     }
