@@ -7,6 +7,7 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Application = UnityEngine.Application;
 using Object = UnityEngine.Object;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
@@ -92,22 +93,21 @@ namespace ProjectSetup.Editor
         }
 
 
-        // First, sort the array by interactiveness
-        // Then, perform non-interactive imports
-        // Then, perform interactive imports. Chain them, waiting for the completion of each one.
-        public static void ImportAssets(IEnumerable<AssetImportEntry> assets)
+        public static void ImportAssetsInteractive(IEnumerable<AssetImportEntry> assets)
         {
-            var nonInteractive = assets.Where(a => !a.Interactive);
-            var interactive = assets.Where(a => a.Interactive);
+            Assert.IsTrue(assets.All(a => a.Interactive));
             
-            foreach (AssetImportEntry assetInfo in nonInteractive)
-            {
-                Assets.Import(assetInfo.Path, assetInfo.Interactive);
-            }
+            Assets.ImportInteractive(assets);
+        }
 
-            if (interactive.Any())
+
+        public static void ImportAssetsNonInteractive(IEnumerable<AssetImportEntry> assets)
+        {
+            Assert.IsTrue(assets.All(a => !a.Interactive));
+            
+            foreach (AssetImportEntry asset in assets)
             {
-                Assets.ImportInteractive(interactive);
+                Assets.Import(asset.Path, asset.Interactive);
             }
         }
 

@@ -1066,9 +1066,9 @@ namespace ProjectSetup.Editor
                 ProjectSetupData.instance.InteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting interactive operations...");
-                
-                IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets;
-                Setup.ImportAssets(assets);
+
+                IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets.Where(a => a.Interactive);
+                Setup.ImportAssetsInteractive(assets);
             }
                 
             if (!ProjectSetupData.instance.NonInteractiveOperationsInProgress && ProjectSetupData.instance.InteractiveOperationsFinished)
@@ -1076,6 +1076,10 @@ namespace ProjectSetup.Editor
                 ProjectSetupData.instance.NonInteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting non-interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets =
+                    ProjectSetupData.instance.QueuedAssets.Where(a => !a.Interactive);
+                Setup.ImportAssetsNonInteractive(assets);
                 
                 IEnumerable<string> packages =
                     ProjectSetupData.instance.QueuedPackagesIDs.Select(id =>
