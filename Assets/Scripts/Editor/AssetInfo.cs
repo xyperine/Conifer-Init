@@ -3,27 +3,28 @@ using UnityEngine;
 
 namespace ProjectSetup.Editor
 {
+    /// <summary>
+    /// Information about an asset in the storage.
+    /// </summary>
     [Serializable]
     public struct AssetInfo : IEquatable<AssetInfo>
     {
         [field: SerializeField] public string Path { get; private set; }
         [field: SerializeField] public string Name { get; private set; }
         [field: SerializeField] public string ID { get; private set; }
-        [field: SerializeField] public bool Interactive { get; private set; }
 
 
-        public AssetInfo(string path, string name, string id, bool interactive)
+        public AssetInfo(string path, string name, string id)
         {
             Path = path;
             Name = name;
             ID = id;
-            Interactive = interactive;
         }
 
 
         public bool Equals(AssetInfo other)
         {
-            return Path == other.Path && Name == other.Name && Interactive == other.Interactive && ID == other.ID;
+            return Path == other.Path && Name == other.Name && ID == other.ID;
         }
 
 
@@ -35,7 +36,7 @@ namespace ProjectSetup.Editor
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Path, Name, ID, Interactive);
+            return HashCode.Combine(Path, Name, ID);
         }
     }
 }

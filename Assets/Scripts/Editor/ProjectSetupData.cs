@@ -13,7 +13,7 @@ namespace ProjectSetup.Editor
         [SerializeField] private string activeSettingsProfileName;
         [SerializeField] private MiscSettings miscSettings;
         [SerializeField] private ProjectSettings projectSettings;
-        [SerializeField] private List<string> queuedAssetIDs;
+        [SerializeField] private List<AssetImportEntry> queuedAssets;
         [SerializeField] private List<string> queuedPackagesIDs;
         [SerializeField] private FolderStructureEntry assetsFolderStructureEntry;
         
@@ -37,12 +37,12 @@ namespace ProjectSetup.Editor
             }
         }
         
-        public List<string> QueuedAssetIDs
+        public List<AssetImportEntry> QueuedAssets
         {
-            get => queuedAssetIDs;
+            get => queuedAssets;
             set
             {
-                queuedAssetIDs = value;
+                queuedAssets = value;
                 Save(true);
             }
         }
@@ -81,7 +81,7 @@ namespace ProjectSetup.Editor
         [field: SerializeField] public bool PreInteractiveOperationsFinished { get; set; }
         
         [field: SerializeField] public bool InteractiveOperationsInProgress { get; set; }
-        [field: SerializeField] public List<AssetInfo> AssetsToImport { get; set; }
+        [field: SerializeField] public List<AssetImportEntry> AssetsToImport { get; set; }
         [field: SerializeField] public bool SetupInProgress { get; set; }
         [field: SerializeField] public bool Importing { get; set; }
         [field: SerializeField] public bool Stable { get; set; }

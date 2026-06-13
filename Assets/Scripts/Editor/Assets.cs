@@ -51,7 +51,7 @@ namespace ProjectSetup.Editor
         }
             
             
-        public static void ImportInteractive(IEnumerable<AssetInfo> assets)
+        public static void ImportInteractive(IEnumerable<AssetImportEntry> assets)
         {
             Assert.IsTrue(assets.Any());
             

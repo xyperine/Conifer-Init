@@ -32,7 +32,7 @@ namespace ProjectSetup.Editor
         }
         
         
-        public static void Begin(IEnumerable<AssetInfo> assets)
+        public static void Begin(IEnumerable<AssetImportEntry> assets)
         {
             Assert.IsTrue(assets.Any());
             
@@ -117,7 +117,7 @@ namespace ProjectSetup.Editor
             
             _data.Importing = true;
 
-            AssetInfo asset = _data.AssetsToImport.First();
+            AssetImportEntry asset = _data.AssetsToImport.First();
             Debug.Log($"Importing: {asset.Name}");
             try
             {
@@ -195,7 +195,7 @@ namespace ProjectSetup.Editor
 
         private static bool IsTheQueuedPackage(string packageName)
         {
-            AssetInfo asset = _data.AssetsToImport.First();
+            AssetImportEntry asset = _data.AssetsToImport.First();
             
             //Debug.Log(packageName);
             //Debug.Log(asset.Path);

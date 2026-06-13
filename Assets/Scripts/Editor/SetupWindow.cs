@@ -61,7 +61,7 @@ namespace ProjectSetup.Editor
 
         private List<string> AvailableAssets => _successfullyRetrievedAssets && _assets != null
             ? _assets.Select(a => a.ID).Where(id =>
-                !ProjectSetupData.instance.QueuedAssetIDs.Contains(id)).ToList()
+                !ProjectSetupData.instance.QueuedAssets.Exists(a => a.ID == id)).ToList()
             : new List<string>();
         
         
@@ -128,7 +128,7 @@ namespace ProjectSetup.Editor
                     Name = DEFAULT_PROFILE_NAME,
                     AssetsFolderStructureEntry = FolderStructureEntry.Default(),
                     QueuedPackagesIDs = new List<string>(),
-                    QueuedAssetIDs = new List<string>(),
+                    QueuedAssets = new List<AssetImportEntry>(),
                     ProjectSettings = ProjectSettings.Default(),
                     MiscSettings = MiscSettings.Default(),
                 };
@@ -159,7 +159,7 @@ namespace ProjectSetup.Editor
             
             ProjectSetupData.instance.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
             ProjectSetupData.instance.QueuedPackagesIDs = new List<string>(_settingsProfile.QueuedPackagesIDs);
-            ProjectSetupData.instance.QueuedAssetIDs = new List<string>(_settingsProfile.QueuedAssetIDs);
+            ProjectSetupData.instance.QueuedAssets = new List<AssetImportEntry>(_settingsProfile.QueuedAssets);
             ProjectSetupData.instance.ProjectSettings = _settingsProfile.ProjectSettings;
             ProjectSetupData.instance.MiscSettings = _settingsProfile.MiscSettings;
         }
@@ -189,7 +189,7 @@ namespace ProjectSetup.Editor
                 foreach (string assetPath in assetPaths)
                 {
                     _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath),
-                        Path.GetFileNameWithoutExtension(assetPath), false));
+                        Path.GetFileNameWithoutExtension(assetPath)));
                 }
 
                 _successfullyRetrievedAssets = true;
@@ -342,7 +342,7 @@ namespace ProjectSetup.Editor
         {
             profile.AssetsFolderStructureEntry = ProjectSetupData.instance.AssetsFolderStructureEntry;
             profile.QueuedPackagesIDs = new List<string>(ProjectSetupData.instance.QueuedPackagesIDs);
-            profile.QueuedAssetIDs = new List<string>(ProjectSetupData.instance.QueuedAssetIDs);
+            profile.QueuedAssets = new List<AssetImportEntry>(ProjectSetupData.instance.QueuedAssets);
             profile.ProjectSettings = ProjectSetupData.instance.ProjectSettings;
             profile.MiscSettings = ProjectSetupData.instance.MiscSettings;
             
@@ -836,7 +836,7 @@ namespace ProjectSetup.Editor
             }
             
             // Available list
-            List<string> queuedAssetIDs = ProjectSetupData.instance.QueuedAssetIDs;
+            List<AssetImportEntry> queuedAssets = ProjectSetupData.instance.QueuedAssets;
             using (new GUILayout.VerticalScope($"Available ({availableAssetIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (availableAssetIDs.Count > 0)
@@ -863,7 +863,7 @@ namespace ProjectSetup.Editor
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
                             string id = availableAssetIDs[i];
-                            queuedAssetIDs.Add(id);
+                            queuedAssets.Add(new AssetImportEntry(_assets.Find(a => a.ID == id), false));
 
                             i--;
                         }
@@ -902,16 +902,16 @@ namespace ProjectSetup.Editor
             SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
-            using (new GUILayout.VerticalScope($"Queued ({queuedAssetIDs.Count})", new GUIStyle(GUI.skin.window)))
+            using (new GUILayout.VerticalScope($"Queued ({queuedAssets.Count})", new GUIStyle(GUI.skin.window)))
             {
-                if (queuedAssetIDs.Count > 0)
+                if (queuedAssets.Count > 0)
                 {
                     int start = (_assetsQueuedPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        queuedAssetIDs.Count - (_assetsQueuedPage - 1) * maxEntriesPerPage);
+                        queuedAssets.Count - (_assetsQueuedPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        AssetInfo assetInfo = _assets.Find(a => a.ID == queuedAssetIDs[i]);
+                        AssetImportEntry asset = queuedAssets[i];
                         using EditorGUILayout.HorizontalScope entryScope =
                             new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0
@@ -925,20 +925,18 @@ namespace ProjectSetup.Editor
                         };
                         EditorGUI.DrawRect(rect, bgColor);
 
-                        GUILayout.Label(assetInfo.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(16f),
+                        GUILayout.Label(asset.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(16f),
                             GUILayout.MinWidth(128f));
 
                         GUILayout.FlexibleSpace();
 
-                        bool interactive = GUILayout.Toggle(assetInfo.Interactive, "Interactive");
-                        _assets[_assets.FindIndex(a => a.ID == queuedAssetIDs[i])] =
-                            new AssetInfo(assetInfo.Path, assetInfo.Name, assetInfo.ID, interactive);
+                        bool interactive = GUILayout.Toggle(asset.Interactive, "Interactive");
+                        queuedAssets[i] = new AssetImportEntry(asset.Path, asset.Name, asset.ID, interactive);
 
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
                                 GUILayout.Height(16f)))
                         {
-                            string id = queuedAssetIDs[i];
-                            queuedAssetIDs.Remove(id);
+                            queuedAssets.RemoveAt(i);
 
                             i--;
                             entriesCount--;
@@ -946,7 +944,7 @@ namespace ProjectSetup.Editor
                     }
 
                     // Pages navigation
-                    if (queuedAssetIDs.Count > maxEntriesPerPage)
+                    if (queuedAssets.Count > maxEntriesPerPage)
                     {
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                         GUILayout.FlexibleSpace();
@@ -960,7 +958,7 @@ namespace ProjectSetup.Editor
                         }
 
                         int maxPages =
-                            Mathf.CeilToInt(queuedAssetIDs.Count / (float) maxEntriesPerPage);
+                            Mathf.CeilToInt(queuedAssets.Count / (float) maxEntriesPerPage);
                         GUILayout.Label($"{_assetsQueuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
 
                         using (new EditorGUI.DisabledGroupScope(_assetsQueuedPage >= maxPages))
@@ -1069,8 +1067,7 @@ namespace ProjectSetup.Editor
                 
                 Debug.Log("Starting interactive operations...");
                 
-                IEnumerable<AssetInfo> assets =
-                    ProjectSetupData.instance.QueuedAssetIDs.Select(id => _assets.Find(a => a.ID == id));
+                IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets;
                 Setup.ImportAssets(assets);
             }
                 

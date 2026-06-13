@@ -95,12 +95,12 @@ namespace ProjectSetup.Editor
         // First, sort the array by interactiveness
         // Then, perform non-interactive imports
         // Then, perform interactive imports. Chain them, waiting for the completion of each one.
-        public static void ImportAssets(IEnumerable<AssetInfo> assets)
+        public static void ImportAssets(IEnumerable<AssetImportEntry> assets)
         {
             var nonInteractive = assets.Where(a => !a.Interactive);
             var interactive = assets.Where(a => a.Interactive);
             
-            foreach (AssetInfo assetInfo in nonInteractive)
+            foreach (AssetImportEntry assetInfo in nonInteractive)
             {
                 Assets.Import(assetInfo.Path, assetInfo.Interactive);
             }
