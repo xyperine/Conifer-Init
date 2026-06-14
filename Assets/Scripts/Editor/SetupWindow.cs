@@ -13,16 +13,17 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 namespace ProjectSetup.Editor
 {
     /// <summary>
-    /// Handles drawing logic and user inputs
+    /// Handles drawing logic and user inputs.
     /// </summary>
+    // Settings profile UI and logic
+    // Folder structure UI
+    // Packages settings UI
+    // Asset settings UI
+    // Project settings UI
+    // Misc settings UI
     public class SetupWindow : EditorWindow
     {
-        private const string DEFAULT_PROFILE_NAME = "Default_Profile";
-        
-        private SettingsProfile _settingsProfile;
-        private List<SettingsProfile> _profiles;
-
-        private SettingsProfile DefaultProfile => _profiles.Find(p => p.Name == DEFAULT_PROFILE_NAME);
+        private readonly SetupBusiness _business = new SetupBusiness();
         
         private Vector2 _scrollPosition;
         
@@ -76,92 +77,11 @@ namespace ProjectSetup.Editor
 
         private void OnEnable()
         {
-            LoadSettingsProfiles();
-
+            _business.Initialize();
+            
             _packagesListRequest = Client.SearchAll();
 
             RetrieveCachedAssets();
-        }
-
-
-        private void LoadSettingsProfiles()
-        {
-            if (!Directory.Exists(PersistenceSerializer<SettingsProfile>.ProfilesStoragePath))
-            {
-                Directory.CreateDirectory(PersistenceSerializer<SettingsProfile>.ProfilesStoragePath);
-            }
-            
-            IEnumerable<string> profilePaths =
-                Directory.EnumerateFiles(PersistenceSerializer<SettingsProfile>.ProfilesStoragePath,
-                    "*.json");
-            _profiles = profilePaths
-                .Select(pp => PersistenceSerializer<SettingsProfile>.ReadFile(Path.GetFileName(pp)))
-                .ToList();
-            
-            string activeProfileName = ProjectSetupData.instance.ActiveSettingsProfileName;
-            Debug.Log(activeProfileName);
-            if (!string.IsNullOrEmpty(activeProfileName))
-            {
-                var p = _profiles.Find(p => p.Name == activeProfileName);
-                if (p != null)
-                {
-                    _settingsProfile = p;
-                }
-                else
-                {
-                    LoadDefaultProfile();
-                }
-            }
-            else
-            {
-                LoadDefaultProfile();
-            }
-        }
-
-
-        private void LoadDefaultProfile()
-        {
-            if (DefaultProfile == null)
-            {
-                SettingsProfile defaultProfile = new SettingsProfile()
-                {
-                    Name = DEFAULT_PROFILE_NAME,
-                    AssetsFolderStructureEntry = FolderStructureEntry.Default(),
-                    QueuedPackagesIDs = new List<string>(),
-                    QueuedAssets = new List<AssetImportEntry>(),
-                    ProjectSettings = ProjectSettings.Default(),
-                    MiscSettings = MiscSettings.Default(),
-                };
-                    
-                PersistenceSerializer<SettingsProfile>.SaveFile(defaultProfile, defaultProfile.Name);
-                
-                _profiles.Add(defaultProfile);
-            }
-            
-            ApplyProfile(DefaultProfile);
-        }
-
-
-        private void ApplyProfile(SettingsProfile profile)
-        {
-            // Reset process data
-            _isAddingChild = false;
-            _newChildName = string.Empty;
-            _newChildParentFullName = string.Empty;
-            _isEditingName = false;
-            _editingNameOf = string.Empty;
-            _newEditedName = string.Empty;
-            _packagesSearchString = string.Empty;
-            _assetsSearchString = string.Empty;
-            
-            _settingsProfile = profile;
-            ProjectSetupData.instance.ActiveSettingsProfileName = _settingsProfile.Name;
-            
-            ProjectSetupData.instance.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
-            ProjectSetupData.instance.QueuedPackagesIDs = new List<string>(_settingsProfile.QueuedPackagesIDs);
-            ProjectSetupData.instance.QueuedAssets = new List<AssetImportEntry>(_settingsProfile.QueuedAssets);
-            ProjectSetupData.instance.ProjectSettings = _settingsProfile.ProjectSettings;
-            ProjectSetupData.instance.MiscSettings = _settingsProfile.MiscSettings;
         }
 
 
@@ -242,25 +162,25 @@ namespace ProjectSetup.Editor
 
             using (EditorGUI.ChangeCheckScope changeScope = new EditorGUI.ChangeCheckScope())
             {
-                string[] profileNames = _profiles.Select(p => p.Name).ToArray();
-                int selectedIndex = Array.IndexOf(profileNames, _settingsProfile.Name);
+                string[] profileNames = _business.Profiles.Select(p => p.Name).ToArray();
+                int selectedIndex = Array.IndexOf(profileNames, _business.ActiveProfile.Name);
                 selectedIndex = EditorGUILayout.Popup("Active Profile", selectedIndex, profileNames,
                     new GUIStyle(EditorStyles.popup),GUILayout.Height(16f));
 
                 if (changeScope.changed)
                 {
-                    SettingsProfile profile = _profiles.Single(p => p.Name == profileNames[selectedIndex]);
+                    SettingsProfile profile = _business.Profiles.Single(p => p.Name == profileNames[selectedIndex]);
                     ApplyProfile(profile);
                 }
             }
             
             using (new GUILayout.HorizontalScope(new GUIStyle()))
             {
-                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_settingsProfile.Name == DefaultProfile.Name))
+                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_business.ActiveProfile.Name == _business.DefaultProfile.Name))
                 {
                     if (GUILayout.Button("Save"))
                     {
-                        ConfirmSaveProfileDialog(_settingsProfile);
+                        ConfirmSaveProfileDialog(_business.ActiveProfile);
                     }
                 }
 
@@ -273,128 +193,81 @@ namespace ProjectSetup.Editor
                 {
                     ShowSaveProfileFilePanel(path => CreateNewProfile(Path.GetFileNameWithoutExtension(path)));
                 }
-
                 
-                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_settingsProfile.Name == DefaultProfile.Name))
+                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_business.ActiveProfile.Name == _business.DefaultProfile.Name))
                 {
                     if (GUILayout.Button("Delete"))
                     {
-                        ConfirmDeleteProfileDialog(_settingsProfile);
+                        ConfirmDeleteProfileDialog(_business.ActiveProfile);
                     }
                 }
 
                 if (GUILayout.Button("Restore"))
                 {
-                    ApplyProfile(_settingsProfile);
+                    ApplyProfile(_business.ActiveProfile);
                 }
             }
+        }
+
+
+        private void ApplyProfile(SettingsProfile profile)
+        {
+            // Reset process data
+            _isAddingChild = false;
+            _newChildName = string.Empty;
+            _newChildParentFullName = string.Empty;
+            _isEditingName = false;
+            _editingNameOf = string.Empty;
+            _newEditedName = string.Empty;
+            _packagesSearchString = string.Empty;
+            _assetsSearchString = string.Empty;
+            
+            _business.ApplyProfile(profile);
         }
 
 
         private void ConfirmDeleteProfileDialog(SettingsProfile profile)
         {
-            Assert.IsFalse(profile.Name == DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(profile.Name == SetupBusiness.DEFAULT_PROFILE_NAME);
             
             if (EditorDialog.DisplayDecisionDialog("Delete Profile?",
                     $"{profile.Name} profile will be irreversibly deleted. Proceed?",
                     "Yes", "No"))
             {
-                DeleteProfile(profile);
+                _business.DeleteProfile(profile);
             }
-        }
-
-
-        private void DeleteProfile(SettingsProfile profile)
-        {
-            ApplyProfile(DefaultProfile);
-            
-            PersistenceSerializer<SettingsProfile>.DeleteFile(profile.Name);
-            
-            Debug.Log($"Deleted {profile.Name} profile");
-            
-            LoadSettingsProfiles();
-            
-            ApplyProfile(DefaultProfile);
         }
 
 
         private void ConfirmSaveProfileDialog(SettingsProfile profile)
         {
-            Assert.IsFalse(profile.Name == DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(profile.Name == SetupBusiness.DEFAULT_PROFILE_NAME);
             
-            if (_profiles.Exists(p => p.Name == profile.Name))
+            if (_business.Profiles.Exists(p => p.Name == profile.Name))
             {
                 if (EditorDialog.DisplayDecisionDialog("Save Profile?",
                         $"This will override the existing {profile.Name} profile. Proceed?",
                         "Yes", "No"))
                 {
-                    SaveProfile(profile);
+                    _business.SaveProfile(profile);
                 }
             }
             else
             {
-                SaveProfile(profile);
+                _business.SaveProfile(profile);
             }
-        }
-
-
-        private void SaveProfile(SettingsProfile profile)
-        {
-            profile.AssetsFolderStructureEntry = ProjectSetupData.instance.AssetsFolderStructureEntry;
-            profile.QueuedPackagesIDs = new List<string>(ProjectSetupData.instance.QueuedPackagesIDs);
-            profile.QueuedAssets = new List<AssetImportEntry>(ProjectSetupData.instance.QueuedAssets);
-            profile.ProjectSettings = ProjectSetupData.instance.ProjectSettings;
-            profile.MiscSettings = ProjectSetupData.instance.MiscSettings;
-            
-            PersistenceSerializer<SettingsProfile>.SaveFile(profile, profile.Name);
-            
-            Debug.Log($"Saved {profile.Name} profile");
-            
-            LoadSettingsProfiles();
-            
-            ApplyProfile(profile);
         }
 
 
         private void ShowSaveProfileFilePanel(Action<string> onSuccess)
         {
-            string newName = "New_Profile";
-            if (_profiles.Exists(p => p.Name == newName))
-            {
-                int i = 1;
-                while (_profiles.Any(p => p.Name == newName))
-                {
-                    newName = "New_Profile" + $"_{i}"; 
-                    i++;
-                }
-            }
+            string newName = _business.ConstructNewProfileName();
             
             string savedPath = EditorUtility.SaveFilePanel("New Profile",
                 PersistenceSerializer<SettingsProfile>.ProfilesStoragePath, newName, "json");
             if (savedPath != string.Empty)
             {
-                bool insideProfileStorage = Directory.GetParent(savedPath).FullName ==
-                             PersistenceSerializer<SettingsProfile>.ProfilesStoragePath;
-                bool hasRightExtension = Path.GetExtension(savedPath) == ".json";
-                bool isNotDefaultProfile = Path.GetFileNameWithoutExtension(savedPath) != DEFAULT_PROFILE_NAME;
-                bool valid = insideProfileStorage && hasRightExtension && isNotDefaultProfile;
-                if (valid)
-                {
-                    onSuccess?.Invoke(savedPath);
-                }
-                else if (!insideProfileStorage)
-                {
-                    Debug.LogError(
-                        $"Must be inside the profiles storage directory!: {PersistenceSerializer<SettingsProfile>.ProfilesStoragePath}");
-                }
-                else if (!hasRightExtension)
-                {
-                    Debug.LogError("The profile file must have .json extension!");
-                }
-                else if (!isNotDefaultProfile)
-                {
-                    Debug.LogError("Can't override the default profile!");
-                }
+                _business.TrySaveProfileAt(savedPath, onSuccess);
             }
         }
 
@@ -419,7 +292,7 @@ namespace ProjectSetup.Editor
 
         private void CreateNewProfile(string newProfileName)
         {
-            ApplyProfile(DefaultProfile);
+            ApplyProfile(_business.DefaultProfile);
             SaveAsProfile(newProfileName);
         }
 
@@ -431,7 +304,7 @@ namespace ProjectSetup.Editor
             if (GUILayout.Button("Reset Structure", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
                 ProjectSetupData.instance.AssetsFolderStructureEntry =
-                    FolderStructureEntry.DeepCopy(_settingsProfile.AssetsFolderStructureEntry, null);
+                    FolderStructureEntry.DeepCopy(_business.ActiveProfile.AssetsFolderStructureEntry, null);
             }
             
             SetupWindowElements.DrawRegularSpace();
@@ -1034,7 +907,8 @@ namespace ProjectSetup.Editor
             }
         }
 
-
+        
+        // Business
         private void Update()
         {
             if (ProjectSetupData.instance.SetupInProgress)
