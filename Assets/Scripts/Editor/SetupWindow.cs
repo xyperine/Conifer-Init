@@ -303,8 +303,7 @@ namespace ProjectSetup.Editor
 
             if (GUILayout.Button("Reset Structure", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
-                ProjectSetupData.instance.AssetsFolderStructureEntry =
-                    FolderStructureEntry.DeepCopy(_business.ActiveProfile.AssetsFolderStructureEntry, null);
+                _business.ResetFolderStructure();
             }
             
             SetupWindowElements.DrawRegularSpace();
@@ -363,7 +362,7 @@ namespace ProjectSetup.Editor
                     if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(16f)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newEditedName))
                     {
-                        entry.Rename(_newEditedName);
+                        _business.RenameFolderStructureEntry(entry, _newEditedName);
 
                         _isEditingName = false;
                         _editingNameOf = string.Empty;
@@ -411,7 +410,8 @@ namespace ProjectSetup.Editor
                     if (GUILayout.Button("-", buttonStyle))
                     {
                         Debug.Log("Removing folder...");
-                        entry.Parent.RemoveChild(entry);
+                        
+                        _business.RemoveFolderStructureEntry(entry);
                     }
                 }
             }
@@ -451,8 +451,8 @@ namespace ProjectSetup.Editor
                     if ((GUILayout.Button("Add", GUILayout.Width(64f), GUILayout.Height(16f)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newChildName))
                     {
-                        entry.AddChild(new FolderStructureEntry(_newChildName, entry));
-
+                        _business.AddFolder(_newChildName, entry);
+                        
                         _newChildName = string.Empty;
                     }
 
@@ -466,9 +466,9 @@ namespace ProjectSetup.Editor
                 }
             }
             
-            foreach (FolderStructureEntry directoryProjection in entry.Children)
+            foreach (FolderStructureEntry childEntry in entry.Children)
             {
-                DrawHierarchyRecursively(directoryProjection, depth + 1);
+                DrawHierarchyRecursively(childEntry, depth + 1);
             }
         }
 

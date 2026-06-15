@@ -193,6 +193,31 @@ namespace ProjectSetup.Editor
         }
 
 
+        public void ResetFolderStructure()
+        {
+            ProjectSetupData.instance.AssetsFolderStructureEntry =
+                FolderStructureEntry.DeepCopy(ActiveProfile.AssetsFolderStructureEntry, null);
+        }
+
+
+        public void RemoveFolderStructureEntry(FolderStructureEntry entry)
+        { 
+            entry.Parent.RemoveChild(entry);
+        }
+
+
+        public void RenameFolderStructureEntry(FolderStructureEntry entry, string newName)
+        {
+            entry.Rename(newName);
+        }
+
+
+        public void AddFolder(string folderName, FolderStructureEntry parent)
+        {
+            parent.AddChild(new FolderStructureEntry(folderName, parent));
+        }
+
+
         private void RetrieveCachedAssets()
         {
             string cachedAssetsPath;
