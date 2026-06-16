@@ -383,5 +383,17 @@ namespace ProjectSetup.Editor
         {
             ProjectSetupData.instance.ProjectSettings = projectSettings;
         }
+
+
+        public MiscSettings GetMiscSettings()
+        {
+            return ProjectSetupData.instance.MiscSettings;
+        }
+
+
+        public void SetMiscSettings(MiscSettings miscSettings)
+        {
+            ProjectSetupData.instance.MiscSettings = miscSettings;
+        }
     }
 }
