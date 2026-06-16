@@ -1,14 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Application = UnityEngine.Application;
-using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
@@ -17,125 +14,11 @@ namespace ProjectSetup.Editor
     /// </summary>
     public static class SetupExecution
     {
-        #region To be removed
-
-        [MenuItem("Tools/Setup/Folder Structure")]
-        public static void FolderStructure()
-        {
-            CreateFolders();
-            
-            DeleteTutorialAssets();
-
-            SetupScene("Main");
-        }
-
-
-        [MenuItem("Tools/Setup/Import Essential Assets")]
-        public static void ImportEssentialAssets()
-        {
-            Assets.Import("Asset Usage Detector.unitypackage", "yasirkula/Editor ExtensionsUtilities", false);
-            Assets.Import("Graphy - Ultimate FPS Counter - Stats Monitor Debugger.unitypackage", "Tayx/ScriptingGUI", false);
-            Assets.Import("Mulligan Renamer.unitypackage", "Red Blue Games/Editor ExtensionsUtilities", false);
-            Assets.Import("NaughtyAttributes.unitypackage", "Denis Rizov/Editor ExtensionsUtilities", false);
-            Assets.Import("Serialized Dictionary.unitypackage", "ayellowpaper/Editor ExtensionsUtilities", false);
-            Assets.Import("Serialize Interfaces.unitypackage", "ayellowpaper/Editor ExtensionsUtilities", false);
-            Assets.Import("Extenject Dependency Injection IOC.unitypackage", "Mathijs Bakker/Editor ExtensionsUtilities", false);
-            Assets.Import("Rainbow Folders 2.unitypackage", "Borodar/Editor ExtensionsUtilities", false);
-        }
-
-
-        [MenuItem("Tools/Setup/Import Packages")]
-        public static void ImportPackages()
-        {
-            if (PackageInfo.FindForAssetPath("Packages/com.unity.textmeshpro") == null)
-            {
-                TMP_PackageResourceImporter.ImportResources(true, false, false);
-            }
-            
-            string[] packages =
-            {
-                "com.unity.recorder",
-            };
-
-            Packages.ImportAsync(packages);
-        }
-
-
-        [MenuItem("Tools/Setup/Project Settings")]
-        public static void SetProjectSettings()
-        {
-            const string companyName = "xyperine";
-            const string initialVersion = "v0.1.0";
-
-            string projectName = Application.dataPath.Split('/')[^2];
-            string defaultNamespace = Regex.Replace(projectName, "\\W|_", "");
-            string productName = projectName;
-            //Debug.Log(defaultNamespace);
-            
-            EditorSettings.projectGenerationRootNamespace = defaultNamespace;
-            EditorSettings.gameObjectNamingScheme = EditorSettings.NamingScheme.Underscore;
-            
-            PlayerSettings.companyName = companyName;
-            PlayerSettings.productName = productName;
-            PlayerSettings.bundleVersion = initialVersion;
-            
-            if (EditorUserBuildSettings.activeBuildTarget is BuildTarget.StandaloneWindows64
-                or BuildTarget.StandaloneWindows or BuildTarget.StandaloneLinux64 or BuildTarget.StandaloneOSX)
-            {
-                PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone, ScriptingImplementation.IL2CPP);
-                Debug.Log("Successfully changed scripting backend to IL2CPP!");
-            }
-        }
-
-        #endregion
-
-
         public static void CreateFolders(string[] folders)
         {
             Folders.Create(string.Empty, folders);
             
             AssetDatabase.Refresh();
-        }
-
-
-        private static void CreateFolders()
-        {
-            string[] folders =
-            {
-                "Audio", "Animations", "Data/Inputs", "Data/URP", "Meshes", "Textures", "Shaders", "Materials", "Plugins", "Prefabs",
-                "Scripts/Tests/Editor", "Scripts/Tests/Runtime",
-            };
-            Folders.Create(string.Empty, folders);
-            
-            AssetDatabase.Refresh();
-        }
-
-
-        private static void DeleteTutorialAssets()
-        {
-            const string tutorialDirectory = "Assets/TutorialInfo";
-            FileUtil.DeleteFileOrDirectory(tutorialDirectory);
-            FileUtil.DeleteFileOrDirectory(tutorialDirectory + ".meta");
-            const string readmeAssetPath = "Assets/Readme.asset";
-            FileUtil.DeleteFileOrDirectory(readmeAssetPath + ".meta");
-            FileUtil.DeleteFileOrDirectory(readmeAssetPath);
-            
-            AssetDatabase.Refresh();
-        }
-
-
-        private static void SetupScene(string sceneName)
-        {
-            if (!sceneName.EndsWith(".unity"))
-            {
-                sceneName += ".unity";
-            }
-            
-            AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", sceneName);
-            
-            AssetDatabase.Refresh();
-            
-            EditorSceneManager.OpenScene($"Assets/Scenes/{sceneName}");
         }
 
 
@@ -206,24 +89,46 @@ namespace ProjectSetup.Editor
             Debug.Log("Project settings set");
         }
 
-        
-        public static void ExecuteMisc(bool deleteTutorial, bool configureScene, string sceneName)
+
+        public static void ExecuteMisc(MiscSettings miscSettings)
         {
-            if (deleteTutorial)
+            if (miscSettings.DeleteTutorial)
             {
                 DeleteTutorialAssets();
             }
 
-            if (configureScene)
+            if (miscSettings.DeleteTutorial)
             {
-                SetupScene(sceneName);
+                SetupScene(miscSettings.SceneName);
             }
         }
 
 
-        public static void ExecuteMisc(MiscSettings miscSettings)
+        private static void SetupScene(string sceneName)
         {
-            ExecuteMisc(miscSettings.DeleteTutorial, miscSettings.ConfigureScene, miscSettings.SceneName);
+            if (!sceneName.EndsWith(".unity"))
+            {
+                sceneName += ".unity";
+            }
+            
+            AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", sceneName);
+            
+            AssetDatabase.Refresh();
+            
+            EditorSceneManager.OpenScene($"Assets/Scenes/{sceneName}");
+        }
+
+
+        private static void DeleteTutorialAssets()
+        {
+            const string tutorialDirectory = "Assets/TutorialInfo";
+            FileUtil.DeleteFileOrDirectory(tutorialDirectory);
+            FileUtil.DeleteFileOrDirectory(tutorialDirectory + ".meta");
+            const string readmeAssetPath = "Assets/Readme.asset";
+            FileUtil.DeleteFileOrDirectory(readmeAssetPath + ".meta");
+            FileUtil.DeleteFileOrDirectory(readmeAssetPath);
+            
+            AssetDatabase.Refresh();
         }
     }
 }
