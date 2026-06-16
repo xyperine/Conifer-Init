@@ -14,19 +14,13 @@ namespace ProjectSetup.Editor
     public class SetupWindow : EditorWindow
     {
         private readonly SetupBusiness _business = new SetupBusiness();
+        
         private FolderStructureUI _folderStructureUI;
         private PackagesSettingsUI _packagesSettingsUI;
         private AssetsSettingsUI _assetsSettingsUI;
+        private ProjectSettingsUI _projectSettingsUI;
         
         private Vector2 _scrollPosition;
-        
-        // Folder structure settings
-
-
-        // Packages settings
-
-        
-        // Assets settings
         
         
         [MenuItem("Tools/Setup Window")]
@@ -45,6 +39,7 @@ namespace ProjectSetup.Editor
             _folderStructureUI = new FolderStructureUI(_business);
             _packagesSettingsUI = new PackagesSettingsUI(_business);
             _assetsSettingsUI = new AssetsSettingsUI(_business);
+            _projectSettingsUI = new ProjectSettingsUI(_business);
         }
 
 
@@ -69,7 +64,7 @@ namespace ProjectSetup.Editor
 
             SetupWindowElements.DrawRegularSpace();
             
-            DrawProjectSettings();
+            _projectSettingsUI.Draw();
             
             SetupWindowElements.DrawRegularSpace();
             
@@ -218,29 +213,6 @@ namespace ProjectSetup.Editor
             SaveAsProfile(newProfileName);
         }
         
-
-        private void DrawProjectSettings()
-        {
-            GUILayout.Label("Project Settings", new GUIStyle(EditorStyles.boldLabel));
-
-            using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
-
-            ProjectSettings projectSettings = _business.GetProjectSettings();
-            
-            projectSettings.DefaultNamespace =
-                EditorGUILayout.TextField("Default Namespace", projectSettings.DefaultNamespace);
-            projectSettings.GameObjectNamingScheme =
-                (EditorSettings.NamingScheme) EditorGUILayout.EnumPopup("Game Object Naming",
-                    projectSettings.GameObjectNamingScheme);
-            projectSettings.CompanyName = EditorGUILayout.TextField("Company Name", projectSettings.CompanyName);
-            projectSettings.ProductName = EditorGUILayout.TextField("Product Name", projectSettings.ProductName);
-            projectSettings.Version = EditorGUILayout.TextField("Version", projectSettings.Version);
-            projectSettings.ScriptingBackend =
-                (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", projectSettings.ScriptingBackend);
-
-            _business.SetProjectSettings(projectSettings);
-        }
-
 
         private void DrawMiscSettings()
         {
