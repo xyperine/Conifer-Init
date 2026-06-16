@@ -5,12 +5,12 @@ namespace ProjectSetup.Editor
 {
     public class MiscSettingsUI
     {
-        private readonly SetupBusiness _business;
+        private readonly SetupConfiguration _configuration;
 
 
-        public MiscSettingsUI(SetupBusiness business)
+        public MiscSettingsUI(SetupConfiguration configuration)
         {
-            _business = business;
+            _configuration = configuration;
         }
         
         
@@ -20,7 +20,7 @@ namespace ProjectSetup.Editor
 
             using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
 
-            MiscSettings miscSettings = _business.GetMiscSettings();
+            MiscSettings miscSettings = _configuration.GetMiscSettings();
             
             miscSettings.DeleteTutorial = GUILayout.Toggle(miscSettings.DeleteTutorial, "Delete tutorial");
             miscSettings.ConfigureScene = GUILayout.Toggle(miscSettings.ConfigureScene, "Configure Scene");
@@ -29,7 +29,7 @@ namespace ProjectSetup.Editor
                 miscSettings.SceneName = EditorGUILayout.TextField("Scene Name", miscSettings.SceneName);
             }
 
-            _business.SetMiscSettings(miscSettings);
+            _configuration.SetMiscSettings(miscSettings);
         }
     }
 }

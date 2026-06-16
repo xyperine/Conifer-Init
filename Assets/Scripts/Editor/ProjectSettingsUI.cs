@@ -5,12 +5,12 @@ namespace ProjectSetup.Editor
 {
     public class ProjectSettingsUI
     {
-        private readonly SetupBusiness _business;
+        private readonly SetupConfiguration _configuration;
 
 
-        public ProjectSettingsUI(SetupBusiness business)
+        public ProjectSettingsUI(SetupConfiguration configuration)
         {
-            _business = business;
+            _configuration = configuration;
         }
         
         
@@ -20,7 +20,7 @@ namespace ProjectSetup.Editor
 
             using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
 
-            ProjectSettings projectSettings = _business.GetProjectSettings();
+            ProjectSettings projectSettings = _configuration.GetProjectSettings();
             
             projectSettings.DefaultNamespace =
                 EditorGUILayout.TextField("Default Namespace", projectSettings.DefaultNamespace);
@@ -33,7 +33,7 @@ namespace ProjectSetup.Editor
             projectSettings.ScriptingBackend =
                 (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", projectSettings.ScriptingBackend);
 
-            _business.SetProjectSettings(projectSettings);
+            _configuration.SetProjectSettings(projectSettings);
         }
     }
 }

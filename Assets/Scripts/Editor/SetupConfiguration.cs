@@ -11,8 +11,10 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
-    // Silly name for now
-    public class SetupBusiness
+    /// <summary>
+    /// Handles the configuration of the setup and setup execution flow.
+    /// </summary>
+    public class SetupConfiguration
     {
         // Profiles
         public const string DEFAULT_PROFILE_NAME = "Default_Profile";
@@ -424,6 +426,7 @@ namespace ProjectSetup.Editor
         }
 
 
+        // Move this to SetupExecution?
         public void Update()
         {
             if (ProjectSetupData.instance.SetupInProgress)
@@ -445,7 +448,7 @@ namespace ProjectSetup.Editor
                 ProjectSetupData.instance.PreInteractiveOperationsInProgress = true;
                 
                 string[] folders = ProjectSetupData.instance.AssetsFolderStructureEntry.ToFolderNames();
-                Setup.CreateFolders(folders);
+                SetupExecution.CreateFolders(folders);
 
                 ProjectSetupData.instance.PreInteractiveOperationsFinished = true;
             }
@@ -457,7 +460,7 @@ namespace ProjectSetup.Editor
                 Debug.Log("Starting interactive operations...");
 
                 IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets.Where(a => a.Interactive);
-                Setup.ImportAssetsInteractive(assets);
+                SetupExecution.ImportAssetsInteractive(assets);
             }
                 
             if (!ProjectSetupData.instance.NonInteractiveOperationsInProgress && ProjectSetupData.instance.InteractiveOperationsFinished)
@@ -468,14 +471,14 @@ namespace ProjectSetup.Editor
 
                 IEnumerable<AssetImportEntry> assets =
                     ProjectSetupData.instance.QueuedAssets.Where(a => !a.Interactive);
-                Setup.ImportAssetsNonInteractive(assets);
+                SetupExecution.ImportAssetsNonInteractive(assets);
 
                 IEnumerable<string> packages = GetFullPackagesID(ProjectSetupData.instance.QueuedPackagesIDs);
-                Setup.ImportPackages(packages);
+                SetupExecution.ImportPackages(packages);
                     
-                Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
+                SetupExecution.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
                     
-                Setup.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
+                SetupExecution.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
 
                 ProjectSetupData.instance.SetupInProgress = false;
                 ProjectSetupData.instance.InteractiveOperationsInProgress = false;

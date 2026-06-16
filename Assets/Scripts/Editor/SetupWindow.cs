@@ -8,7 +8,7 @@ namespace ProjectSetup.Editor
     /// </summary>
     public class SetupWindow : EditorWindow
     {
-        private readonly SetupBusiness _business = new SetupBusiness();
+        private readonly SetupConfiguration _configuration = new SetupConfiguration();
 
         private ProfileSettingsUI _profileSettingsUI;
         private FolderStructureUI _folderStructureUI;
@@ -31,15 +31,15 @@ namespace ProjectSetup.Editor
 
         private void OnEnable()
         {
-            _business.Initialize();
-            _business.ApplyingProfile += ResetTemporaryState;
+            _configuration.Initialize();
+            _configuration.ApplyingProfile += ResetTemporaryState;
 
-            _profileSettingsUI = new ProfileSettingsUI(_business);
-            _folderStructureUI = new FolderStructureUI(_business);
-            _packagesSettingsUI = new PackagesSettingsUI(_business);
-            _assetsSettingsUI = new AssetsSettingsUI(_business);
-            _projectSettingsUI = new ProjectSettingsUI(_business);
-            _miscSettingsUI = new MiscSettingsUI(_business);
+            _profileSettingsUI = new ProfileSettingsUI(_configuration);
+            _folderStructureUI = new FolderStructureUI(_configuration);
+            _packagesSettingsUI = new PackagesSettingsUI(_configuration);
+            _assetsSettingsUI = new AssetsSettingsUI(_configuration);
+            _projectSettingsUI = new ProjectSettingsUI(_configuration);
+            _miscSettingsUI = new MiscSettingsUI(_configuration);
         }
 
 
@@ -90,20 +90,20 @@ namespace ProjectSetup.Editor
         {
             if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
-                _business.ExecuteSetup();
+                _configuration.ExecuteSetup();
             }
         }
         
         
         private void Update()
         {
-            _business.Update();
+            _configuration.Update();
         }
 
 
         private void OnDisable()
         {
-            _business.ApplyingProfile -= ResetTemporaryState;
+            _configuration.ApplyingProfile -= ResetTemporaryState;
         }
     }
 }

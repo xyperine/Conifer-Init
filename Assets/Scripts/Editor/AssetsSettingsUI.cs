@@ -7,7 +7,7 @@ namespace ProjectSetup.Editor
 {
     public class AssetsSettingsUI
     {
-        private readonly SetupBusiness _business;
+        private readonly SetupConfiguration _configuration;
 
         private int _availableAssetsPage = 1;
         private int _queuedAssetsPage = 1;
@@ -15,9 +15,9 @@ namespace ProjectSetup.Editor
         private string _assetsSearchString;
         
 
-        public AssetsSettingsUI(SetupBusiness business)
+        public AssetsSettingsUI(SetupConfiguration configuration)
         {
-            _business = business;
+            _configuration = configuration;
         }
 
 
@@ -33,9 +33,9 @@ namespace ProjectSetup.Editor
             
             GUILayout.Label("Assets Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            if (!_business.SuccessfullyRetrievedAssets)
+            if (!_configuration.SuccessfullyRetrievedAssets)
             {
-                _business.RetrieveCachedAssets();
+                _configuration.RetrieveCachedAssets();
                 
                 return;
             }
@@ -45,16 +45,16 @@ namespace ProjectSetup.Editor
                 GUILayout.TextField(_assetsSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
             
-            List<string> availableAssetIDs = _business.AvailableAssets;
+            List<string> availableAssetIDs = _configuration.AvailableAssets;
             if (!string.IsNullOrWhiteSpace(_assetsSearchString))
             {
-                availableAssetIDs = _business.FindAssets(_assetsSearchString);
+                availableAssetIDs = _configuration.FindAssets(_assetsSearchString);
 
                 _availableAssetsPage = 1;
             }
             
             // Available list
-            List<AssetImportEntry> queuedAssets = _business.GetQueuedAssets();
+            List<AssetImportEntry> queuedAssets = _configuration.GetQueuedAssets();
             using (new GUILayout.VerticalScope($"Available ({availableAssetIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (availableAssetIDs.Count > 0)
@@ -64,7 +64,7 @@ namespace ProjectSetup.Editor
                         availableAssetIDs.Count - (_availableAssetsPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        string assetName = _business.FindAssetByID(availableAssetIDs[i]).Name;
+                        string assetName = _configuration.FindAssetByID(availableAssetIDs[i]).Name;
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0 
                             ? new Color(0f, 0f, 0f, 0.03f)
@@ -80,7 +80,7 @@ namespace ProjectSetup.Editor
                         GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
-                            _business.QueueAsset(availableAssetIDs[i]);
+                            _configuration.QueueAsset(availableAssetIDs[i]);
 
                             i--;
                         }
@@ -148,12 +148,12 @@ namespace ProjectSetup.Editor
                         GUILayout.FlexibleSpace();
 
                         bool interactive = GUILayout.Toggle(asset.Interactive, "Interactive");
-                        _business.SetInteractiveImportForAsset(asset.ID, interactive);
+                        _configuration.SetInteractiveImportForAsset(asset.ID, interactive);
 
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
                                 GUILayout.Height(16f)))
                         {
-                            _business.DequeueAsset(asset.ID);
+                            _configuration.DequeueAsset(asset.ID);
 
                             i--;
                             entriesCount--;

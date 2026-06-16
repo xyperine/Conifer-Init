@@ -9,12 +9,12 @@ namespace ProjectSetup.Editor
 {
     public class ProfileSettingsUI
     {
-        private readonly SetupBusiness _business;
+        private readonly SetupConfiguration _configuration;
         
 
-        public ProfileSettingsUI(SetupBusiness business)
+        public ProfileSettingsUI(SetupConfiguration configuration)
         {
-            _business = business;
+            _configuration = configuration;
         }
 
 
@@ -24,25 +24,25 @@ namespace ProjectSetup.Editor
 
             using (EditorGUI.ChangeCheckScope changeScope = new EditorGUI.ChangeCheckScope())
             {
-                string[] profileNames = _business.Profiles.Select(p => p.Name).ToArray();
-                int selectedIndex = Array.IndexOf(profileNames, _business.ActiveProfile.Name);
+                string[] profileNames = _configuration.Profiles.Select(p => p.Name).ToArray();
+                int selectedIndex = Array.IndexOf(profileNames, _configuration.ActiveProfile.Name);
                 selectedIndex = EditorGUILayout.Popup("Active Profile", selectedIndex, profileNames,
                     new GUIStyle(EditorStyles.popup),GUILayout.Height(16f));
 
                 if (changeScope.changed)
                 {
-                    SettingsProfile profile = _business.Profiles.Single(p => p.Name == profileNames[selectedIndex]);
+                    SettingsProfile profile = _configuration.Profiles.Single(p => p.Name == profileNames[selectedIndex]);
                     ApplyProfile(profile);
                 }
             }
             
             using (new GUILayout.HorizontalScope(new GUIStyle()))
             {
-                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_business.ActiveProfile.Name == _business.DefaultProfile.Name))
+                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_configuration.ActiveProfile.Name == _configuration.DefaultProfile.Name))
                 {
                     if (GUILayout.Button("Save"))
                     {
-                        ConfirmSaveProfileDialog(_business.ActiveProfile);
+                        ConfirmSaveProfileDialog(_configuration.ActiveProfile);
                     }
                 }
 
@@ -56,17 +56,17 @@ namespace ProjectSetup.Editor
                     ShowSaveProfileFilePanel(path => CreateNewProfile(Path.GetFileNameWithoutExtension(path)));
                 }
                 
-                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_business.ActiveProfile.Name == _business.DefaultProfile.Name))
+                using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_configuration.ActiveProfile.Name == _configuration.DefaultProfile.Name))
                 {
                     if (GUILayout.Button("Delete"))
                     {
-                        ConfirmDeleteProfileDialog(_business.ActiveProfile);
+                        ConfirmDeleteProfileDialog(_configuration.ActiveProfile);
                     }
                 }
 
                 if (GUILayout.Button("Restore"))
                 {
-                    ApplyProfile(_business.ActiveProfile);
+                    ApplyProfile(_configuration.ActiveProfile);
                 }
             }
         }
@@ -74,52 +74,52 @@ namespace ProjectSetup.Editor
 
         private void ApplyProfile(SettingsProfile profile)
         {
-            _business.ApplyProfile(profile);
+            _configuration.ApplyProfile(profile);
         }
 
 
         private void ConfirmDeleteProfileDialog(SettingsProfile profile)
         {
-            Assert.IsFalse(profile.Name == SetupBusiness.DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
             
             if (EditorDialog.DisplayDecisionDialog("Delete Profile?",
                     $"{profile.Name} profile will be irreversibly deleted. Proceed?",
                     "Yes", "No"))
             {
-                _business.DeleteProfile(profile);
+                _configuration.DeleteProfile(profile);
             }
         }
 
 
         private void ConfirmSaveProfileDialog(SettingsProfile profile)
         {
-            Assert.IsFalse(profile.Name == SetupBusiness.DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
             
-            if (_business.Profiles.Exists(p => p.Name == profile.Name))
+            if (_configuration.Profiles.Exists(p => p.Name == profile.Name))
             {
                 if (EditorDialog.DisplayDecisionDialog("Save Profile?",
                         $"This will override the existing {profile.Name} profile. Proceed?",
                         "Yes", "No"))
                 {
-                    _business.SaveProfile(profile);
+                    _configuration.SaveProfile(profile);
                 }
             }
             else
             {
-                _business.SaveProfile(profile);
+                _configuration.SaveProfile(profile);
             }
         }
 
 
         private void ShowSaveProfileFilePanel(Action<string> onSuccess)
         {
-            string newName = _business.ConstructNewProfileName();
+            string newName = _configuration.ConstructNewProfileName();
             
             string savedPath = EditorUtility.SaveFilePanel("New Profile",
                 PersistenceSerializer<SettingsProfile>.ProfilesStoragePath, newName, "json");
             if (savedPath != string.Empty)
             {
-                _business.TrySaveProfileAt(savedPath, onSuccess);
+                _configuration.TrySaveProfileAt(savedPath, onSuccess);
             }
         }
 
@@ -144,7 +144,7 @@ namespace ProjectSetup.Editor
 
         private void CreateNewProfile(string newProfileName)
         {
-            ApplyProfile(_business.DefaultProfile);
+            ApplyProfile(_configuration.DefaultProfile);
             SaveAsProfile(newProfileName);
         }
     }

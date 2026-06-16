@@ -7,7 +7,7 @@ namespace ProjectSetup.Editor
 {
     public class FolderStructureUI
     {
-        private readonly SetupBusiness _business;
+        private readonly SetupConfiguration _configuration;
         
         private int _elementIndex;
         
@@ -20,9 +20,9 @@ namespace ProjectSetup.Editor
         private string _newEditedName;
 
 
-        public FolderStructureUI(SetupBusiness business)
+        public FolderStructureUI(SetupConfiguration configuration)
         {
-            _business = business;
+            _configuration = configuration;
         }
 
 
@@ -43,7 +43,7 @@ namespace ProjectSetup.Editor
 
             if (GUILayout.Button("Reset Structure", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
-                _business.ResetFolderStructure();
+                _configuration.ResetFolderStructure();
             }
             
             SetupWindowElements.DrawSmallSpace();
@@ -52,7 +52,7 @@ namespace ProjectSetup.Editor
             GUIStyle foldersSectionStyle = new GUIStyle(GUI.skin.FindStyle("Window"));
             using (new GUILayout.VerticalScope("Hierarchy", foldersSectionStyle))
             {
-                DrawHierarchyRecursively(_business.GetAssetsFSE());
+                DrawHierarchyRecursively(_configuration.GetAssetsFSE());
             }
         }
 
@@ -102,7 +102,7 @@ namespace ProjectSetup.Editor
                     if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(16f)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newEditedName))
                     {
-                        _business.RenameFolderStructureEntry(entry, _newEditedName);
+                        _configuration.RenameFolderStructureEntry(entry, _newEditedName);
 
                         _isEditingName = false;
                         _editingNameOf = string.Empty;
@@ -151,7 +151,7 @@ namespace ProjectSetup.Editor
                     {
                         Debug.Log("Removing folder...");
                         
-                        _business.RemoveFolderStructureEntry(entry);
+                        _configuration.RemoveFolderStructureEntry(entry);
                     }
                 }
             }
@@ -191,7 +191,7 @@ namespace ProjectSetup.Editor
                     if ((GUILayout.Button("Add", GUILayout.Width(64f), GUILayout.Height(16f)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newChildName))
                     {
-                        _business.AddFolder(_newChildName, entry);
+                        _configuration.AddFolder(_newChildName, entry);
                         
                         _newChildName = string.Empty;
                     }

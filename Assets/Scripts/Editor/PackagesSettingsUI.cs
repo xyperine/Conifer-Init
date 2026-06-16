@@ -9,7 +9,7 @@ namespace ProjectSetup.Editor
 {
     public class PackagesSettingsUI
     {
-        private readonly SetupBusiness _business;
+        private readonly SetupConfiguration _configuration;
         
         private int _availablePackagesPage = 1;
         private int _queuedPackagesPage = 1;
@@ -17,9 +17,9 @@ namespace ProjectSetup.Editor
         private string _packagesSearchString;
 
 
-        public PackagesSettingsUI(SetupBusiness business)
+        public PackagesSettingsUI(SetupConfiguration configuration)
         {
-            _business = business;
+            _configuration = configuration;
         }
 
 
@@ -45,16 +45,16 @@ namespace ProjectSetup.Editor
                 GUILayout.TextField(_packagesSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
             
-            List<string> availablePackageIDs = _business.AvailablePackages;
+            List<string> availablePackageIDs = _configuration.AvailablePackages;
             if (!string.IsNullOrWhiteSpace(_packagesSearchString))
             {
-                availablePackageIDs = _business.FindPackages(_packagesSearchString);
+                availablePackageIDs = _configuration.FindPackages(_packagesSearchString);
 
                 _availablePackagesPage = 1;
             }
             
             // Available list
-            List<string> queuedPackageIDs = _business.GetQueuedPackageIDs();
+            List<string> queuedPackageIDs = _configuration.GetQueuedPackageIDs();
             using (new GUILayout.VerticalScope($"Available ({availablePackageIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (availablePackageIDs.Count > 0)
@@ -64,7 +64,7 @@ namespace ProjectSetup.Editor
                         availablePackageIDs.Count - (_availablePackagesPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _business.GetPackageByID(availablePackageIDs[i]);
+                        PackageInfo packageInfo = _configuration.GetPackageByID(availablePackageIDs[i]);
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0 
                             ? new Color(0f, 0f, 0f, 0.03f)
@@ -80,7 +80,7 @@ namespace ProjectSetup.Editor
                         GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
-                            _business.QueuePackage(availablePackageIDs[i]);
+                            _configuration.QueuePackage(availablePackageIDs[i]);
 
                             i--;
                         }
@@ -128,7 +128,7 @@ namespace ProjectSetup.Editor
                         queuedPackageIDs.Count - (_queuedPackagesPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _business.GetPackageByID(queuedPackageIDs[i]);
+                        PackageInfo packageInfo = _configuration.GetPackageByID(queuedPackageIDs[i]);
                         using EditorGUILayout.HorizontalScope entryScope =
                             new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0
@@ -148,7 +148,7 @@ namespace ProjectSetup.Editor
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
                                 GUILayout.Height(16f)))
                         {
-                            _business.DequeuePackage(queuedPackageIDs[i]);
+                            _configuration.DequeuePackage(queuedPackageIDs[i]);
 
                             i--;
                             entriesCount--;
@@ -193,7 +193,7 @@ namespace ProjectSetup.Editor
         // This routine is poorly designed so I don't know what to do with it 
         private bool SuccessfullyRetrievedPackages()
         {
-            switch (_business.PackagesListRequest.Status)
+            switch (_configuration.PackagesListRequest.Status)
             {
                 case StatusCode.InProgress:
                     GUILayout.Label("Retrieving packages...");
@@ -202,20 +202,20 @@ namespace ProjectSetup.Editor
                     //Debug.Log("Successfully retrieved packages.");
                     GUIStyle style1 = new GUIStyle(GUI.skin.label)
                         {normal = new GUIStyleState() {textColor = Color.limeGreen}};
-                    GUILayout.Label($"Retrieved packages: {_business.PackagesListRequest.Result.Length}", style1);
+                    GUILayout.Label($"Retrieved packages: {_configuration.PackagesListRequest.Result.Length}", style1);
                     break;
                 case StatusCode.Failure:
                     //Debug.Log("Failed to retrieve packages.");
                     GUIStyle style = new GUIStyle(GUI.skin.label)
                         {normal = new GUIStyleState() {textColor = Color.crimson}};
-                    GUILayout.Label($"Error while retrieving packages: {_business.PackagesListRequest.Error.message}", style);
+                    GUILayout.Label($"Error while retrieving packages: {_configuration.PackagesListRequest.Error.message}", style);
                     break;
                 default:
                     Debug.LogError("Invalid request");
                     throw new ArgumentOutOfRangeException();
             }
             
-            return _business.SuccessfullyRetrievedPackages();
+            return _configuration.SuccessfullyRetrievedPackages();
         }
     }
 }
