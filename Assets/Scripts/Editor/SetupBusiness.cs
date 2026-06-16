@@ -6,6 +6,8 @@ using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using UnityEngine.Assertions;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor
 {
@@ -22,9 +24,16 @@ namespace ProjectSetup.Editor
 
         public SettingsProfile ActiveProfile => _activeProfile;
 
-        private SearchRequest _packagesListRequest;
         private bool _successfullyRetrievedPackages;
-        
+        private Dictionary<string, PackageInfo> _allPackages;
+
+        public List<string> AvailablePackages => _successfullyRetrievedPackages && _allPackages != null
+            ? _allPackages.Keys.Where(id =>
+                !ProjectSetupData.instance.QueuedPackagesIDs.Contains(id)).ToList()
+            : new List<string>();
+
+        public SearchRequest PackagesListRequest { get; private set; }
+
         private bool _successfullyRetrievedAssets = false;
         private List<AssetInfo> _assets = new List<AssetInfo>();
         
@@ -34,7 +43,7 @@ namespace ProjectSetup.Editor
         {
             LoadSettingsProfiles();
 
-            //_packagesListRequest = Client.SearchAll();
+            PackagesListRequest = Client.SearchAll();
 
             //RetrieveCachedAssets();
         }
@@ -217,6 +226,72 @@ namespace ProjectSetup.Editor
             parent.AddChild(new FolderStructureEntry(folderName, parent));
         }
 
+        
+        public bool SuccessfullyRetrievedPackages()
+        {
+            if (_successfullyRetrievedPackages)
+            {
+                return _allPackages != null;
+            }
+            
+            switch (PackagesListRequest.Status)
+            {
+                case StatusCode.InProgress:
+                    _successfullyRetrievedPackages = false;
+                    break;
+                case StatusCode.Success:
+                    _successfullyRetrievedPackages = true;
+                    _allPackages = PackagesListRequest.Result.ToDictionary(p => p.name, p => p);
+                    break;
+                case StatusCode.Failure:
+                    _successfullyRetrievedPackages = false;
+                    break;
+                default:
+                    _successfullyRetrievedPackages = false;
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return _successfullyRetrievedPackages;
+        }
+
+
+        public List<string> FindPackages(string nameFilter)
+        {
+            Assert.IsFalse(string.IsNullOrWhiteSpace(nameFilter));
+
+            return AvailablePackages.FindAll(id => _allPackages[id].displayName.Contains(nameFilter,
+                StringComparison.OrdinalIgnoreCase));
+        }
+
+
+        public PackageInfo GetPackageByID(string id)
+        {
+            return _allPackages[id];
+        }
+
+
+        public void QueuePackage(string id)
+        {
+            ProjectSetupData.instance.QueuedPackagesIDs.Add(id);
+        }
+
+
+        public void DequeuePackage(string id)
+        {
+            ProjectSetupData.instance.QueuedPackagesIDs.Remove(id);
+        }
+
+
+        /// <summary>
+        /// Converts list of shorter package ids to a list of full package ids.
+        /// </summary>
+        /// <param name="packageIDs">List of shorter package ids, equivalent to PackageInfo.name.</param>
+        /// <returns>List of full package ids, equivalent of PackageInfo.packageId.</returns>
+        public IEnumerable<string> GetFullPackagesID(IEnumerable<string> packageIDs)
+        {
+            return packageIDs.Select(id => _allPackages[id].packageId);
+        }
+        
 
         private void RetrieveCachedAssets()
         {

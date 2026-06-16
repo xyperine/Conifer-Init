@@ -39,24 +39,16 @@ namespace ProjectSetup.Editor
         private string _newEditedName;
 
         // Packages settings
-        private SearchRequest _packagesListRequest;
-        private bool _successfullyRetrievedPackages;
-
-        private int _availablePage = 1;
-        private int _queuedPage = 1;
+        private int _availablePackagesPage = 1;
+        private int _queuedPackagesPage = 1;
 
         private string _packagesSearchString;
-
-        private List<string> AvailablePackages => _successfullyRetrievedPackages && _packagesListRequest?.Result != null
-            ? _packagesListRequest.Result.Select(p => p.name).Where(id =>
-                !ProjectSetupData.instance.QueuedPackagesIDs.Contains(id)).ToList()
-            : new List<string>();
         
         // Assets settings
         private bool _successfullyRetrievedAssets = false;
         private List<AssetInfo> _assets = new List<AssetInfo>();
-        private int _assetsAvailablePage = 1;
-        private int _assetsQueuedPage = 1;
+        private int _availableAssetsPage = 1;
+        private int _queuedAssetsPage = 1;
 
         private string _assetsSearchString;
 
@@ -79,8 +71,6 @@ namespace ProjectSetup.Editor
         {
             _business.Initialize();
             
-            _packagesListRequest = Client.SearchAll();
-
             RetrieveCachedAssets();
         }
 
@@ -487,7 +477,7 @@ namespace ProjectSetup.Editor
             
             GUILayout.Label("Packages Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            if (!SuccessfullyRetrievedPackages(_packagesListRequest))
+            if (!SuccessfullyRetrievedPackages())
             {
                 return;
             }
@@ -497,14 +487,12 @@ namespace ProjectSetup.Editor
                 GUILayout.TextField(_packagesSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
             
-            List<string> availablePackageIDs = AvailablePackages;
+            List<string> availablePackageIDs = _business.AvailablePackages;
             if (!string.IsNullOrWhiteSpace(_packagesSearchString))
             {
-                availablePackageIDs = availablePackageIDs.FindAll(id =>
-                    _packagesListRequest.Result.First(p => p.name == id).displayName.Contains(_packagesSearchString,
-                        StringComparison.OrdinalIgnoreCase));
+                availablePackageIDs = _business.FindPackages(_packagesSearchString);
 
-                _availablePage = 1;
+                _availablePackagesPage = 1;
             }
             
             // Available list
@@ -513,12 +501,12 @@ namespace ProjectSetup.Editor
             {
                 if (availablePackageIDs.Count > 0)
                 {
-                    int start = (_availablePage - 1) * maxEntriesPerPage;
+                    int start = (_availablePackagesPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        availablePackageIDs.Count - (_availablePage - 1) * maxEntriesPerPage);
+                        availablePackageIDs.Count - (_availablePackagesPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _packagesListRequest.Result.First(p => p.name == availablePackageIDs[i]);
+                        PackageInfo packageInfo = _business.GetPackageByID(availablePackageIDs[i]);
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0 
                             ? new Color(0f, 0f, 0f, 0.03f)
@@ -534,8 +522,7 @@ namespace ProjectSetup.Editor
                         GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
-                            string id = availablePackageIDs[i];
-                            queuedPackageIDs.Add(id);
+                            _business.QueuePackage(availablePackageIDs[i]);
 
                             i--;
                         }
@@ -545,23 +532,23 @@ namespace ProjectSetup.Editor
                     using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                     GUILayout.FlexibleSpace();
                             
-                    using (new EditorGUI.DisabledGroupScope(_availablePage <= 1))
+                    using (new EditorGUI.DisabledGroupScope(_availablePackagesPage <= 1))
                     {
                         if (GUILayout.Button("<"))
                         {
-                            _availablePage--;
+                            _availablePackagesPage--;
                         }
                     }
                             
                     int maxPages =
-                        Mathf.CeilToInt(AvailablePackages.Count / (float) maxEntriesPerPage);
-                    GUILayout.Label($"{_availablePage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                        Mathf.CeilToInt(availablePackageIDs.Count / (float) maxEntriesPerPage);
+                    GUILayout.Label($"{_availablePackagesPage}/{maxPages}", new GUIStyle(GUI.skin.label));
                             
-                    using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
+                    using (new EditorGUI.DisabledGroupScope(_availablePackagesPage >= maxPages))
                     {
                         if (GUILayout.Button(">"))
                         {
-                            _availablePage++;
+                            _availablePackagesPage++;
                         }
                     }
                 }
@@ -578,12 +565,12 @@ namespace ProjectSetup.Editor
             {
                 if (queuedPackageIDs.Count > 0)
                 {
-                    int start = (_queuedPage - 1) * maxEntriesPerPage;
+                    int start = (_queuedPackagesPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        queuedPackageIDs.Count - (_queuedPage - 1) * maxEntriesPerPage);
+                        queuedPackageIDs.Count - (_queuedPackagesPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        PackageInfo packageInfo = _packagesListRequest.Result.First(p => p.name == queuedPackageIDs[i]);
+                        PackageInfo packageInfo = _business.GetPackageByID(queuedPackageIDs[i]);
                         using EditorGUILayout.HorizontalScope entryScope =
                             new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0
@@ -603,8 +590,7 @@ namespace ProjectSetup.Editor
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
                                 GUILayout.Height(16f)))
                         {
-                            string id = queuedPackageIDs[i];
-                            queuedPackageIDs.Remove(id);
+                            _business.DequeuePackage(queuedPackageIDs[i]);
 
                             i--;
                             entriesCount--;
@@ -617,23 +603,23 @@ namespace ProjectSetup.Editor
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                         GUILayout.FlexibleSpace();
 
-                        using (new EditorGUI.DisabledGroupScope(_queuedPage <= 1))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPackagesPage <= 1))
                         {
                             if (GUILayout.Button("<"))
                             {
-                                _queuedPage--;
+                                _queuedPackagesPage--;
                             }
                         }
 
                         int maxPages =
                             Mathf.CeilToInt(queuedPackageIDs.Count / (float) maxEntriesPerPage);
-                        GUILayout.Label($"{_queuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                        GUILayout.Label($"{_queuedPackagesPage}/{maxPages}", new GUIStyle(GUI.skin.label));
 
-                        using (new EditorGUI.DisabledGroupScope(_queuedPage >= maxPages))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPackagesPage >= maxPages))
                         {
                             if (GUILayout.Button(">"))
                             {
-                                _queuedPage++;
+                                _queuedPackagesPage++;
                             }
                         }
                     }
@@ -646,37 +632,32 @@ namespace ProjectSetup.Editor
         }
 
 
-        private bool SuccessfullyRetrievedPackages(SearchRequest searchRequest)
+        // This routine is poorly designed so I don't know what to do with it 
+        private bool SuccessfullyRetrievedPackages()
         {
-            if (_successfullyRetrievedPackages)
-            {
-                return searchRequest.Result != null;
-            }
-            
-            switch (searchRequest.Status)
+            switch (_business.PackagesListRequest.Status)
             {
                 case StatusCode.InProgress:
                     GUILayout.Label("Retrieving packages...");
-                    _successfullyRetrievedPackages = false;
-                    return false;
+                    break;
                 case StatusCode.Success:
-                    Debug.Log("Successfully retrieved packages.");
+                    //Debug.Log("Successfully retrieved packages.");
                     GUIStyle style1 = new GUIStyle(GUI.skin.label)
                         {normal = new GUIStyleState() {textColor = Color.limeGreen}};
-                    GUILayout.Label($"Retrieved packages: {searchRequest.Result.Length}", style1);
-                    _successfullyRetrievedPackages = true;
-                    return true;
+                    GUILayout.Label($"Retrieved packages: {_business.PackagesListRequest.Result.Length}", style1);
+                    break;
                 case StatusCode.Failure:
+                    //Debug.Log("Failed to retrieve packages.");
                     GUIStyle style = new GUIStyle(GUI.skin.label)
                         {normal = new GUIStyleState() {textColor = Color.crimson}};
-                    GUILayout.Label($"Error while retrieving packages: {searchRequest.Error.message}", style);
-                    _successfullyRetrievedPackages = false;
-                    return false;
+                    GUILayout.Label($"Error while retrieving packages: {_business.PackagesListRequest.Error.message}", style);
+                    break;
                 default:
                     Debug.LogError("Invalid request");
-                    _successfullyRetrievedPackages = false;
                     throw new ArgumentOutOfRangeException();
             }
+            
+            return _business.SuccessfullyRetrievedPackages();
         }
 
 
@@ -705,7 +686,7 @@ namespace ProjectSetup.Editor
                     _assets.Find(a => a.ID == id).Name.Contains(_assetsSearchString,
                         StringComparison.OrdinalIgnoreCase));
 
-                _assetsAvailablePage = 1;
+                _availableAssetsPage = 1;
             }
             
             // Available list
@@ -714,9 +695,9 @@ namespace ProjectSetup.Editor
             {
                 if (availableAssetIDs.Count > 0)
                 {
-                    int start = (_assetsAvailablePage - 1) * maxEntriesPerPage;
+                    int start = (_availableAssetsPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        availableAssetIDs.Count - (_assetsAvailablePage - 1) * maxEntriesPerPage);
+                        availableAssetIDs.Count - (_availableAssetsPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         string assetName = _assets.Find(a => a.ID == availableAssetIDs[i]).Name;
@@ -746,23 +727,23 @@ namespace ProjectSetup.Editor
                     using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                     GUILayout.FlexibleSpace();
                             
-                    using (new EditorGUI.DisabledGroupScope(_assetsAvailablePage <= 1))
+                    using (new EditorGUI.DisabledGroupScope(_availableAssetsPage <= 1))
                     {
                         if (GUILayout.Button("<"))
                         {
-                            _assetsAvailablePage--;
+                            _availableAssetsPage--;
                         }
                     }
                             
                     int maxPages =
                         Mathf.CeilToInt(AvailableAssets.Count / (float) maxEntriesPerPage);
-                    GUILayout.Label($"{_assetsAvailablePage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                    GUILayout.Label($"{_availableAssetsPage}/{maxPages}", new GUIStyle(GUI.skin.label));
                             
-                    using (new EditorGUI.DisabledGroupScope(_assetsAvailablePage >= maxPages))
+                    using (new EditorGUI.DisabledGroupScope(_availableAssetsPage >= maxPages))
                     {
                         if (GUILayout.Button(">"))
                         {
-                            _assetsAvailablePage++;
+                            _availableAssetsPage++;
                         }
                     }
                 }
@@ -779,9 +760,9 @@ namespace ProjectSetup.Editor
             {
                 if (queuedAssets.Count > 0)
                 {
-                    int start = (_assetsQueuedPage - 1) * maxEntriesPerPage;
+                    int start = (_queuedAssetsPage - 1) * maxEntriesPerPage;
                     int entriesCount = Math.Min(maxEntriesPerPage,
-                        queuedAssets.Count - (_assetsQueuedPage - 1) * maxEntriesPerPage);
+                        queuedAssets.Count - (_queuedAssetsPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         AssetImportEntry asset = queuedAssets[i];
@@ -822,23 +803,23 @@ namespace ProjectSetup.Editor
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
                         GUILayout.FlexibleSpace();
 
-                        using (new EditorGUI.DisabledGroupScope(_assetsQueuedPage <= 1))
+                        using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage <= 1))
                         {
                             if (GUILayout.Button("<"))
                             {
-                                _assetsQueuedPage--;
+                                _queuedAssetsPage--;
                             }
                         }
 
                         int maxPages =
                             Mathf.CeilToInt(queuedAssets.Count / (float) maxEntriesPerPage);
-                        GUILayout.Label($"{_assetsQueuedPage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                        GUILayout.Label($"{_queuedAssetsPage}/{maxPages}", new GUIStyle(GUI.skin.label));
 
-                        using (new EditorGUI.DisabledGroupScope(_assetsQueuedPage >= maxPages))
+                        using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage >= maxPages))
                         {
                             if (GUILayout.Button(">"))
                             {
-                                _assetsQueuedPage++;
+                                _queuedAssetsPage++;
                             }
                         }
                     }
@@ -954,10 +935,8 @@ namespace ProjectSetup.Editor
                 IEnumerable<AssetImportEntry> assets =
                     ProjectSetupData.instance.QueuedAssets.Where(a => !a.Interactive);
                 Setup.ImportAssetsNonInteractive(assets);
-                
-                IEnumerable<string> packages =
-                    ProjectSetupData.instance.QueuedPackagesIDs.Select(id =>
-                        _packagesListRequest.Result.First(p => p.name == id).packageId);
+
+                IEnumerable<string> packages = _business.GetFullPackagesID(ProjectSetupData.instance.QueuedPackagesIDs);
                 Setup.ImportPackages(packages);
                     
                 Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
