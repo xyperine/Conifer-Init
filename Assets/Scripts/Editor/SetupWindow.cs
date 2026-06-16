@@ -19,6 +19,7 @@ namespace ProjectSetup.Editor
         private PackagesSettingsUI _packagesSettingsUI;
         private AssetsSettingsUI _assetsSettingsUI;
         private ProjectSettingsUI _projectSettingsUI;
+        private MiscSettingsUI _miscSettingsUI;
         
         private Vector2 _scrollPosition;
         
@@ -40,6 +41,7 @@ namespace ProjectSetup.Editor
             _packagesSettingsUI = new PackagesSettingsUI(_business);
             _assetsSettingsUI = new AssetsSettingsUI(_business);
             _projectSettingsUI = new ProjectSettingsUI(_business);
+            _miscSettingsUI = new MiscSettingsUI(_business);
         }
 
 
@@ -68,7 +70,7 @@ namespace ProjectSetup.Editor
             
             SetupWindowElements.DrawRegularSpace();
             
-            DrawMiscSettings();
+            _miscSettingsUI.Draw();
             
             SetupWindowElements.DrawRegularSpace();
             
@@ -211,25 +213,6 @@ namespace ProjectSetup.Editor
         {
             ApplyProfile(_business.DefaultProfile);
             SaveAsProfile(newProfileName);
-        }
-        
-
-        private void DrawMiscSettings()
-        {
-            GUILayout.Label("Misc Settings", new GUIStyle(EditorStyles.boldLabel));
-
-            using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
-
-            MiscSettings miscSettings = _business.GetMiscSettings();
-            
-            miscSettings.DeleteTutorial = GUILayout.Toggle(miscSettings.DeleteTutorial, "Delete tutorial");
-            miscSettings.ConfigureScene = GUILayout.Toggle(miscSettings.ConfigureScene, "Configure Scene");
-            if (miscSettings.ConfigureScene)
-            {
-                miscSettings.SceneName = EditorGUILayout.TextField("Scene Name", miscSettings.SceneName);
-            }
-
-            _business.SetMiscSettings(miscSettings);
         }
 
 
