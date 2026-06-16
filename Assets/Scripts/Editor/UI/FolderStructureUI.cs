@@ -3,7 +3,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.UI
 {
     public class FolderStructureUI
     {

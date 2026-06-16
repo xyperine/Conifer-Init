@@ -5,7 +5,7 @@ using UnityEditor.PackageManager;
 using UnityEngine;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.UI
 {
     public class PackagesSettingsUI
     {

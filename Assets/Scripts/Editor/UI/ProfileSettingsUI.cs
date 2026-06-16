@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.UI
 {
     public class ProfileSettingsUI
     {

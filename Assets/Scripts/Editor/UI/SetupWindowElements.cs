@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.UI
 {
     public static class SetupWindowElements
     {
