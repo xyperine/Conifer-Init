@@ -45,17 +45,10 @@ namespace ProjectSetup.Editor
         private string _packagesSearchString;
         
         // Assets settings
-        private bool _successfullyRetrievedAssets = false;
-        private List<AssetInfo> _assets = new List<AssetInfo>();
         private int _availableAssetsPage = 1;
         private int _queuedAssetsPage = 1;
 
         private string _assetsSearchString;
-
-        private List<string> AvailableAssets => _successfullyRetrievedAssets && _assets != null
-            ? _assets.Select(a => a.ID).Where(id =>
-                !ProjectSetupData.instance.QueuedAssets.Exists(a => a.ID == id)).ToList()
-            : new List<string>();
         
         
         [MenuItem("Tools/Setup Window")]
@@ -70,44 +63,6 @@ namespace ProjectSetup.Editor
         private void OnEnable()
         {
             _business.Initialize();
-            
-            RetrieveCachedAssets();
-        }
-
-
-        private void RetrieveCachedAssets()
-        {
-            string cachedAssetsPath;
-            if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
-            {
-                string homeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
-                cachedAssetsPath = Path.Combine(homeDirectory, "Library", "Unity", "Asset Store-5.x");
-            }
-            else
-            {
-                string defaultPath =
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Unity");
-                cachedAssetsPath = Path.Combine(EditorPrefs.GetString("AssetStoreCacheRootPath", defaultPath),
-                    "Asset Store-5.x");
-            }
-                
-            if (Directory.Exists(cachedAssetsPath))
-            {
-                string[] assetPaths = Directory.GetFiles(cachedAssetsPath, "*.unitypackage", SearchOption.AllDirectories);
-
-                _assets.Clear();
-                foreach (string assetPath in assetPaths)
-                {
-                    _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath),
-                        Path.GetFileNameWithoutExtension(assetPath)));
-                }
-
-                _successfullyRetrievedAssets = true;
-            }
-            else
-            {
-                throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
-            }
         }
 
 
@@ -667,9 +622,9 @@ namespace ProjectSetup.Editor
             
             GUILayout.Label("Assets Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            if (!_successfullyRetrievedAssets)
+            if (!_business.SuccessfullyRetrievedAssets)
             {
-                RetrieveCachedAssets();
+                _business.RetrieveCachedAssets();
                 
                 return;
             }
@@ -679,12 +634,10 @@ namespace ProjectSetup.Editor
                 GUILayout.TextField(_assetsSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
                     GUILayout.MaxWidth(256f));
             
-            List<string> availableAssetIDs = AvailableAssets;
+            List<string> availableAssetIDs = _business.AvailableAssets;
             if (!string.IsNullOrWhiteSpace(_assetsSearchString))
             {
-                availableAssetIDs = availableAssetIDs.FindAll(id =>
-                    _assets.Find(a => a.ID == id).Name.Contains(_assetsSearchString,
-                        StringComparison.OrdinalIgnoreCase));
+                availableAssetIDs = _business.FindAssets(_assetsSearchString);
 
                 _availableAssetsPage = 1;
             }
@@ -700,7 +653,7 @@ namespace ProjectSetup.Editor
                         availableAssetIDs.Count - (_availableAssetsPage - 1) * maxEntriesPerPage);
                     for (int i = start; i < start + entriesCount; i++)
                     {
-                        string assetName = _assets.Find(a => a.ID == availableAssetIDs[i]).Name;
+                        string assetName = _business.FindAssetByID(availableAssetIDs[i]).Name;
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
                         Color bgColor = i % 2 == 0 
                             ? new Color(0f, 0f, 0f, 0.03f)
@@ -716,8 +669,7 @@ namespace ProjectSetup.Editor
                         GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
                         {
-                            string id = availableAssetIDs[i];
-                            queuedAssets.Add(new AssetImportEntry(_assets.Find(a => a.ID == id), false));
+                            _business.QueueAsset(availableAssetIDs[i]);
 
                             i--;
                         }
@@ -736,7 +688,7 @@ namespace ProjectSetup.Editor
                     }
                             
                     int maxPages =
-                        Mathf.CeilToInt(AvailableAssets.Count / (float) maxEntriesPerPage);
+                        Mathf.CeilToInt(availableAssetIDs.Count / (float) maxEntriesPerPage);
                     GUILayout.Label($"{_availableAssetsPage}/{maxPages}", new GUIStyle(GUI.skin.label));
                             
                     using (new EditorGUI.DisabledGroupScope(_availableAssetsPage >= maxPages))
@@ -785,12 +737,12 @@ namespace ProjectSetup.Editor
                         GUILayout.FlexibleSpace();
 
                         bool interactive = GUILayout.Toggle(asset.Interactive, "Interactive");
-                        queuedAssets[i] = new AssetImportEntry(asset.Path, asset.Name, asset.ID, interactive);
+                        _business.SetInteractiveImportForAsset(asset.ID, interactive);
 
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
                                 GUILayout.Height(16f)))
                         {
-                            queuedAssets.RemoveAt(i);
+                            _business.DequeueAsset(asset.ID);
 
                             i--;
                             entriesCount--;

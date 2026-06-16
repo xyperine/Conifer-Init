@@ -14,6 +14,7 @@ namespace ProjectSetup.Editor
     // Silly name for now
     public class SetupBusiness
     {
+        // Profiles
         public const string DEFAULT_PROFILE_NAME = "Default_Profile";
         
         private SettingsProfile _activeProfile;
@@ -24,6 +25,7 @@ namespace ProjectSetup.Editor
 
         public SettingsProfile ActiveProfile => _activeProfile;
 
+        // Packages
         private bool _successfullyRetrievedPackages;
         private Dictionary<string, PackageInfo> _allPackages;
 
@@ -31,12 +33,19 @@ namespace ProjectSetup.Editor
             ? _allPackages.Keys.Where(id =>
                 !ProjectSetupData.instance.QueuedPackagesIDs.Contains(id)).ToList()
             : new List<string>();
-
+        
         public SearchRequest PackagesListRequest { get; private set; }
 
-        private bool _successfullyRetrievedAssets = false;
-        private List<AssetInfo> _assets = new List<AssetInfo>();
+        // Assets
+
+        public bool SuccessfullyRetrievedAssets { get; private set; } = false;
+
+        private readonly Dictionary<string, AssetInfo> _assets = new Dictionary<string, AssetInfo>();
         
+        public List<string> AvailableAssets => SuccessfullyRetrievedAssets && _assets != null
+            ? _assets.Keys.Where(id =>
+                !ProjectSetupData.instance.QueuedAssets.Exists(a => a.ID == id)).ToList()
+            : new List<string>();
         
         
         public void Initialize()
@@ -45,7 +54,7 @@ namespace ProjectSetup.Editor
 
             PackagesListRequest = Client.SearchAll();
 
-            //RetrieveCachedAssets();
+            RetrieveCachedAssets();
         }
 
         
@@ -293,7 +302,7 @@ namespace ProjectSetup.Editor
         }
         
 
-        private void RetrieveCachedAssets()
+        public void RetrieveCachedAssets()
         {
             string cachedAssetsPath;
             if (Environment.OSVersion.Platform is PlatformID.MacOSX or PlatformID.Unix)
@@ -316,16 +325,51 @@ namespace ProjectSetup.Editor
                 _assets.Clear();
                 foreach (string assetPath in assetPaths)
                 {
-                    _assets.Add(new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath),
-                        Path.GetFileNameWithoutExtension(assetPath)));
+                    string id = Path.GetFileNameWithoutExtension(assetPath);
+                    _assets.Add(id, new AssetInfo(assetPath, Path.GetFileNameWithoutExtension(assetPath), id));
                 }
 
-                _successfullyRetrievedAssets = true;
+                SuccessfullyRetrievedAssets = true;
             }
             else
             {
                 throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
             }
+        }
+
+
+        public List<string> FindAssets(string nameFilter)
+        {
+            return AvailableAssets.FindAll(id =>
+                _assets[id].Name.Contains(nameFilter,
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
+
+        public AssetInfo FindAssetByID(string id)
+        {
+            return _assets[id];
+        }
+
+
+        public void QueueAsset(string id)
+        {
+            ProjectSetupData.instance.QueuedAssets.Add(new AssetImportEntry(_assets[id], false));
+        }
+
+
+        public void DequeueAsset(string id)
+        {
+            ProjectSetupData.instance.QueuedAssets.Remove(ProjectSetupData.instance.QueuedAssets.Find(a => a.ID == id));
+        }
+
+
+        public void SetInteractiveImportForAsset(string id, bool interactive)
+        {
+            int index = ProjectSetupData.instance.QueuedAssets.FindIndex(a => a.ID == id);
+            AssetImportEntry entry = ProjectSetupData.instance.QueuedAssets[index];
+            ProjectSetupData.instance.QueuedAssets[index] =
+                new AssetImportEntry(entry.Path, entry.Name, entry.ID, interactive);
         }
     }
 }
