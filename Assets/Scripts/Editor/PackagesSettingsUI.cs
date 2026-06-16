@@ -116,7 +116,7 @@ namespace ProjectSetup.Editor
                 }
             }
 
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSmallSpace();
                 
             // Queued list
             using (new GUILayout.VerticalScope($"Queued ({queuedPackageIDs.Count})", new GUIStyle(GUI.skin.window)))

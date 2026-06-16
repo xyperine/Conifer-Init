@@ -46,7 +46,7 @@ namespace ProjectSetup.Editor
                 _business.ResetFolderStructure();
             }
             
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSmallSpace();
 
             _elementIndex = -1;
             GUIStyle foldersSectionStyle = new GUIStyle(GUI.skin.FindStyle("Window"));
