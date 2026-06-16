@@ -371,5 +371,17 @@ namespace ProjectSetup.Editor
             ProjectSetupData.instance.QueuedAssets[index] =
                 new AssetImportEntry(entry.Path, entry.Name, entry.ID, interactive);
         }
+
+
+        public ProjectSettings GetProjectSettings()
+        {
+            return ProjectSetupData.instance.ProjectSettings;
+        }
+
+
+        public void SetProjectSettings(ProjectSettings projectSettings)
+        {
+            ProjectSetupData.instance.ProjectSettings = projectSettings;
+        }
     }
 }

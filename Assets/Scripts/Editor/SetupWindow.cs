@@ -788,7 +788,10 @@ namespace ProjectSetup.Editor
         {
             GUILayout.Label("Project Settings", new GUIStyle(EditorStyles.boldLabel));
 
-            ProjectSettings projectSettings = ProjectSetupData.instance.ProjectSettings;
+            using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
+
+            ProjectSettings projectSettings = _business.GetProjectSettings();
+            
             projectSettings.DefaultNamespace =
                 EditorGUILayout.TextField("Default Namespace", projectSettings.DefaultNamespace);
             projectSettings.GameObjectNamingScheme =
@@ -800,7 +803,7 @@ namespace ProjectSetup.Editor
             projectSettings.ScriptingBackend =
                 (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", projectSettings.ScriptingBackend);
 
-            ProjectSetupData.instance.ProjectSettings = projectSettings;
+            _business.SetProjectSettings(projectSettings);
         }
 
 
