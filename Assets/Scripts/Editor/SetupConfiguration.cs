@@ -16,6 +16,8 @@ namespace ProjectSetup.Editor
     /// </summary>
     public class SetupConfiguration
     {
+        private ProjectSetupData _data;
+        
         // Profiles
         public const string DEFAULT_PROFILE_NAME = "Default_Profile";
         
@@ -35,7 +37,7 @@ namespace ProjectSetup.Editor
 
         public List<string> AvailablePackages => _successfullyRetrievedPackages && _allPackages != null
             ? _allPackages.Keys.Where(id =>
-                !ProjectSetupData.instance.QueuedPackagesIDs.Contains(id)).ToList()
+                !_data.QueuedPackagesIDs.Contains(id)).ToList()
             : new List<string>();
         
         public SearchRequest PackagesListRequest { get; private set; }
@@ -47,12 +49,14 @@ namespace ProjectSetup.Editor
         
         public List<string> AvailableAssets => SuccessfullyRetrievedAssets && _assets != null
             ? _assets.Keys.Where(id =>
-                !ProjectSetupData.instance.QueuedAssets.Exists(a => a.ID == id)).ToList()
+                !_data.QueuedAssets.Exists(a => a.ID == id)).ToList()
             : new List<string>();
         
         
         public void Initialize()
         {
+            _data = ProjectSetupData.instance;
+            
             LoadSettingsProfiles();
 
             PackagesListRequest = Client.SearchAll();
@@ -75,7 +79,7 @@ namespace ProjectSetup.Editor
                 .Select(pp => PersistenceSerializer<SettingsProfile>.ReadFile(Path.GetFileName(pp)))
                 .ToList();
             
-            string activeProfileName = ProjectSetupData.instance.ActiveSettingsProfileName;
+            string activeProfileName = _data.ActiveSettingsProfileName;
             Debug.Log(activeProfileName);
             if (!string.IsNullOrEmpty(activeProfileName))
             {
@@ -124,23 +128,23 @@ namespace ProjectSetup.Editor
             ApplyingProfile?.Invoke();
             
             _activeProfile = profile;
-            ProjectSetupData.instance.ActiveSettingsProfileName = _activeProfile.Name;
+            _data.ActiveSettingsProfileName = _activeProfile.Name;
             
-            ProjectSetupData.instance.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_activeProfile.AssetsFolderStructureEntry, null);
-            ProjectSetupData.instance.QueuedPackagesIDs = new List<string>(_activeProfile.QueuedPackagesIDs);
-            ProjectSetupData.instance.QueuedAssets = new List<AssetImportEntry>(_activeProfile.QueuedAssets);
-            ProjectSetupData.instance.ProjectSettings = _activeProfile.ProjectSettings;
-            ProjectSetupData.instance.MiscSettings = _activeProfile.MiscSettings;
+            _data.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_activeProfile.AssetsFolderStructureEntry, null);
+            _data.QueuedPackagesIDs = new List<string>(_activeProfile.QueuedPackagesIDs);
+            _data.QueuedAssets = new List<AssetImportEntry>(_activeProfile.QueuedAssets);
+            _data.ProjectSettings = _activeProfile.ProjectSettings;
+            _data.MiscSettings = _activeProfile.MiscSettings;
         }
 
 
         public void SaveProfile(SettingsProfile profile)
         {
-            profile.AssetsFolderStructureEntry = ProjectSetupData.instance.AssetsFolderStructureEntry;
-            profile.QueuedPackagesIDs = new List<string>(ProjectSetupData.instance.QueuedPackagesIDs);
-            profile.QueuedAssets = new List<AssetImportEntry>(ProjectSetupData.instance.QueuedAssets);
-            profile.ProjectSettings = ProjectSetupData.instance.ProjectSettings;
-            profile.MiscSettings = ProjectSetupData.instance.MiscSettings;
+            profile.AssetsFolderStructureEntry = _data.AssetsFolderStructureEntry;
+            profile.QueuedPackagesIDs = new List<string>(_data.QueuedPackagesIDs);
+            profile.QueuedAssets = new List<AssetImportEntry>(_data.QueuedAssets);
+            profile.ProjectSettings = _data.ProjectSettings;
+            profile.MiscSettings = _data.MiscSettings;
             
             PersistenceSerializer<SettingsProfile>.SaveFile(profile, profile.Name);
             
@@ -218,13 +222,13 @@ namespace ProjectSetup.Editor
 
         public FolderStructureEntry GetAssetsFSE()
         {
-            return ProjectSetupData.instance.AssetsFolderStructureEntry;
+            return _data.AssetsFolderStructureEntry;
         }
         
         
         public void ResetFolderStructure()
         {
-            ProjectSetupData.instance.AssetsFolderStructureEntry =
+            _data.AssetsFolderStructureEntry =
                 FolderStructureEntry.DeepCopy(ActiveProfile.AssetsFolderStructureEntry, null);
         }
 
@@ -249,7 +253,7 @@ namespace ProjectSetup.Editor
 
         public List<string> GetQueuedPackageIDs()
         {
-            return ProjectSetupData.instance.QueuedPackagesIDs;
+            return _data.QueuedPackagesIDs;
         }
         
         
@@ -298,13 +302,13 @@ namespace ProjectSetup.Editor
 
         public void QueuePackage(string id)
         {
-            ProjectSetupData.instance.QueuedPackagesIDs.Add(id);
+            _data.QueuedPackagesIDs.Add(id);
         }
 
 
         public void DequeuePackage(string id)
         {
-            ProjectSetupData.instance.QueuedPackagesIDs.Remove(id);
+            _data.QueuedPackagesIDs.Remove(id);
         }
 
 
@@ -357,7 +361,7 @@ namespace ProjectSetup.Editor
 
         public List<AssetImportEntry> GetQueuedAssets()
         {
-            return ProjectSetupData.instance.QueuedAssets;
+            return _data.QueuedAssets;
         }
         
         
@@ -377,59 +381,59 @@ namespace ProjectSetup.Editor
 
         public void QueueAsset(string id)
         {
-            ProjectSetupData.instance.QueuedAssets.Add(new AssetImportEntry(_assets[id], false));
+            _data.QueuedAssets.Add(new AssetImportEntry(_assets[id], false));
         }
 
 
         public void DequeueAsset(string id)
         {
-            ProjectSetupData.instance.QueuedAssets.Remove(ProjectSetupData.instance.QueuedAssets.Find(a => a.ID == id));
+            _data.QueuedAssets.Remove(_data.QueuedAssets.Find(a => a.ID == id));
         }
 
 
         public void SetInteractiveImportForAsset(string id, bool interactive)
         {
-            int index = ProjectSetupData.instance.QueuedAssets.FindIndex(a => a.ID == id);
-            AssetImportEntry entry = ProjectSetupData.instance.QueuedAssets[index];
-            ProjectSetupData.instance.QueuedAssets[index] =
+            int index = _data.QueuedAssets.FindIndex(a => a.ID == id);
+            AssetImportEntry entry = _data.QueuedAssets[index];
+            _data.QueuedAssets[index] =
                 new AssetImportEntry(entry.Path, entry.Name, entry.ID, interactive);
         }
 
 
         public ProjectSettings GetProjectSettings()
         {
-            return ProjectSetupData.instance.ProjectSettings;
+            return _data.ProjectSettings;
         }
 
 
         public void SetProjectSettings(ProjectSettings projectSettings)
         {
-            ProjectSetupData.instance.ProjectSettings = projectSettings;
+            _data.ProjectSettings = projectSettings;
         }
 
 
         public MiscSettings GetMiscSettings()
         {
-            return ProjectSetupData.instance.MiscSettings;
+            return _data.MiscSettings;
         }
 
 
         public void SetMiscSettings(MiscSettings miscSettings)
         {
-            ProjectSetupData.instance.MiscSettings = miscSettings;
+            _data.MiscSettings = miscSettings;
         }
 
 
         public void ExecuteSetup()
         {
-            ProjectSetupData.instance.SetupInProgress = true;
+            _data.SetupInProgress = true;
         }
 
 
         // Move this to SetupExecution?
         public void Update()
         {
-            if (ProjectSetupData.instance.SetupInProgress)
+            if (_data.SetupInProgress)
             {
                 PerformSetup();
             }
@@ -438,52 +442,52 @@ namespace ProjectSetup.Editor
         
         private void PerformSetup()
         {
-            if (!ProjectSetupData.instance.SetupInProgress)
+            if (!_data.SetupInProgress)
             {
                 return;
             }
 
-            if (!ProjectSetupData.instance.PreInteractiveOperationsInProgress)
+            if (!_data.PreInteractiveOperationsInProgress)
             {
-                ProjectSetupData.instance.PreInteractiveOperationsInProgress = true;
+                _data.PreInteractiveOperationsInProgress = true;
                 
-                string[] folders = ProjectSetupData.instance.AssetsFolderStructureEntry.ToFolderNames();
+                string[] folders = _data.AssetsFolderStructureEntry.ToFolderNames();
                 SetupExecution.CreateFolders(folders);
 
-                ProjectSetupData.instance.PreInteractiveOperationsFinished = true;
+                _data.PreInteractiveOperationsFinished = true;
             }
 
-            if (!ProjectSetupData.instance.InteractiveOperationsInProgress)
+            if (!_data.InteractiveOperationsInProgress)
             {
-                ProjectSetupData.instance.InteractiveOperationsInProgress = true;
+                _data.InteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting interactive operations...");
 
-                IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets.Where(a => a.Interactive);
+                IEnumerable<AssetImportEntry> assets = _data.QueuedAssets.Where(a => a.Interactive);
                 SetupExecution.ImportAssetsInteractive(assets);
             }
                 
-            if (!ProjectSetupData.instance.NonInteractiveOperationsInProgress && ProjectSetupData.instance.InteractiveOperationsFinished)
+            if (!_data.NonInteractiveOperationsInProgress && _data.InteractiveOperationsFinished)
             {
-                ProjectSetupData.instance.NonInteractiveOperationsInProgress = true;
+                _data.NonInteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting non-interactive operations...");
 
                 IEnumerable<AssetImportEntry> assets =
-                    ProjectSetupData.instance.QueuedAssets.Where(a => !a.Interactive);
+                    _data.QueuedAssets.Where(a => !a.Interactive);
                 SetupExecution.ImportAssetsNonInteractive(assets);
 
-                IEnumerable<string> packages = GetFullPackagesID(ProjectSetupData.instance.QueuedPackagesIDs);
+                IEnumerable<string> packages = GetFullPackagesID(_data.QueuedPackagesIDs);
                 SetupExecution.ImportPackages(packages);
                     
-                SetupExecution.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
+                SetupExecution.SetProjectSettings(_data.ProjectSettings);
                     
-                SetupExecution.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
+                SetupExecution.ExecuteMisc(_data.MiscSettings);
 
-                ProjectSetupData.instance.SetupInProgress = false;
-                ProjectSetupData.instance.InteractiveOperationsInProgress = false;
-                ProjectSetupData.instance.InteractiveOperationsFinished = false;
-                ProjectSetupData.instance.NonInteractiveOperationsInProgress = false;
+                _data.SetupInProgress = false;
+                _data.InteractiveOperationsInProgress = false;
+                _data.InteractiveOperationsFinished = false;
+                _data.NonInteractiveOperationsInProgress = false;
                 Debug.Log("Setup finished");
             }
         }
