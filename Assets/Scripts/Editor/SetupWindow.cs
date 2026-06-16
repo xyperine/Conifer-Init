@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEditor.PackageManager;
-using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 using UnityEngine.Assertions;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
@@ -15,12 +14,6 @@ namespace ProjectSetup.Editor
     /// <summary>
     /// Handles drawing logic and user inputs.
     /// </summary>
-    // Settings profile UI and logic
-    // Folder structure UI
-    // Packages settings UI
-    // Asset settings UI
-    // Project settings UI
-    // Misc settings UI
     public class SetupWindow : EditorWindow
     {
         private readonly SetupBusiness _business = new SetupBusiness();
@@ -830,80 +823,14 @@ namespace ProjectSetup.Editor
         {
             if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
             {
-                ProjectSetupData.instance.SetupInProgress = true;
-            }
-
-            // Debug
-            if (GUILayout.Button("Reset", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
-            {
-                ProjectSetupData.instance.SetupInProgress = false;
-                ProjectSetupData.instance.InteractiveOperationsInProgress = false;
-                ProjectSetupData.instance.InteractiveOperationsFinished = false;
-                ProjectSetupData.instance.NonInteractiveOperationsInProgress = false;
+                _business.ExecuteSetup();
             }
         }
-
         
-        // Business
+        
         private void Update()
         {
-            if (ProjectSetupData.instance.SetupInProgress)
-            {
-                PerformSetup();
-            }
-        }
-
-
-        private void PerformSetup()
-        {
-            if (!ProjectSetupData.instance.SetupInProgress)
-            {
-                return;
-            }
-
-            if (!ProjectSetupData.instance.PreInteractiveOperationsInProgress)
-            {
-                ProjectSetupData.instance.PreInteractiveOperationsInProgress = true;
-                
-                string[] folders = ProjectSetupData.instance.AssetsFolderStructureEntry.ToFolderNames();
-                Setup.CreateFolders(folders);
-
-                ProjectSetupData.instance.PreInteractiveOperationsFinished = true;
-            }
-
-            if (!ProjectSetupData.instance.InteractiveOperationsInProgress)
-            {
-                ProjectSetupData.instance.InteractiveOperationsInProgress = true;
-                
-                Debug.Log("Starting interactive operations...");
-
-                IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets.Where(a => a.Interactive);
-                Setup.ImportAssetsInteractive(assets);
-            }
-                
-            if (!ProjectSetupData.instance.NonInteractiveOperationsInProgress && ProjectSetupData.instance.InteractiveOperationsFinished)
-            {
-                ProjectSetupData.instance.NonInteractiveOperationsInProgress = true;
-                
-                Debug.Log("Starting non-interactive operations...");
-
-                IEnumerable<AssetImportEntry> assets =
-                    ProjectSetupData.instance.QueuedAssets.Where(a => !a.Interactive);
-                Setup.ImportAssetsNonInteractive(assets);
-
-                IEnumerable<string> packages = _business.GetFullPackagesID(ProjectSetupData.instance.QueuedPackagesIDs);
-                Setup.ImportPackages(packages);
-                    
-                Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
-                    
-                Setup.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
-
-                ProjectSetupData.instance.SetupInProgress = false;
-                ProjectSetupData.instance.InteractiveOperationsInProgress = false;
-                ProjectSetupData.instance.InteractiveOperationsFinished = false;
-                ProjectSetupData.instance.NonInteractiveOperationsInProgress = false;
-                Debug.Log("Setup finished");
-            }
+            _business.Update();
         }
     }
 }

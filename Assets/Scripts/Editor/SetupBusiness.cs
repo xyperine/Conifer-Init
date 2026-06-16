@@ -395,5 +395,73 @@ namespace ProjectSetup.Editor
         {
             ProjectSetupData.instance.MiscSettings = miscSettings;
         }
+
+
+        public void ExecuteSetup()
+        {
+            ProjectSetupData.instance.SetupInProgress = true;
+        }
+
+
+        public void Update()
+        {
+            if (ProjectSetupData.instance.SetupInProgress)
+            {
+                PerformSetup();
+            }
+        }
+        
+        
+        private void PerformSetup()
+        {
+            if (!ProjectSetupData.instance.SetupInProgress)
+            {
+                return;
+            }
+
+            if (!ProjectSetupData.instance.PreInteractiveOperationsInProgress)
+            {
+                ProjectSetupData.instance.PreInteractiveOperationsInProgress = true;
+                
+                string[] folders = ProjectSetupData.instance.AssetsFolderStructureEntry.ToFolderNames();
+                Setup.CreateFolders(folders);
+
+                ProjectSetupData.instance.PreInteractiveOperationsFinished = true;
+            }
+
+            if (!ProjectSetupData.instance.InteractiveOperationsInProgress)
+            {
+                ProjectSetupData.instance.InteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets = ProjectSetupData.instance.QueuedAssets.Where(a => a.Interactive);
+                Setup.ImportAssetsInteractive(assets);
+            }
+                
+            if (!ProjectSetupData.instance.NonInteractiveOperationsInProgress && ProjectSetupData.instance.InteractiveOperationsFinished)
+            {
+                ProjectSetupData.instance.NonInteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting non-interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets =
+                    ProjectSetupData.instance.QueuedAssets.Where(a => !a.Interactive);
+                Setup.ImportAssetsNonInteractive(assets);
+
+                IEnumerable<string> packages = GetFullPackagesID(ProjectSetupData.instance.QueuedPackagesIDs);
+                Setup.ImportPackages(packages);
+                    
+                Setup.SetProjectSettings(ProjectSetupData.instance.ProjectSettings);
+                    
+                Setup.ExecuteMisc(ProjectSetupData.instance.MiscSettings);
+
+                ProjectSetupData.instance.SetupInProgress = false;
+                ProjectSetupData.instance.InteractiveOperationsInProgress = false;
+                ProjectSetupData.instance.InteractiveOperationsFinished = false;
+                ProjectSetupData.instance.NonInteractiveOperationsInProgress = false;
+                Debug.Log("Setup finished");
+            }
+        }
     }
 }
