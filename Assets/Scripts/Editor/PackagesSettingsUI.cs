@@ -23,7 +23,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public void Reset()
+        public void ResetTemporaryState()
         {
             _packagesSearchString = string.Empty;
         }

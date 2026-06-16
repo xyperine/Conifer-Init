@@ -25,6 +25,8 @@ namespace ProjectSetup.Editor
 
         public SettingsProfile ActiveProfile => _activeProfile;
 
+        public event Action ApplyingProfile;
+
         // Packages
         private bool _successfullyRetrievedPackages;
         private Dictionary<string, PackageInfo> _allPackages;
@@ -37,7 +39,6 @@ namespace ProjectSetup.Editor
         public SearchRequest PackagesListRequest { get; private set; }
 
         // Assets
-
         public bool SuccessfullyRetrievedAssets { get; private set; } = false;
 
         private readonly Dictionary<string, AssetInfo> _assets = new Dictionary<string, AssetInfo>();
@@ -118,6 +119,8 @@ namespace ProjectSetup.Editor
         
         public void ApplyProfile(SettingsProfile profile)
         {
+            ApplyingProfile?.Invoke();
+            
             _activeProfile = profile;
             ProjectSetupData.instance.ActiveSettingsProfileName = _activeProfile.Name;
             

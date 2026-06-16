@@ -26,7 +26,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public void Reset()
+        public void ResetTemporaryState()
         {
             _isAddingChild = false;
             _newChildName = string.Empty;

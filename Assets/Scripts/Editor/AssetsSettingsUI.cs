@@ -21,7 +21,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public void Reset()
+        public void ResetTemporaryState()
         {
             _assetsSearchString = string.Empty;
         }
