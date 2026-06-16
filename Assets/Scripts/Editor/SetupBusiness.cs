@@ -211,6 +211,12 @@ namespace ProjectSetup.Editor
         }
 
 
+        public FolderStructureEntry GetAssetsFSE()
+        {
+            return ProjectSetupData.instance.AssetsFolderStructureEntry;
+        }
+        
+        
         public void ResetFolderStructure()
         {
             ProjectSetupData.instance.AssetsFolderStructureEntry =
@@ -235,6 +241,12 @@ namespace ProjectSetup.Editor
             parent.AddChild(new FolderStructureEntry(folderName, parent));
         }
 
+
+        public List<string> GetQueuedPackageIDs()
+        {
+            return ProjectSetupData.instance.QueuedPackagesIDs;
+        }
+        
         
         public bool SuccessfullyRetrievedPackages()
         {
@@ -301,7 +313,7 @@ namespace ProjectSetup.Editor
             return packageIDs.Select(id => _allPackages[id].packageId);
         }
         
-
+        
         public void RetrieveCachedAssets()
         {
             string cachedAssetsPath;
@@ -338,6 +350,12 @@ namespace ProjectSetup.Editor
         }
 
 
+        public List<AssetImportEntry> GetQueuedAssets()
+        {
+            return ProjectSetupData.instance.QueuedAssets;
+        }
+        
+        
         public List<string> FindAssets(string nameFilter)
         {
             return AvailableAssets.FindAll(id =>

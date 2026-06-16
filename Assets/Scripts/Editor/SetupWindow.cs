@@ -250,7 +250,7 @@ namespace ProjectSetup.Editor
             GUIStyle foldersSectionStyle = new GUIStyle(GUI.skin.FindStyle("Window"));
             using (new GUILayout.VerticalScope("Hierarchy", foldersSectionStyle))
             {
-                DrawHierarchyRecursively(ProjectSetupData.instance.AssetsFolderStructureEntry);
+                DrawHierarchyRecursively(_business.GetAssetsFSE());
             }
         }
 
@@ -444,7 +444,7 @@ namespace ProjectSetup.Editor
             }
             
             // Available list
-            List<string> queuedPackageIDs = ProjectSetupData.instance.QueuedPackagesIDs;
+            List<string> queuedPackageIDs = _business.GetQueuedPackageIDs();
             using (new GUILayout.VerticalScope($"Available ({availablePackageIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (availablePackageIDs.Count > 0)
@@ -636,7 +636,7 @@ namespace ProjectSetup.Editor
             }
             
             // Available list
-            List<AssetImportEntry> queuedAssets = ProjectSetupData.instance.QueuedAssets;
+            List<AssetImportEntry> queuedAssets = _business.GetQueuedAssets();
             using (new GUILayout.VerticalScope($"Available ({availableAssetIDs.Count})", new GUIStyle(GUI.skin.window)))
             {
                 if (availableAssetIDs.Count > 0)
