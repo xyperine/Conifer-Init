@@ -27,7 +27,7 @@ namespace ProjectSetup.Editor.UI
                 string[] profileNames = _configuration.Profiles.Select(p => p.Name).ToArray();
                 int selectedIndex = Array.IndexOf(profileNames, _configuration.ActiveProfile.Name);
                 selectedIndex = EditorGUILayout.Popup("Active Profile", selectedIndex, profileNames,
-                    new GUIStyle(EditorStyles.popup),GUILayout.Height(16f));
+                    new GUIStyle(EditorStyles.popup),GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT));
 
                 if (changeScope.changed)
                 {

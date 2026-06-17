@@ -69,8 +69,8 @@ namespace ProjectSetup.Editor.UI
                         
                         SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
                                 
-                        GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
-                        if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                        GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
+                        if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                         {
                             _configuration.QueuePackage(availablePackageIDs[i]);
 
@@ -126,11 +126,11 @@ namespace ProjectSetup.Editor.UI
                         
                         SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
 
-                        GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f),
+                        GUILayout.Label(packageInfo.displayName, new GUIStyle(GUI.skin.label), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
                             GUILayout.MinWidth(128f));
 
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
-                                GUILayout.Height(16f)))
+                                GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                         {
                             _configuration.DequeuePackage(queuedPackageIDs[i]);
 

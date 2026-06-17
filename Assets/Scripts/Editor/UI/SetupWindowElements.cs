@@ -7,6 +7,7 @@ namespace ProjectSetup.Editor.UI
     {
         public const float SMALL_SPACE_SIZE = 4f;
         public const float REGULAR_SPACE_SIZE = 8f;
+        public const float REGULAR_ELEMENT_HEIGHT = 16f;
 
         private static readonly Color ListElementColor1 = new Color(0f, 0f, 0f, 0.03f);
         private static readonly Color ListElementColor2 = new Color(1f, 1f, 1f, 0.03f);

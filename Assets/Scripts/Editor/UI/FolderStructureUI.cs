@@ -87,10 +87,10 @@ namespace ProjectSetup.Editor.UI
                     GUI.SetNextControlName(textFieldName);
                     GUILayout.Label(sb.ToString(), new GUIStyle(GUI.skin.label), GUILayout.ExpandWidth(false));
                     _newEditedName = GUILayout.TextField(_newEditedName, GUILayout.MaxWidth(256f),
-                        GUILayout.Height(16f));
+                        GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT));
                     EditorGUI.FocusTextInControl(textFieldName);
 
-                    if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(16f)) ||
+                    if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newEditedName))
                     {
                         _configuration.RenameFolderStructureEntry(entry, _newEditedName);
@@ -100,7 +100,7 @@ namespace ProjectSetup.Editor.UI
                         _newEditedName = string.Empty;
                     }
 
-                    if (GUILayout.Button("Cancel", GUILayout.Width(64f), GUILayout.Height(16f)) ||
+                    if (GUILayout.Button("Cancel", GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)) ||
                         Event.current.keyCode == KeyCode.Escape)
                     {
                         _isEditingName = false;
@@ -128,7 +128,7 @@ namespace ProjectSetup.Editor.UI
                         GUILayout.Label(indentedName.ToString(), labelStyle);
                     }
 
-                    GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) {fixedWidth = 16, fixedHeight = 16};
+                    GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) {fixedWidth = 16f, fixedHeight = 16f};
                     if (GUILayout.Button("+", buttonStyle) && !_isEditingName)
                     {
                         _isAddingChild = true;
@@ -155,16 +155,7 @@ namespace ProjectSetup.Editor.UI
                 using (EditorGUILayout.HorizontalScope newFolderScope =
                        new EditorGUILayout.HorizontalScope(new GUIStyle()))
                 {
-                    Color bgColor = _elementIndex % 2 == 0
-                        ? new Color(0f, 0f, 0f, 0.03f)
-                        : new Color(1f, 1f, 1f, 0.03f);
-
-                    Rect rect = new Rect
-                    {
-                        position = newFolderScope.rect.position,
-                        size = newFolderScope.rect.size,
-                    };
-                    EditorGUI.DrawRect(rect, bgColor);
+                    SetupWindowElements.DrawListElementBackground(newFolderScope.rect, _elementIndex);
 
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < depth + 1; i++)
@@ -176,10 +167,10 @@ namespace ProjectSetup.Editor.UI
 
                     const string textFieldName = "New_Child_Name_Text_Field";
                     GUI.SetNextControlName(textFieldName);
-                    _newChildName = GUILayout.TextField(_newChildName, GUILayout.MaxWidth(256f), GUILayout.Height(16f));
+                    _newChildName = GUILayout.TextField(_newChildName, GUILayout.MaxWidth(256f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT));
                     EditorGUI.FocusTextInControl(textFieldName);
 
-                    if ((GUILayout.Button("Add", GUILayout.Width(64f), GUILayout.Height(16f)) ||
+                    if ((GUILayout.Button("Add", GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newChildName))
                     {
                         _configuration.AddFolder(_newChildName, entry);
@@ -187,7 +178,7 @@ namespace ProjectSetup.Editor.UI
                         _newChildName = string.Empty;
                     }
 
-                    if (GUILayout.Button("Cancel", GUILayout.Width(64f), GUILayout.Height(16f)) ||
+                    if (GUILayout.Button("Cancel", GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)) ||
                         Event.current.keyCode == KeyCode.Escape)
                     {
                         _isAddingChild = false;

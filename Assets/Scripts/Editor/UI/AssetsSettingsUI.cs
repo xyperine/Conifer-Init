@@ -69,8 +69,8 @@ namespace ProjectSetup.Editor.UI
                         
                         SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
                                 
-                        GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
-                        if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
+                        GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
+                        if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                         {
                             _configuration.QueueAsset(availableAssetIDs[i]);
 
@@ -126,7 +126,7 @@ namespace ProjectSetup.Editor.UI
                         
                         SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
 
-                        GUILayout.Label(asset.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(16f),
+                        GUILayout.Label(asset.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
                             GUILayout.MinWidth(128f));
 
                         GUILayout.FlexibleSpace();
@@ -135,7 +135,7 @@ namespace ProjectSetup.Editor.UI
                         _configuration.SetInteractiveImportForAsset(asset.ID, interactive);
 
                         if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
-                                GUILayout.Height(16f)))
+                                GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                         {
                             _configuration.DequeueAsset(asset.ID);
 
