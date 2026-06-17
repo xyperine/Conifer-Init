@@ -66,16 +66,8 @@ namespace ProjectSetup.Editor.UI
                     {
                         string assetName = _configuration.FindAssetByID(availableAssetIDs[i]).Name;
                         using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
-                        Color bgColor = i % 2 == 0 
-                            ? new Color(0f, 0f, 0f, 0.03f)
-                            : new Color(1f, 1f, 1f, 0.03f);
-
-                        Rect rect = new Rect
-                        {
-                            position = entryScope.rect.position,
-                            size = entryScope.rect.size,
-                        };
-                        EditorGUI.DrawRect(rect, bgColor);
+                        
+                        SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
                                 
                         GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(16f), GUILayout.MinWidth(128f));
                         if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(16f)))
@@ -131,16 +123,8 @@ namespace ProjectSetup.Editor.UI
                         AssetImportEntry asset = queuedAssets[i];
                         using EditorGUILayout.HorizontalScope entryScope =
                             new EditorGUILayout.HorizontalScope(new GUIStyle());
-                        Color bgColor = i % 2 == 0
-                            ? new Color(0f, 0f, 0f, 0.03f)
-                            : new Color(1f, 1f, 1f, 0.03f);
-
-                        Rect rect = new Rect
-                        {
-                            position = entryScope.rect.position,
-                            size = entryScope.rect.size,
-                        };
-                        EditorGUI.DrawRect(rect, bgColor);
+                        
+                        SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
 
                         GUILayout.Label(asset.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(16f),
                             GUILayout.MinWidth(128f));

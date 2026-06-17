@@ -73,16 +73,7 @@ namespace ProjectSetup.Editor.UI
             // Draw the row
             using (EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle()))
             {
-                Color bgColor = _elementIndex % 2 == 0
-                    ? new Color(0f, 0f, 0f, 0.03f)
-                    : new Color(1f, 1f, 1f, 0.03f);
-
-                Rect rect = new Rect
-                {
-                    position = entryScope.rect.position,
-                    size = entryScope.rect.size,
-                };
-                EditorGUI.DrawRect(rect, bgColor);
+                SetupWindowElements.DrawListElementBackground(entryScope.rect, _elementIndex);
 
                 if (_isEditingName && _editingNameOf == entry.FullName)
                 {
