@@ -206,8 +206,7 @@ namespace ProjectSetup.Editor.UI
 
         private bool IsValidFolderName(string s)
         {
-            bool valid = !string.IsNullOrEmpty(s) && !string.IsNullOrWhiteSpace(s) &&
-                         s.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
+            bool valid = !string.IsNullOrWhiteSpace(s) && s.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
             return valid;
         }
     }
