@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -8,6 +9,8 @@ namespace ProjectSetup.Editor.UI
     public class FolderStructureUI
     {
         private readonly SetupConfiguration _configuration;
+        
+        private readonly Queue<FolderStructureEntry> _entriesToRemove = new Queue<FolderStructureEntry>();
         
         private int _elementIndex;
         
@@ -53,6 +56,11 @@ namespace ProjectSetup.Editor.UI
             using (new GUILayout.VerticalScope("Hierarchy", foldersSectionStyle))
             {
                 DrawHierarchyRecursively(_configuration.GetAssetsFSE());
+            }
+
+            while (_entriesToRemove.Count > 0)
+            {
+                _configuration.RemoveFolderStructureEntry(_entriesToRemove.Dequeue());
             }
         }
 
@@ -142,7 +150,7 @@ namespace ProjectSetup.Editor.UI
                     {
                         Debug.Log("Removing folder...");
                         
-                        _configuration.RemoveFolderStructureEntry(entry);
+                        _entriesToRemove.Enqueue(entry);
                     }
                 }
             }
