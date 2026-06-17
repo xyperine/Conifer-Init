@@ -146,11 +146,14 @@ namespace ProjectSetup.Editor.UI
                         Debug.Log("Adding child...");
                     }
 
-                    if (GUILayout.Button("-", buttonStyle))
+                    if (entry.FullName != "Assets")
                     {
-                        Debug.Log("Removing folder...");
-                        
-                        _entriesToRemove.Enqueue(entry);
+                        if (GUILayout.Button("-", buttonStyle))
+                        {
+                            Debug.Log("Removing folder...");
+                            
+                            _entriesToRemove.Enqueue(entry);
+                        }
                     }
                 }
             }
