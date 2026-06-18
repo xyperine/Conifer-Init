@@ -9,6 +9,8 @@ namespace ProjectSetup.Editor.UI
 {
     public class PackagesSettingsUI
     {
+        private const int MAX_ENTRIES_PER_PAGE = 10;
+        
         private readonly SetupConfiguration _configuration;
 
         private GUIStyle _titleStyle;
@@ -59,9 +61,7 @@ namespace ProjectSetup.Editor.UI
 
                 _stylesInitialized = true;
             }
-            
-            const int maxEntriesPerPage = 10;
-            
+
             GUILayout.Label("Packages Settings", _titleStyle);
 
             if (!SuccessfullyRetrievedPackages())
@@ -87,9 +87,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (availablePackageIDs.Count > 0)
                 {
-                    int start = (_availablePackagesPage - 1) * maxEntriesPerPage;
-                    int entriesCount = Math.Min(maxEntriesPerPage,
-                        availablePackageIDs.Count - (_availablePackagesPage - 1) * maxEntriesPerPage);
+                    int start = (_availablePackagesPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
+                        availablePackageIDs.Count - (_availablePackagesPage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         PackageInfo packageInfo = _configuration.GetPackageByID(availablePackageIDs[i]);
@@ -119,7 +119,7 @@ namespace ProjectSetup.Editor.UI
                     }
                             
                     int maxPages =
-                        Mathf.CeilToInt(availablePackageIDs.Count / (float) maxEntriesPerPage);
+                        Mathf.CeilToInt(availablePackageIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
                     GUILayout.Label($"{_availablePackagesPage}/{maxPages}", _labelStyle);
                             
                     using (new EditorGUI.DisabledGroupScope(_availablePackagesPage >= maxPages))
@@ -143,9 +143,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (queuedPackageIDs.Count > 0)
                 {
-                    int start = (_queuedPackagesPage - 1) * maxEntriesPerPage;
-                    int entriesCount = Math.Min(maxEntriesPerPage,
-                        queuedPackageIDs.Count - (_queuedPackagesPage - 1) * maxEntriesPerPage);
+                    int start = (_queuedPackagesPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
+                        queuedPackageIDs.Count - (_queuedPackagesPage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         PackageInfo packageInfo = _configuration.GetPackageByID(queuedPackageIDs[i]);
@@ -168,7 +168,7 @@ namespace ProjectSetup.Editor.UI
                     }
 
                     // Pages navigation
-                    if (queuedPackageIDs.Count > maxEntriesPerPage)
+                    if (queuedPackageIDs.Count > MAX_ENTRIES_PER_PAGE)
                     {
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                         GUILayout.FlexibleSpace();
@@ -182,7 +182,7 @@ namespace ProjectSetup.Editor.UI
                         }
 
                         int maxPages =
-                            Mathf.CeilToInt(queuedPackageIDs.Count / (float) maxEntriesPerPage);
+                            Mathf.CeilToInt(queuedPackageIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
                         GUILayout.Label($"{_queuedPackagesPage}/{maxPages}", _labelStyle);
 
                         using (new EditorGUI.DisabledGroupScope(_queuedPackagesPage >= maxPages))

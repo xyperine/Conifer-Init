@@ -7,6 +7,8 @@ namespace ProjectSetup.Editor.UI
 {
     public class AssetsSettingsUI
     {
+        private const int MAX_ENTRIES_PER_PAGE = 10;
+        
         private readonly SetupConfiguration _configuration;
 
         private GUIStyle _titleStyle;
@@ -51,9 +53,7 @@ namespace ProjectSetup.Editor.UI
 
                 _stylesInitialized = true;
             }
-            
-            const int maxEntriesPerPage = 10;
-            
+
             GUILayout.Label("Assets Settings", _titleStyle);
 
             if (!_configuration.SuccessfullyRetrievedAssets)
@@ -82,9 +82,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (availableAssetIDs.Count > 0)
                 {
-                    int start = (_availableAssetsPage - 1) * maxEntriesPerPage;
-                    int entriesCount = Math.Min(maxEntriesPerPage,
-                        availableAssetIDs.Count - (_availableAssetsPage - 1) * maxEntriesPerPage);
+                    int start = (_availableAssetsPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
+                        availableAssetIDs.Count - (_availableAssetsPage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         string assetName = _configuration.FindAssetByID(availableAssetIDs[i]).Name;
@@ -114,7 +114,7 @@ namespace ProjectSetup.Editor.UI
                     }
                             
                     int maxPages =
-                        Mathf.CeilToInt(availableAssetIDs.Count / (float) maxEntriesPerPage);
+                        Mathf.CeilToInt(availableAssetIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
                     GUILayout.Label($"{_availableAssetsPage}/{maxPages}", _labelStyle);
                             
                     using (new EditorGUI.DisabledGroupScope(_availableAssetsPage >= maxPages))
@@ -138,9 +138,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (queuedAssets.Count > 0)
                 {
-                    int start = (_queuedAssetsPage - 1) * maxEntriesPerPage;
-                    int entriesCount = Math.Min(maxEntriesPerPage,
-                        queuedAssets.Count - (_queuedAssetsPage - 1) * maxEntriesPerPage);
+                    int start = (_queuedAssetsPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
+                        queuedAssets.Count - (_queuedAssetsPage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         AssetImportEntry asset = queuedAssets[i];
@@ -168,7 +168,7 @@ namespace ProjectSetup.Editor.UI
                     }
 
                     // Pages navigation
-                    if (queuedAssets.Count > maxEntriesPerPage)
+                    if (queuedAssets.Count > MAX_ENTRIES_PER_PAGE)
                     {
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                         GUILayout.FlexibleSpace();
@@ -182,7 +182,7 @@ namespace ProjectSetup.Editor.UI
                         }
 
                         int maxPages =
-                            Mathf.CeilToInt(queuedAssets.Count / (float) maxEntriesPerPage);
+                            Mathf.CeilToInt(queuedAssets.Count / (float) MAX_ENTRIES_PER_PAGE);
                         GUILayout.Label($"{_queuedAssetsPage}/{maxPages}", _labelStyle);
 
                         using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage >= maxPages))
