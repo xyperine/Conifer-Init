@@ -43,6 +43,12 @@ namespace ProjectSetup.Editor.UI
         }
 
 
+        private void OnInspectorUpdate()
+        {
+            Repaint();
+        }
+
+
         private void OnGUI()
         {
             using GUILayout.ScrollViewScope scrollViewScope = new GUILayout.ScrollViewScope(_scrollPosition);
