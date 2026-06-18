@@ -11,6 +11,15 @@ namespace ProjectSetup.Editor.UI
         private readonly SetupConfiguration _configuration;
         
         private readonly Queue<FolderStructureEntry> _entriesToRemove = new Queue<FolderStructureEntry>();
+
+        private GUIStyle _titleStyle;
+        private GUIStyle _windowStyle;
+        private GUIStyle _buttonStyle;
+        private GUIStyle _labelStyle;
+        private GUIStyle _scopeStyle;
+        private GUIStyle _hoverableLabelStyle;
+        
+        private bool _stylesInitialized;
         
         private int _elementIndex;
         
@@ -42,9 +51,24 @@ namespace ProjectSetup.Editor.UI
         
         public void Draw()
         {
-            GUILayout.Label("Folder Structure", new GUIStyle(EditorStyles.boldLabel));
+            if (!_stylesInitialized)
+            {
+                _titleStyle = new GUIStyle(EditorStyles.boldLabel);
+                _buttonStyle = new GUIStyle(GUI.skin.button);
+                _windowStyle = new GUIStyle(GUI.skin.window);
+                _scopeStyle = new GUIStyle();
+                _labelStyle = new GUIStyle(GUI.skin.label);
+                _hoverableLabelStyle = new GUIStyle(GUI.skin.label)
+                {
+                    hover = new GUIStyleState() {textColor = Color.cornflowerBlue},
+                };
+                
+                _stylesInitialized = true;
+            }
+            
+            GUILayout.Label("Folder Structure", _titleStyle);
 
-            if (GUILayout.Button("Reset Structure", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
+            if (GUILayout.Button("Reset Structure", _buttonStyle, GUILayout.Width(128f)))
             {
                 _configuration.ResetFolderStructure();
             }
@@ -52,8 +76,7 @@ namespace ProjectSetup.Editor.UI
             SetupWindowElements.DrawSmallSpace();
 
             _elementIndex = -1;
-            GUIStyle foldersSectionStyle = new GUIStyle(GUI.skin.FindStyle("Window"));
-            using (new GUILayout.VerticalScope("Hierarchy", foldersSectionStyle))
+            using (new GUILayout.VerticalScope("Hierarchy", _windowStyle))
             {
                 DrawHierarchyRecursively(_configuration.GetAssetsFSE());
             }
@@ -79,7 +102,7 @@ namespace ProjectSetup.Editor.UI
             indentedName.Append(entry.Name);
                 
             // Draw the row
-            using (EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle()))
+            using (EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_scopeStyle))
             {
                 SetupWindowElements.DrawListElementBackground(entryScope.rect, _elementIndex);
 
@@ -93,7 +116,7 @@ namespace ProjectSetup.Editor.UI
 
                     const string textFieldName = "Rename_Text_Field";
                     GUI.SetNextControlName(textFieldName);
-                    GUILayout.Label(sb.ToString(), new GUIStyle(GUI.skin.label), GUILayout.ExpandWidth(false));
+                    GUILayout.Label(sb.ToString(), _labelStyle, GUILayout.ExpandWidth(false));
                     _newEditedName = GUILayout.TextField(_newEditedName, GUILayout.MaxWidth(256f),
                         GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT));
                     EditorGUI.FocusTextInControl(textFieldName);
@@ -120,10 +143,7 @@ namespace ProjectSetup.Editor.UI
                 {
                     if (entry.FullName != "Assets")
                     {
-                        GUIStyle labelStyle = new GUIStyle(GUI.skin.label);
-                        // Really slow to detect the hover for some reason
-                        labelStyle.hover = new GUIStyleState() {textColor = Color.cornflowerBlue};
-                        if (GUILayout.Button(indentedName.ToString(), labelStyle) && !_isAddingChild)
+                        if (GUILayout.Button(indentedName.ToString(), _hoverableLabelStyle) && !_isAddingChild)
                         {
                             _isEditingName = true;
                             _editingNameOf = entry.FullName;
@@ -132,12 +152,10 @@ namespace ProjectSetup.Editor.UI
                     }
                     else
                     {
-                        GUIStyle labelStyle = new GUIStyle(GUI.skin.label);
-                        GUILayout.Label(indentedName.ToString(), labelStyle);
+                        GUILayout.Label(indentedName.ToString(), _labelStyle);
                     }
 
-                    GUIStyle buttonStyle = new GUIStyle(GUI.skin.button) {fixedWidth = 16f, fixedHeight = 16f};
-                    if (GUILayout.Button("+", buttonStyle) && !_isEditingName)
+                    if (GUILayout.Button("+", _buttonStyle, GUILayout.Width(16f), GUILayout.Height(16f)) && !_isEditingName)
                     {
                         _isAddingChild = true;
                         _newChildParentFullName = entry.FullName;
@@ -148,7 +166,7 @@ namespace ProjectSetup.Editor.UI
 
                     if (entry.FullName != "Assets")
                     {
-                        if (GUILayout.Button("-", buttonStyle))
+                        if (GUILayout.Button("-", _buttonStyle, GUILayout.Width(16f), GUILayout.Height(16f)))
                         {
                             Debug.Log("Removing folder...");
                             
@@ -164,7 +182,7 @@ namespace ProjectSetup.Editor.UI
                 _elementIndex++;
 
                 using (EditorGUILayout.HorizontalScope newFolderScope =
-                       new EditorGUILayout.HorizontalScope(new GUIStyle()))
+                       new EditorGUILayout.HorizontalScope(_scopeStyle))
                 {
                     SetupWindowElements.DrawListElementBackground(newFolderScope.rect, _elementIndex);
 
@@ -174,7 +192,7 @@ namespace ProjectSetup.Editor.UI
                         sb.Append("|    ");
                     }
 
-                    GUILayout.Label(sb.ToString(), new GUIStyle(GUI.skin.label), GUILayout.ExpandWidth(false));
+                    GUILayout.Label(sb.ToString(), _labelStyle, GUILayout.ExpandWidth(false));
 
                     const string textFieldName = "New_Child_Name_Text_Field";
                     GUI.SetNextControlName(textFieldName);
