@@ -9,6 +9,15 @@ namespace ProjectSetup.Editor.UI
     {
         private readonly SetupConfiguration _configuration;
 
+        private GUIStyle _titleStyle;
+        private GUIStyle _searchBarStyle;
+        private GUIStyle _windowStyle;
+        private GUIStyle _scopeStyle;
+        private GUIStyle _labelStyle;
+        private GUIStyle _buttonStyle;
+
+        private bool _stylesInitialized;
+
         private int _availableAssetsPage = 1;
         private int _queuedAssetsPage = 1;
 
@@ -28,10 +37,22 @@ namespace ProjectSetup.Editor.UI
         
         
         public void Draw()
-        { 
+        {
+            if (!_stylesInitialized)
+            {
+                _titleStyle = new GUIStyle(EditorStyles.boldLabel);
+                _searchBarStyle = new GUIStyle(EditorStyles.toolbarSearchField);
+                _windowStyle = new GUIStyle(GUI.skin.window);
+                _scopeStyle = new GUIStyle();
+                _labelStyle = new GUIStyle(GUI.skin.label);
+                _buttonStyle = new GUIStyle(GUI.skin.button);
+
+                _stylesInitialized = true;
+            }
+            
             const int maxEntriesPerPage = 10;
             
-            GUILayout.Label("Assets Settings", new GUIStyle(EditorStyles.boldLabel));
+            GUILayout.Label("Assets Settings", _titleStyle);
 
             if (!_configuration.SuccessfullyRetrievedAssets)
             {
@@ -42,7 +63,7 @@ namespace ProjectSetup.Editor.UI
             
             // Search feature
             _assetsSearchString =
-                GUILayout.TextField(_assetsSearchString, new GUIStyle(EditorStyles.toolbarSearchField),
+                GUILayout.TextField(_assetsSearchString, _searchBarStyle,
                     GUILayout.MaxWidth(256f));
             
             List<string> availableAssetIDs = _configuration.AvailableAssets;
@@ -55,7 +76,7 @@ namespace ProjectSetup.Editor.UI
             
             // Available list
             List<AssetImportEntry> queuedAssets = _configuration.GetQueuedAssets();
-            using (new GUILayout.VerticalScope($"Available ({availableAssetIDs.Count})", new GUIStyle(GUI.skin.window)))
+            using (new GUILayout.VerticalScope($"Available ({availableAssetIDs.Count})", _windowStyle))
             {
                 if (availableAssetIDs.Count > 0)
                 {
@@ -65,12 +86,12 @@ namespace ProjectSetup.Editor.UI
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         string assetName = _configuration.FindAssetByID(availableAssetIDs[i]).Name;
-                        using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(new GUIStyle());
+                        using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_scopeStyle);
                         
                         SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
                                 
-                        GUILayout.Label(assetName, new GUIStyle(GUI.skin.label), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
-                        if (GUILayout.Button("Import", new GUIStyle(GUI.skin.button), GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
+                        GUILayout.Label(assetName, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
+                        if (GUILayout.Button("Import", _buttonStyle, GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                         {
                             _configuration.QueueAsset(availableAssetIDs[i]);
 
@@ -79,7 +100,7 @@ namespace ProjectSetup.Editor.UI
                     }
 
                     // Pages navigation
-                    using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
+                    using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                     GUILayout.FlexibleSpace();
                             
                     using (new EditorGUI.DisabledGroupScope(_availableAssetsPage <= 1))
@@ -92,7 +113,7 @@ namespace ProjectSetup.Editor.UI
                             
                     int maxPages =
                         Mathf.CeilToInt(availableAssetIDs.Count / (float) maxEntriesPerPage);
-                    GUILayout.Label($"{_availableAssetsPage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                    GUILayout.Label($"{_availableAssetsPage}/{maxPages}", _labelStyle);
                             
                     using (new EditorGUI.DisabledGroupScope(_availableAssetsPage >= maxPages))
                     {
@@ -111,7 +132,7 @@ namespace ProjectSetup.Editor.UI
             SetupWindowElements.DrawSmallSpace();
                 
             // Queued list
-            using (new GUILayout.VerticalScope($"Queued ({queuedAssets.Count})", new GUIStyle(GUI.skin.window)))
+            using (new GUILayout.VerticalScope($"Queued ({queuedAssets.Count})", _windowStyle))
             {
                 if (queuedAssets.Count > 0)
                 {
@@ -122,11 +143,11 @@ namespace ProjectSetup.Editor.UI
                     {
                         AssetImportEntry asset = queuedAssets[i];
                         using EditorGUILayout.HorizontalScope entryScope =
-                            new EditorGUILayout.HorizontalScope(new GUIStyle());
+                            new EditorGUILayout.HorizontalScope(_scopeStyle);
                         
                         SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
 
-                        GUILayout.Label(asset.Name, new GUIStyle(GUI.skin.label), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
+                        GUILayout.Label(asset.Name, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
                             GUILayout.MinWidth(128f));
 
                         GUILayout.FlexibleSpace();
@@ -134,7 +155,7 @@ namespace ProjectSetup.Editor.UI
                         bool interactive = GUILayout.Toggle(asset.Interactive, "Interactive");
                         _configuration.SetInteractiveImportForAsset(asset.ID, interactive);
 
-                        if (GUILayout.Button("Remove", new GUIStyle(GUI.skin.button), GUILayout.Width(64f),
+                        if (GUILayout.Button("Remove", _buttonStyle, GUILayout.Width(64f),
                                 GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                         {
                             _configuration.DequeueAsset(asset.ID);
@@ -147,7 +168,7 @@ namespace ProjectSetup.Editor.UI
                     // Pages navigation
                     if (queuedAssets.Count > maxEntriesPerPage)
                     {
-                        using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(new GUIStyle());
+                        using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                         GUILayout.FlexibleSpace();
 
                         using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage <= 1))
@@ -160,7 +181,7 @@ namespace ProjectSetup.Editor.UI
 
                         int maxPages =
                             Mathf.CeilToInt(queuedAssets.Count / (float) maxEntriesPerPage);
-                        GUILayout.Label($"{_queuedAssetsPage}/{maxPages}", new GUIStyle(GUI.skin.label));
+                        GUILayout.Label($"{_queuedAssetsPage}/{maxPages}", _labelStyle);
 
                         using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage >= maxPages))
                         {
