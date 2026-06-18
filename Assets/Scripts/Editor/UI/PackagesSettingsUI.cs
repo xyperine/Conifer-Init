@@ -36,6 +36,8 @@ namespace ProjectSetup.Editor.UI
 
         public void ResetTemporaryState()
         {
+            _availablePackagesPage = 1;
+            _queuedPackagesPage = 1;
             _packagesSearchString = string.Empty;
         }
         

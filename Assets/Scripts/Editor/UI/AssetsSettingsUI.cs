@@ -32,6 +32,8 @@ namespace ProjectSetup.Editor.UI
 
         public void ResetTemporaryState()
         {
+            _availableAssetsPage = 1;
+            _queuedAssetsPage = 1;
             _assetsSearchString = string.Empty;
         }
         
