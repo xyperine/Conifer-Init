@@ -44,10 +44,7 @@ namespace ProjectSetup.Editor
 
         private readonly Dictionary<string, AssetInfo> _assets = new Dictionary<string, AssetInfo>();
         
-        public List<string> AvailableAssets => SuccessfullyRetrievedAssets && _assets != null
-            ? _assets.Keys.Where(id =>
-                !_data.QueuedAssets.Exists(a => a.ID == id)).ToList()
-            : new List<string>();
+        public List<string> AvailableAssets { get; private set; }
         
         
         public void Initialize()
@@ -367,6 +364,17 @@ namespace ProjectSetup.Editor
             {
                 throw new DirectoryNotFoundException($"Couldn't find {cachedAssetsPath}");
             }
+            
+            GenerateAvailableAssets();
+        }
+
+
+        private void GenerateAvailableAssets()
+        {
+            AvailableAssets = SuccessfullyRetrievedAssets && _assets != null
+                ? _assets.Keys.Where(id =>
+                    !_data.QueuedAssets.Exists(a => a.ID == id)).ToList()
+                : new List<string>();
         }
 
 
@@ -393,12 +401,16 @@ namespace ProjectSetup.Editor
         public void QueueAsset(string id)
         {
             _data.QueuedAssets.Add(new AssetImportEntry(_assets[id], false));
+            
+            GenerateAvailableAssets();
         }
 
 
         public void DequeueAsset(string id)
         {
             _data.QueuedAssets.Remove(_data.QueuedAssets.Find(a => a.ID == id));
+            
+            GenerateAvailableAssets();
         }
 
 
