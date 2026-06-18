@@ -20,10 +20,10 @@ namespace ProjectSetup.Editor.UI
 
         private bool _stylesInitialized;
 
-        private int _availableAssetsPage = 1;
-        private int _queuedAssetsPage = 1;
+        private int _availablePage = 1;
+        private int _queuedPage = 1;
 
-        private string _assetsSearchString;
+        private string _searchString;
         
 
         public AssetsSettingsUI(SetupConfiguration configuration)
@@ -34,9 +34,9 @@ namespace ProjectSetup.Editor.UI
 
         public void ResetTemporaryState()
         {
-            _availableAssetsPage = 1;
-            _queuedAssetsPage = 1;
-            _assetsSearchString = string.Empty;
+            _availablePage = 1;
+            _queuedPage = 1;
+            _searchString = string.Empty;
         }
         
         
@@ -64,16 +64,16 @@ namespace ProjectSetup.Editor.UI
             }
             
             // Search feature
-            _assetsSearchString =
-                GUILayout.TextField(_assetsSearchString, _searchBarStyle,
+            _searchString =
+                GUILayout.TextField(_searchString, _searchBarStyle,
                     GUILayout.MaxWidth(256f));
             
             List<string> availableAssetIDs = _configuration.AvailableAssets;
-            if (!string.IsNullOrWhiteSpace(_assetsSearchString))
+            if (!string.IsNullOrWhiteSpace(_searchString))
             {
-                availableAssetIDs = _configuration.FindAssets(_assetsSearchString);
+                availableAssetIDs = _configuration.FindAssets(_searchString);
 
-                _availableAssetsPage = 1;
+                _availablePage = 1;
             }
             
             // Available list
@@ -82,9 +82,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (availableAssetIDs.Count > 0)
                 {
-                    int start = (_availableAssetsPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int start = (_availablePage - 1) * MAX_ENTRIES_PER_PAGE;
                     int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
-                        availableAssetIDs.Count - (_availableAssetsPage - 1) * MAX_ENTRIES_PER_PAGE);
+                        availableAssetIDs.Count - (_availablePage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         string assetName = _configuration.FindAssetByID(availableAssetIDs[i]).Name;
@@ -105,23 +105,23 @@ namespace ProjectSetup.Editor.UI
                     using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                     GUILayout.FlexibleSpace();
                             
-                    using (new EditorGUI.DisabledGroupScope(_availableAssetsPage <= 1))
+                    using (new EditorGUI.DisabledGroupScope(_availablePage <= 1))
                     {
                         if (GUILayout.Button("<"))
                         {
-                            _availableAssetsPage--;
+                            _availablePage--;
                         }
                     }
                             
                     int maxPages =
                         Mathf.CeilToInt(availableAssetIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
-                    GUILayout.Label($"{_availableAssetsPage}/{maxPages}", _labelStyle);
+                    GUILayout.Label($"{_availablePage}/{maxPages}", _labelStyle);
                             
-                    using (new EditorGUI.DisabledGroupScope(_availableAssetsPage >= maxPages))
+                    using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
                     {
                         if (GUILayout.Button(">"))
                         {
-                            _availableAssetsPage++;
+                            _availablePage++;
                         }
                     }
                 }
@@ -138,9 +138,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (queuedAssets.Count > 0)
                 {
-                    int start = (_queuedAssetsPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int start = (_queuedPage - 1) * MAX_ENTRIES_PER_PAGE;
                     int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
-                        queuedAssets.Count - (_queuedAssetsPage - 1) * MAX_ENTRIES_PER_PAGE);
+                        queuedAssets.Count - (_queuedPage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         AssetImportEntry asset = queuedAssets[i];
@@ -173,23 +173,23 @@ namespace ProjectSetup.Editor.UI
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                         GUILayout.FlexibleSpace();
 
-                        using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage <= 1))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPage <= 1))
                         {
                             if (GUILayout.Button("<"))
                             {
-                                _queuedAssetsPage--;
+                                _queuedPage--;
                             }
                         }
 
                         int maxPages =
                             Mathf.CeilToInt(queuedAssets.Count / (float) MAX_ENTRIES_PER_PAGE);
-                        GUILayout.Label($"{_queuedAssetsPage}/{maxPages}", _labelStyle);
+                        GUILayout.Label($"{_queuedPage}/{maxPages}", _labelStyle);
 
-                        using (new EditorGUI.DisabledGroupScope(_queuedAssetsPage >= maxPages))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPage >= maxPages))
                         {
                             if (GUILayout.Button(">"))
                             {
-                                _queuedAssetsPage++;
+                                _queuedPage++;
                             }
                         }
                     }

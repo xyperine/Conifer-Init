@@ -24,10 +24,10 @@ namespace ProjectSetup.Editor.UI
 
         private bool _stylesInitialized;
         
-        private int _availablePackagesPage = 1;
-        private int _queuedPackagesPage = 1;
+        private int _availablePage = 1;
+        private int _queuedPage = 1;
 
-        private string _packagesSearchString;
+        private string _searchString;
 
 
         public PackagesSettingsUI(SetupConfiguration configuration)
@@ -38,9 +38,9 @@ namespace ProjectSetup.Editor.UI
 
         public void ResetTemporaryState()
         {
-            _availablePackagesPage = 1;
-            _queuedPackagesPage = 1;
-            _packagesSearchString = string.Empty;
+            _availablePage = 1;
+            _queuedPage = 1;
+            _searchString = string.Empty;
         }
         
         
@@ -70,15 +70,15 @@ namespace ProjectSetup.Editor.UI
             }
 
             // Search feature
-            _packagesSearchString =
-                GUILayout.TextField(_packagesSearchString, _searchBarStyle, GUILayout.MaxWidth(256f));
+            _searchString =
+                GUILayout.TextField(_searchString, _searchBarStyle, GUILayout.MaxWidth(256f));
             
             List<string> availablePackageIDs = _configuration.AvailablePackages;
-            if (!string.IsNullOrWhiteSpace(_packagesSearchString))
+            if (!string.IsNullOrWhiteSpace(_searchString))
             {
-                availablePackageIDs = _configuration.FindPackages(_packagesSearchString);
+                availablePackageIDs = _configuration.FindPackages(_searchString);
 
-                _availablePackagesPage = 1;
+                _availablePage = 1;
             }
             
             // Available list
@@ -87,9 +87,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (availablePackageIDs.Count > 0)
                 {
-                    int start = (_availablePackagesPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int start = (_availablePage - 1) * MAX_ENTRIES_PER_PAGE;
                     int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
-                        availablePackageIDs.Count - (_availablePackagesPage - 1) * MAX_ENTRIES_PER_PAGE);
+                        availablePackageIDs.Count - (_availablePage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         PackageInfo packageInfo = _configuration.GetPackageByID(availablePackageIDs[i]);
@@ -110,23 +110,23 @@ namespace ProjectSetup.Editor.UI
                     using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                     GUILayout.FlexibleSpace();
                             
-                    using (new EditorGUI.DisabledGroupScope(_availablePackagesPage <= 1))
+                    using (new EditorGUI.DisabledGroupScope(_availablePage <= 1))
                     {
                         if (GUILayout.Button("<"))
                         {
-                            _availablePackagesPage--;
+                            _availablePage--;
                         }
                     }
                             
                     int maxPages =
                         Mathf.CeilToInt(availablePackageIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
-                    GUILayout.Label($"{_availablePackagesPage}/{maxPages}", _labelStyle);
+                    GUILayout.Label($"{_availablePage}/{maxPages}", _labelStyle);
                             
-                    using (new EditorGUI.DisabledGroupScope(_availablePackagesPage >= maxPages))
+                    using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
                     {
                         if (GUILayout.Button(">"))
                         {
-                            _availablePackagesPage++;
+                            _availablePage++;
                         }
                     }
                 }
@@ -143,9 +143,9 @@ namespace ProjectSetup.Editor.UI
             {
                 if (queuedPackageIDs.Count > 0)
                 {
-                    int start = (_queuedPackagesPage - 1) * MAX_ENTRIES_PER_PAGE;
+                    int start = (_queuedPage - 1) * MAX_ENTRIES_PER_PAGE;
                     int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
-                        queuedPackageIDs.Count - (_queuedPackagesPage - 1) * MAX_ENTRIES_PER_PAGE);
+                        queuedPackageIDs.Count - (_queuedPage - 1) * MAX_ENTRIES_PER_PAGE);
                     for (int i = start; i < start + entriesCount; i++)
                     {
                         PackageInfo packageInfo = _configuration.GetPackageByID(queuedPackageIDs[i]);
@@ -173,23 +173,23 @@ namespace ProjectSetup.Editor.UI
                         using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
                         GUILayout.FlexibleSpace();
 
-                        using (new EditorGUI.DisabledGroupScope(_queuedPackagesPage <= 1))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPage <= 1))
                         {
                             if (GUILayout.Button("<"))
                             {
-                                _queuedPackagesPage--;
+                                _queuedPage--;
                             }
                         }
 
                         int maxPages =
                             Mathf.CeilToInt(queuedPackageIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
-                        GUILayout.Label($"{_queuedPackagesPage}/{maxPages}", _labelStyle);
+                        GUILayout.Label($"{_queuedPage}/{maxPages}", _labelStyle);
 
-                        using (new EditorGUI.DisabledGroupScope(_queuedPackagesPage >= maxPages))
+                        using (new EditorGUI.DisabledGroupScope(_queuedPage >= maxPages))
                         {
                             if (GUILayout.Button(">"))
                             {
-                                _queuedPackagesPage++;
+                                _queuedPage++;
                             }
                         }
                     }
