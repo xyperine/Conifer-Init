@@ -20,61 +20,37 @@ namespace ProjectSetup.Editor
         public FolderStructureEntry AssetsFolderStructureEntry
         {
             get => assetsFolderStructureEntry;
-            set
-            {
-                assetsFolderStructureEntry = value;
-                Save(true);
-            }
+            set => assetsFolderStructureEntry = value;
         }
 
         public List<string> QueuedPackagesIDs
         {
             get => queuedPackagesIDs;
-            set
-            {
-                queuedPackagesIDs = value;
-                Save(true);
-            }
+            set => queuedPackagesIDs = value;
         }
         
         public List<AssetImportEntry> QueuedAssets
         {
             get => queuedAssets;
-            set
-            {
-                queuedAssets = value;
-                Save(true);
-            }
+            set => queuedAssets = value;
         }
 
         public ProjectSettings ProjectSettings
         {
             get => projectSettings;
-            set
-            {
-                projectSettings = value;
-                Save(true);
-            }
+            set => projectSettings = value;
         }
 
         public MiscSettings MiscSettings
         {
             get => miscSettings;
-            set
-            {
-                miscSettings = value;
-                Save(true);
-            }
+            set => miscSettings = value;
         }
 
         public string ActiveSettingsProfileName
         {
             get => activeSettingsProfileName;
-            set
-            {
-                activeSettingsProfileName = value;
-                Save(true);
-            }
+            set => activeSettingsProfileName = value;
         }
         
         [field: SerializeField] public bool PreInteractiveOperationsInProgress { get; set; }
@@ -89,5 +65,11 @@ namespace ProjectSetup.Editor
         [field: SerializeField] public bool InteractiveOperationsFinished { get; set; }
         
         [field: SerializeField] public bool NonInteractiveOperationsInProgress { get; set; }
+
+
+        public void Save()
+        {
+            Save(true);
+        }
     }
 }

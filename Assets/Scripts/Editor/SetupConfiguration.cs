@@ -430,9 +430,10 @@ namespace ProjectSetup.Editor
         }
 
 
-        // Move this to SetupExecution?
         public void Update()
         {
+            _data.Save();
+            
             if (_data.SetupInProgress)
             {
                 PerformSetup();
@@ -440,6 +441,7 @@ namespace ProjectSetup.Editor
         }
         
         
+        // Move this to SetupExecution?
         private void PerformSetup()
         {
             if (!_data.SetupInProgress)
