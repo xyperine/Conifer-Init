@@ -35,10 +35,7 @@ namespace ProjectSetup.Editor
         private bool _successfullyRetrievedPackages;
         private Dictionary<string, PackageInfo> _allPackages;
 
-        public List<string> AvailablePackages => _successfullyRetrievedPackages && _allPackages != null
-            ? _allPackages.Keys.Where(id =>
-                !_data.QueuedPackagesIDs.Contains(id)).ToList()
-            : new List<string>();
+        public List<string> AvailablePackages { get; private set; }
         
         public SearchRequest PackagesListRequest { get; private set; }
 
@@ -272,6 +269,7 @@ namespace ProjectSetup.Editor
                 case StatusCode.Success:
                     _successfullyRetrievedPackages = true;
                     _allPackages = PackagesListRequest.Result.ToDictionary(p => p.name, p => p);
+                    GenerateAvailablePackages();
                     break;
                 case StatusCode.Failure:
                     _successfullyRetrievedPackages = false;
@@ -282,6 +280,15 @@ namespace ProjectSetup.Editor
             }
 
             return _successfullyRetrievedPackages;
+        }
+
+
+        private void GenerateAvailablePackages()
+        {
+            AvailablePackages = _successfullyRetrievedPackages && _allPackages != null
+                ? _allPackages.Keys.Where(id =>
+                    !_data.QueuedPackagesIDs.Contains(id)).ToList()
+                : new List<string>();
         }
 
 
@@ -303,12 +310,16 @@ namespace ProjectSetup.Editor
         public void QueuePackage(string id)
         {
             _data.QueuedPackagesIDs.Add(id);
+
+            GenerateAvailablePackages();
         }
 
 
         public void DequeuePackage(string id)
         {
             _data.QueuedPackagesIDs.Remove(id);
+            
+            GenerateAvailablePackages();
         }
 
 
