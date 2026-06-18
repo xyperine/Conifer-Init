@@ -61,6 +61,7 @@ namespace ProjectSetup.Editor.UI
                 _hoverableLabelStyle = new GUIStyle(GUI.skin.label)
                 {
                     hover = new GUIStyleState() {textColor = Color.cornflowerBlue},
+                    active = new GUIStyleState() {textColor = Color.cornflowerBlue},
                 };
                 
                 _stylesInitialized = true;
