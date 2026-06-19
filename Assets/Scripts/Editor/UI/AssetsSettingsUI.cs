@@ -68,6 +68,8 @@ namespace ProjectSetup.Editor.UI
                 GUILayout.TextField(_searchString, _searchBarStyle,
                     GUILayout.MaxWidth(256f));
             
+            SetupWindowElements.DrawRegularSpace();
+            
             List<string> availableAssetIDs = _configuration.AvailableAssets;
             if (!string.IsNullOrWhiteSpace(_searchString))
             {
@@ -131,7 +133,7 @@ namespace ProjectSetup.Editor.UI
                 }
             }
 
-            SetupWindowElements.DrawSmallSpace();
+            SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
             using (new GUILayout.VerticalScope($"Queued ({queuedAssets.Count})", _windowStyle))

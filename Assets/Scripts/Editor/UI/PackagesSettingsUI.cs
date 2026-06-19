@@ -73,6 +73,8 @@ namespace ProjectSetup.Editor.UI
             _searchString =
                 GUILayout.TextField(_searchString, _searchBarStyle, GUILayout.MaxWidth(256f));
             
+            SetupWindowElements.DrawRegularSpace();
+            
             List<string> availablePackageIDs = _configuration.AvailablePackages;
             if (!string.IsNullOrWhiteSpace(_searchString))
             {
@@ -136,7 +138,7 @@ namespace ProjectSetup.Editor.UI
                 }
             }
 
-            SetupWindowElements.DrawSmallSpace();
+            SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
             using (new GUILayout.VerticalScope($"Queued ({queuedPackageIDs.Count})", _windowStyle))

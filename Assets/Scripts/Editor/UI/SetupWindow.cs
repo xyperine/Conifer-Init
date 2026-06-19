@@ -62,27 +62,27 @@ namespace ProjectSetup.Editor.UI
             
             _profileSettingsUI.Draw();
             
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSpace();
             
             _folderStructureUI.Draw();
 
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSpace();
 
             _packagesSettingsUI.Draw();
             
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSpace();
             
             _assetsSettingsUI.Draw();
 
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSpace();
             
             _projectSettingsUI.Draw();
             
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSpace();
             
             _miscSettingsUI.Draw();
             
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSpace();
             
             DrawExecuteSetup();
             

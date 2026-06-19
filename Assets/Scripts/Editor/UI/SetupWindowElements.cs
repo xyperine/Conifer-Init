@@ -5,9 +5,11 @@ namespace ProjectSetup.Editor.UI
 {
     public static class SetupWindowElements
     {
-        public const float SMALL_SPACE_SIZE = 4f;
-        public const float REGULAR_SPACE_SIZE = 8f;
         public const float REGULAR_ELEMENT_HEIGHT = 16f;
+        
+        private const float SMALL_SPACE_SIZE = 4f;
+        private const float REGULAR_SPACE_SIZE = 8f;
+        private const float SECTION_SPACE_SIZE = 16f;
 
         private static readonly Color ListElementColor1 = new Color(0f, 0f, 0f, 0.03f);
         private static readonly Color ListElementColor2 = new Color(1f, 1f, 1f, 0.03f);
@@ -47,6 +49,12 @@ namespace ProjectSetup.Editor.UI
         public static void DrawSmallSpace()
         {
             GUILayout.Space(SMALL_SPACE_SIZE);
+        }
+
+
+        public static void DrawSectionSpace()
+        {
+            GUILayout.Space(SECTION_SPACE_SIZE);
         }
     }
 }
