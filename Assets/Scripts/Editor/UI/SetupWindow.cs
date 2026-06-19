@@ -53,7 +53,7 @@ namespace ProjectSetup.Editor.UI
             Repaint();
         }
 
-
+        
         private void OnGUI()
         {
             using GUILayout.ScrollViewScope scrollViewScope =

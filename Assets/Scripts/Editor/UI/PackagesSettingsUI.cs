@@ -53,10 +53,21 @@ namespace ProjectSetup.Editor.UI
                 _windowStyle = new GUIStyle(GUI.skin.window);
                 _labelStyle = new GUIStyle(GUI.skin.label);
                 _buttonStyle = new GUIStyle(GUI.skin.button);
-                _successStyle = new GUIStyle(GUI.skin.label)
-                    {normal = new GUIStyleState() {textColor = Color.limeGreen}};
-                _errorStyle = new GUIStyle(GUI.skin.label)
-                    {normal = new GUIStyleState() {textColor = Color.crimson}};
+                
+                _successStyle = new GUIStyle(GUI.skin.label);
+                _successStyle.normal = new GUIStyleState() {textColor = Color.limeGreen};
+                _successStyle.hover = new GUIStyleState() {textColor = Color.limeGreen};
+                _successStyle.active = new GUIStyleState() {textColor = Color.limeGreen};
+                _successStyle.focused = new GUIStyleState() {textColor = Color.limeGreen};
+                _successStyle.wordWrap = true;
+                
+                _errorStyle = new GUIStyle(GUI.skin.label);
+                _errorStyle.normal = new GUIStyleState() {textColor = Color.crimson};
+                _errorStyle.hover = new GUIStyleState() {textColor = Color.crimson};
+                _errorStyle.active = new GUIStyleState() {textColor = Color.crimson};
+                _errorStyle.focused = new GUIStyleState() {textColor = Color.crimson};
+                _errorStyle.wordWrap = true;
+                
                 _scopeStyle = new GUIStyle();
 
                 _stylesInitialized = true;

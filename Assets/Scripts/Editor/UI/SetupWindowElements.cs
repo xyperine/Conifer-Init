@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace ProjectSetup.Editor.UI
 {
+    /// <summary>
+    /// Contains standardized window elements.
+    /// </summary>
     public static class SetupWindowElements
     {
         public const float REGULAR_ELEMENT_HEIGHT = 16f;
