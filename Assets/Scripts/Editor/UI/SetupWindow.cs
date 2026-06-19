@@ -10,6 +10,8 @@ namespace ProjectSetup.Editor.UI
     {
         private readonly SetupConfiguration _configuration = new SetupConfiguration();
 
+        private GUIStyle _entireWindowStyle;
+
         private ProfileSettingsUI _profileSettingsUI;
         private FolderStructureUI _folderStructureUI;
         private PackagesSettingsUI _packagesSettingsUI;
@@ -33,13 +35,16 @@ namespace ProjectSetup.Editor.UI
         {
             _configuration.Initialize();
             _configuration.ApplyingProfile += ResetTemporaryState;
-
+            
             _profileSettingsUI = new ProfileSettingsUI(_configuration);
             _folderStructureUI = new FolderStructureUI(_configuration);
             _packagesSettingsUI = new PackagesSettingsUI(_configuration);
             _assetsSettingsUI = new AssetsSettingsUI(_configuration);
             _projectSettingsUI = new ProjectSettingsUI(_configuration);
             _miscSettingsUI = new MiscSettingsUI(_configuration);
+            
+            _entireWindowStyle = new GUIStyle();
+            _entireWindowStyle.padding = new RectOffset(16, 16, 16, 16);
         }
 
 
@@ -51,7 +56,8 @@ namespace ProjectSetup.Editor.UI
 
         private void OnGUI()
         {
-            using GUILayout.ScrollViewScope scrollViewScope = new GUILayout.ScrollViewScope(_scrollPosition);
+            using GUILayout.ScrollViewScope scrollViewScope =
+                new GUILayout.ScrollViewScope(_scrollPosition, _entireWindowStyle);
             _scrollPosition = scrollViewScope.scrollPosition;
             
             _profileSettingsUI.Draw();
