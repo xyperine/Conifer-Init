@@ -41,7 +41,7 @@ namespace ProjectSetup.Editor.UI
             
             EditorGUI.DrawRect(rect, bgColor);
         }
-
+        
 
         public static void DrawRegularSpace()
         {
