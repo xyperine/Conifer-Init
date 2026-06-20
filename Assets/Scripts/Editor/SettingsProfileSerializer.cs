@@ -6,11 +6,9 @@ using UnityEngine.Assertions;
 namespace ProjectSetup.Editor
 {
     /// <summary>
-    /// Serializes passed data into a JSON file. Asserts that passed file names are valid.
+    /// Serializes passed settings profile a JSON file. Asserts that passed file names are valid.
     /// </summary>
-    /// <typeparam name="TData">Type of data to be persisted.</typeparam>
-    internal static class PersistenceSerializer<TData>
-        where TData : new()
+    internal static class SettingsProfileSerializer
     {
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
         {
@@ -24,7 +22,7 @@ namespace ProjectSetup.Editor
             "Project Setup Tool", "Profiles");
         
 
-        public static TData ReadFile(string fileName)
+        public static SettingsProfile ReadFile(string fileName)
         {
             if (!fileName.EndsWith(".json"))
             {
@@ -39,11 +37,11 @@ namespace ProjectSetup.Editor
             }
 
             string json = File.ReadAllText(GetFullPath(fileName));
-            return JsonConvert.DeserializeObject<TData>(json, SerializerSettings);
+            return JsonConvert.DeserializeObject<SettingsProfile>(json, SerializerSettings);
         }
 
         
-        public static void SaveFile(TData data, string fileName)
+        public static void SaveFile(SettingsProfile profile, string fileName)
         {
             if (!fileName.EndsWith(".json"))
             {
@@ -57,7 +55,7 @@ namespace ProjectSetup.Editor
                 Directory.CreateDirectory(ProfilesStoragePath);
             }
 
-            string json = JsonConvert.SerializeObject(data, SerializerSettings);
+            string json = JsonConvert.SerializeObject(profile, SerializerSettings);
             File.WriteAllText(GetFullPath(fileName), json);
         }
 

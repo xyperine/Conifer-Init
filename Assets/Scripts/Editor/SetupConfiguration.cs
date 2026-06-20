@@ -61,16 +61,16 @@ namespace ProjectSetup.Editor
         
         public void LoadSettingsProfiles()
         {
-            if (!Directory.Exists(PersistenceSerializer<SettingsProfile>.ProfilesStoragePath))
+            if (!Directory.Exists(SettingsProfileSerializer.ProfilesStoragePath))
             {
-                Directory.CreateDirectory(PersistenceSerializer<SettingsProfile>.ProfilesStoragePath);
+                Directory.CreateDirectory(SettingsProfileSerializer.ProfilesStoragePath);
             }
             
             IEnumerable<string> profilePaths =
-                Directory.EnumerateFiles(PersistenceSerializer<SettingsProfile>.ProfilesStoragePath,
+                Directory.EnumerateFiles(SettingsProfileSerializer.ProfilesStoragePath,
                     "*.json");
             _profiles = profilePaths
-                .Select(pp => PersistenceSerializer<SettingsProfile>.ReadFile(Path.GetFileName(pp)))
+                .Select(pp => SettingsProfileSerializer.ReadFile(Path.GetFileName(pp)))
                 .ToList();
             
             string activeProfileName = _data.ActiveSettingsProfileName;
@@ -108,7 +108,7 @@ namespace ProjectSetup.Editor
                     MiscSettings = MiscSettings.Default(),
                 };
                     
-                PersistenceSerializer<SettingsProfile>.SaveFile(defaultProfile, defaultProfile.Name);
+                SettingsProfileSerializer.SaveFile(defaultProfile, defaultProfile.Name);
                 
                 _profiles.Add(defaultProfile);
             }
@@ -140,7 +140,7 @@ namespace ProjectSetup.Editor
             profile.ProjectSettings = _data.ProjectSettings;
             profile.MiscSettings = _data.MiscSettings;
             
-            PersistenceSerializer<SettingsProfile>.SaveFile(profile, profile.Name);
+            SettingsProfileSerializer.SaveFile(profile, profile.Name);
             
             Debug.Log($"Saved {profile.Name} profile");
             
@@ -154,7 +154,7 @@ namespace ProjectSetup.Editor
         {
             ApplyProfile(DefaultProfile);
             
-            PersistenceSerializer<SettingsProfile>.DeleteFile(profile.Name);
+            SettingsProfileSerializer.DeleteFile(profile.Name);
             
             Debug.Log($"Deleted {profile.Name} profile");
             
@@ -167,8 +167,7 @@ namespace ProjectSetup.Editor
         public void TrySaveProfileAt(string path, Action<string> onSuccess)
         {
             // Extract all of this
-            bool insideProfileStorage = Directory.GetParent(path).FullName ==
-                                        PersistenceSerializer<SettingsProfile>.ProfilesStoragePath;
+            bool insideProfileStorage = Directory.GetParent(path).FullName == SettingsProfileSerializer.ProfilesStoragePath;
             bool hasRightExtension = Path.GetExtension(path) == ".json";
             bool isNotDefaultProfile = Path.GetFileNameWithoutExtension(path) != DEFAULT_PROFILE_NAME;
             bool valid = insideProfileStorage && hasRightExtension && isNotDefaultProfile;
@@ -179,7 +178,7 @@ namespace ProjectSetup.Editor
             else if (!insideProfileStorage)
             {
                 Debug.LogError(
-                    $"Must be inside the profiles storage directory!: {PersistenceSerializer<SettingsProfile>.ProfilesStoragePath}");
+                    $"Must be inside the profiles storage directory!: {SettingsProfileSerializer.ProfilesStoragePath}");
             }
             else if (!hasRightExtension)
             {

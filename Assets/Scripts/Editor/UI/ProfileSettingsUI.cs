@@ -116,7 +116,7 @@ namespace ProjectSetup.Editor.UI
             string newName = _configuration.ConstructNewProfileName();
             
             string savedPath = EditorUtility.SaveFilePanel("New Profile",
-                PersistenceSerializer<SettingsProfile>.ProfilesStoragePath, newName, "json");
+                SettingsProfileSerializer.ProfilesStoragePath, newName, "json");
             if (savedPath != string.Empty)
             {
                 _configuration.TrySaveProfileAt(savedPath, onSuccess);
