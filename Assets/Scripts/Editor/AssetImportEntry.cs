@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace ProjectSetup.Editor
@@ -19,6 +20,7 @@ namespace ProjectSetup.Editor
         { }
 
 
+        [JsonConstructor]
         public AssetImportEntry(string path, string name, string id, bool interactive)
         {
             Path = path;
