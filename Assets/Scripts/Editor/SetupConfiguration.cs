@@ -129,6 +129,9 @@ namespace ProjectSetup.Editor
             _data.QueuedAssets = new List<AssetImportEntry>(_activeProfile.QueuedAssets);
             _data.ProjectSettings = _activeProfile.ProjectSettings;
             _data.MiscSettings = _activeProfile.MiscSettings;
+            
+            GenerateAvailablePackages();
+            GenerateAvailableAssets();
         }
 
 
