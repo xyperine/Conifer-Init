@@ -116,6 +116,12 @@ namespace ProjectSetup.Editor.UI
                             _configuration.QueuePackage(availablePackageIDs[i]);
 
                             i--;
+                            entriesCount--;
+
+                            if (entriesCount <= 0)
+                            {
+                                _availablePage--;
+                            }
                         }
                     }
 
@@ -177,6 +183,11 @@ namespace ProjectSetup.Editor.UI
 
                             i--;
                             entriesCount--;
+
+                            if (entriesCount <= 0)
+                            {
+                                _queuedPage--;
+                            }
                         }
                     }
 
