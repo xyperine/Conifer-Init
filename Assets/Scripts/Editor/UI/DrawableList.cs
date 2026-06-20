@@ -84,7 +84,7 @@ namespace ProjectSetup.Editor.UI
 
         private void DrawPagesNavigation(int totalElements)
         {
-            if (totalElements < MAX_ENTRIES_PER_PAGE)
+            if (totalElements <= MAX_ENTRIES_PER_PAGE)
             {
                 return;
             }
