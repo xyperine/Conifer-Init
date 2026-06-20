@@ -8,7 +8,7 @@ namespace ProjectSetup.Editor
     /// Information about an asset scheduled for import.
     /// </summary>
     [Serializable]
-    internal struct AssetImportEntry
+    internal struct AssetImportEntry : IEquatable<AssetImportEntry>
     {
         [field: SerializeField] public string Path { get; private set; }
         [field: SerializeField] public string Name { get; private set; }
@@ -27,6 +27,24 @@ namespace ProjectSetup.Editor
             Name = name;
             ID = id;
             Interactive = interactive;
+        }
+
+
+        public bool Equals(AssetImportEntry other)
+        {
+            return Path == other.Path && Name == other.Name && ID == other.ID && Interactive == other.Interactive;
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            return obj is AssetImportEntry other && Equals(other);
+        }
+
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Path, Name, ID, Interactive);
         }
     }
 }
