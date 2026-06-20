@@ -9,7 +9,7 @@ namespace ProjectSetup.Editor
     /// Serializes passed data into a JSON file. Asserts that passed file names are valid.
     /// </summary>
     /// <typeparam name="TData">Type of data to be persisted.</typeparam>
-    public static class PersistenceSerializer<TData>
+    internal static class PersistenceSerializer<TData>
         where TData : new()
     {
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings

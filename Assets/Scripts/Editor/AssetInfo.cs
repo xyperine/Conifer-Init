@@ -7,7 +7,7 @@ namespace ProjectSetup.Editor
     /// Information about an asset in the storage.
     /// </summary>
     [Serializable]
-    public struct AssetInfo : IEquatable<AssetInfo>
+    internal struct AssetInfo : IEquatable<AssetInfo>
     {
         [field: SerializeField] public string Path { get; private set; }
         [field: SerializeField] public string Name { get; private set; }

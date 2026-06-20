@@ -7,7 +7,7 @@ using UnityEngine.Assertions;
 
 namespace ProjectSetup.Editor.UI
 {
-    public class ProfileSettingsUI
+    internal sealed class ProfileSettingsUI
     {
         private readonly SetupConfiguration _configuration;
         

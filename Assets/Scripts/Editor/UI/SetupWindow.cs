@@ -6,7 +6,7 @@ namespace ProjectSetup.Editor.UI
     /// <summary>
     /// Coordinates draw logic, handling user inputs, and setup execution. Also acts as a composition root.
     /// </summary>
-    public class SetupWindow : EditorWindow
+    internal sealed class SetupWindow : EditorWindow
     {
         private readonly SetupConfiguration _configuration = new SetupConfiguration();
 

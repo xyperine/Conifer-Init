@@ -7,7 +7,7 @@ namespace ProjectSetup.Editor
     /// Information about an asset scheduled for import.
     /// </summary>
     [Serializable]
-    public struct AssetImportEntry
+    internal struct AssetImportEntry
     {
         [field: SerializeField] public string Path { get; private set; }
         [field: SerializeField] public string Name { get; private set; }

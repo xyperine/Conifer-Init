@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ProjectSetup.Editor.UI
 {
-    public class AssetsSettingsUI
+    internal sealed class AssetsSettingsUI
     {
         private const int MAX_ENTRIES_PER_PAGE = 10;
         

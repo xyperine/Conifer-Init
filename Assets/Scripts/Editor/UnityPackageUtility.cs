@@ -9,7 +9,7 @@ using UnityEngine.Assertions;
 
 namespace ProjectSetup.Editor
 {
-    public static class UnityPackageUtility
+    internal static class UnityPackageUtility
     {
         public const string UNITY_PACKAGE_FILE_EXTENSION = ".unitypackage";
 

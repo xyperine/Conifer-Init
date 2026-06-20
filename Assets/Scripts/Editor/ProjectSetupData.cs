@@ -8,7 +8,7 @@ namespace ProjectSetup.Editor
     /// Contains all the tool data that needs to survive domain reloads and even persist across sessions.
     /// </summary>
     [FilePath("Library/ProjectSetupTool/Data.txt", FilePathAttribute.Location.ProjectFolder)]
-    public class ProjectSetupData : ScriptableSingleton<ProjectSetupData>
+    internal sealed class ProjectSetupData : ScriptableSingleton<ProjectSetupData>
     {
         [SerializeField] private string activeSettingsProfileName;
         [SerializeField] private MiscSettings miscSettings;

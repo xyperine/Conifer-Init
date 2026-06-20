@@ -10,7 +10,7 @@ namespace ProjectSetup.Editor
     /// <summary>
     /// Handles sequential interactive assets import.
     /// </summary>
-    public static class SequentialAssetsImporter
+    internal static class SequentialAssetsImporter
     {
         private static ProjectSetupData _data;
 

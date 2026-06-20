@@ -11,7 +11,7 @@ namespace ProjectSetup.Editor
     /// Describes a folder in the Assets directory. Paths are relative to the Assets directory. Implements a tree structure.
     /// </summary>
     [Serializable]
-    public class FolderStructureEntry : IEquatable<FolderStructureEntry>
+    internal sealed class FolderStructureEntry : IEquatable<FolderStructureEntry>
     {
         [field: JsonProperty, SerializeReference] public List<FolderStructureEntry> Children { get; private set; }
             

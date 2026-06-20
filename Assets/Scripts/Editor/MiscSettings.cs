@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ProjectSetup.Editor
 {
     [Serializable]
-    public struct MiscSettings
+    internal struct MiscSettings
     {
         [field: SerializeField] public bool DeleteTutorial { get; set; }
         [field: SerializeField] public bool ConfigureScene { get; set; }

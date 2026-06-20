@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace ProjectSetup.Editor
 {
     [Serializable]
-    public class SettingsProfile
+    internal sealed class SettingsProfile
     {
         public string Name { get; set; }
         

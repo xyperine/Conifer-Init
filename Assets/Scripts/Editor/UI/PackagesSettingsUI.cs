@@ -7,7 +7,7 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ProjectSetup.Editor.UI
 {
-    public class PackagesSettingsUI
+    internal sealed class PackagesSettingsUI
     {
         private const int MAX_ENTRIES_PER_PAGE = 10;
         

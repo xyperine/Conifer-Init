@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ProjectSetup.Editor
 {
     [Serializable]
-    public struct ProjectSettings
+    internal struct ProjectSettings
     {
         [field: SerializeField] public string DefaultNamespace { get; set; }
         [field: SerializeField] public EditorSettings.NamingScheme GameObjectNamingScheme { get; set; }

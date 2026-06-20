@@ -14,7 +14,7 @@ namespace ProjectSetup.Editor
     /// <summary>
     /// Handles the configuration of the setup and setup execution flow.
     /// </summary>
-    public class SetupConfiguration
+    internal sealed class SetupConfiguration
     {
         private ProjectSetupData _data;
         

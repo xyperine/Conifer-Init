@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ProjectSetup.Editor.UI
 {
-    public class ProjectSettingsUI
+    internal sealed class ProjectSettingsUI
     {
         private readonly SetupConfiguration _configuration;
 

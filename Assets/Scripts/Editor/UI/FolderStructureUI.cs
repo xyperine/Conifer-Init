@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ProjectSetup.Editor.UI
 {
-    public class FolderStructureUI
+    internal sealed class FolderStructureUI
     {
         private readonly SetupConfiguration _configuration;
         

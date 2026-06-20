@@ -12,7 +12,7 @@ namespace ProjectSetup.Editor
     /// <summary>
     /// Handles high-level logic of executing the setup by coordinating other components.
     /// </summary>
-    public static class SetupExecution
+    internal static class SetupExecution
     {
         public static void CreateFolders(string[] folders)
         {
