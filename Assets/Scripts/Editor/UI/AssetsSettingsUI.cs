@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,35 +6,35 @@ namespace ProjectSetup.Editor.UI
 {
     internal sealed class AssetsSettingsUI
     {
-        private const int MAX_ENTRIES_PER_PAGE = 10;
-        
         private readonly SetupConfiguration _configuration;
+        
+        private readonly ListDrawer _availableListDrawer;
+        private readonly ListDrawer _queuedListDrawer;
 
         private GUIStyle _titleStyle;
         private GUIStyle _searchBarStyle;
-        private GUIStyle _windowStyle;
-        private GUIStyle _scopeStyle;
         private GUIStyle _labelStyle;
         private GUIStyle _buttonStyle;
 
         private bool _stylesInitialized;
-
-        private int _availablePage = 1;
-        private int _queuedPage = 1;
-
+        
         private string _searchString;
         
 
         public AssetsSettingsUI(SetupConfiguration configuration)
         {
             _configuration = configuration;
+
+            _availableListDrawer = new ListDrawer();
+            _queuedListDrawer = new ListDrawer();
         }
 
 
         public void ResetTemporaryState()
         {
-            _availablePage = 1;
-            _queuedPage = 1;
+            _availableListDrawer.Reset();
+            _queuedListDrawer.Reset();
+            
             _searchString = string.Empty;
         }
         
@@ -46,8 +45,6 @@ namespace ProjectSetup.Editor.UI
             {
                 _titleStyle = new GUIStyle(EditorStyles.boldLabel);
                 _searchBarStyle = new GUIStyle(EditorStyles.toolbarSearchField);
-                _windowStyle = new GUIStyle(GUI.skin.window);
-                _scopeStyle = new GUIStyle();
                 _labelStyle = new GUIStyle(GUI.skin.label);
                 _buttonStyle = new GUIStyle(GUI.skin.button);
 
@@ -75,143 +72,41 @@ namespace ProjectSetup.Editor.UI
             {
                 availableAssetIDs = _configuration.FindAssets(_searchString);
 
-                _availablePage = 1;
+                _availableListDrawer.Reset();
             }
             
             // Available list
-            List<AssetImportEntry> queuedAssets = _configuration.GetQueuedAssets();
-            using (new GUILayout.VerticalScope($"Available ({availableAssetIDs.Count})", _windowStyle))
+            _availableListDrawer.Draw(availableAssetIDs, id =>
             {
-                if (availableAssetIDs.Count > 0)
-                {
-                    int start = (_availablePage - 1) * MAX_ENTRIES_PER_PAGE;
-                    int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
-                        availableAssetIDs.Count - (_availablePage - 1) * MAX_ENTRIES_PER_PAGE);
-                    for (int i = start; i < start + entriesCount; i++)
-                    {
-                        string assetName = _configuration.FindAssetByID(availableAssetIDs[i]).Name;
-                        using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_scopeStyle);
-                        
-                        SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
+                string assetName = _configuration.FindAssetByID(id).Name;
                                 
-                        GUILayout.Label(assetName, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
-                        if (GUILayout.Button("Import", _buttonStyle, GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
-                        {
-                            _configuration.QueueAsset(availableAssetIDs[i]);
-
-                            i--;
-                            entriesCount--;
-
-                            if (entriesCount <= 0)
-                            {
-                                _availablePage--;
-                            }
-                        }
-                    }
-
-                    // Pages navigation
-                    using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
-                    GUILayout.FlexibleSpace();
-                            
-                    using (new EditorGUI.DisabledGroupScope(_availablePage <= 1))
-                    {
-                        if (GUILayout.Button("<"))
-                        {
-                            _availablePage--;
-                        }
-                    }
-                            
-                    int maxPages =
-                        Mathf.CeilToInt(availableAssetIDs.Count / (float) MAX_ENTRIES_PER_PAGE);
-                    GUILayout.Label($"{_availablePage}/{maxPages}", _labelStyle);
-                            
-                    using (new EditorGUI.DisabledGroupScope(_availablePage >= maxPages))
-                    {
-                        if (GUILayout.Button(">"))
-                        {
-                            _availablePage++;
-                        }
-                    }
-                }
-                else
+                GUILayout.Label(assetName, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
+                if (GUILayout.Button("Import", _buttonStyle, GUILayout.Width(64f), GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
-                    SetupWindowElements.DrawEmptyListElement();
+                    _configuration.QueueAsset(id);
                 }
-            }
-
+            }, $"Available ({availableAssetIDs.Count})");
+            
             SetupWindowElements.DrawRegularSpace();
                 
             // Queued list
-            using (new GUILayout.VerticalScope($"Queued ({queuedAssets.Count})", _windowStyle))
+            List<AssetImportEntry> queuedAssets = _configuration.GetQueuedAssets();
+            _queuedListDrawer.Draw(queuedAssets, entry =>
             {
-                if (queuedAssets.Count > 0)
+                GUILayout.Label(entry.Name, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
+                    GUILayout.MinWidth(128f));
+
+                GUILayout.FlexibleSpace();
+
+                bool interactive = GUILayout.Toggle(entry.Interactive, "Interactive");
+                _configuration.SetInteractiveImportForAsset(entry.ID, interactive);
+
+                if (GUILayout.Button("Remove", _buttonStyle, GUILayout.Width(64f),
+                        GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
-                    int start = (_queuedPage - 1) * MAX_ENTRIES_PER_PAGE;
-                    int entriesCount = Math.Min(MAX_ENTRIES_PER_PAGE,
-                        queuedAssets.Count - (_queuedPage - 1) * MAX_ENTRIES_PER_PAGE);
-                    for (int i = start; i < start + entriesCount; i++)
-                    {
-                        AssetImportEntry asset = queuedAssets[i];
-                        using EditorGUILayout.HorizontalScope entryScope =
-                            new EditorGUILayout.HorizontalScope(_scopeStyle);
-                        
-                        SetupWindowElements.DrawListElementBackground(entryScope.rect, i);
-
-                        GUILayout.Label(asset.Name, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
-                            GUILayout.MinWidth(128f));
-
-                        GUILayout.FlexibleSpace();
-
-                        bool interactive = GUILayout.Toggle(asset.Interactive, "Interactive");
-                        _configuration.SetInteractiveImportForAsset(asset.ID, interactive);
-
-                        if (GUILayout.Button("Remove", _buttonStyle, GUILayout.Width(64f),
-                                GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
-                        {
-                            _configuration.DequeueAsset(asset.ID);
-
-                            i--;
-                            entriesCount--;
-
-                            if (entriesCount <= 0)
-                            {
-                                _queuedPage--;
-                            }
-                        }
-                    }
-
-                    // Pages navigation
-                    if (queuedAssets.Count > MAX_ENTRIES_PER_PAGE)
-                    {
-                        using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
-                        GUILayout.FlexibleSpace();
-
-                        using (new EditorGUI.DisabledGroupScope(_queuedPage <= 1))
-                        {
-                            if (GUILayout.Button("<"))
-                            {
-                                _queuedPage--;
-                            }
-                        }
-
-                        int maxPages =
-                            Mathf.CeilToInt(queuedAssets.Count / (float) MAX_ENTRIES_PER_PAGE);
-                        GUILayout.Label($"{_queuedPage}/{maxPages}", _labelStyle);
-
-                        using (new EditorGUI.DisabledGroupScope(_queuedPage >= maxPages))
-                        {
-                            if (GUILayout.Button(">"))
-                            {
-                                _queuedPage++;
-                            }
-                        }
-                    }
+                    _configuration.DequeueAsset(entry.ID);
                 }
-                else
-                {
-                    SetupWindowElements.DrawEmptyListElement();
-                }
-            }
+            }, $"Queued ({queuedAssets.Count})");
         }
     }
 }
