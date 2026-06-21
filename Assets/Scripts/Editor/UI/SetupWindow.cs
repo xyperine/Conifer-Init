@@ -25,8 +25,13 @@ namespace ProjectSetup.Editor.UI
         [MenuItem("Tools/Setup Window")]
         private static void ShowWindow()
         {
-            SetupWindow window = GetWindow<SetupWindow>();
-            window.titleContent = new GUIContent("Setup");
+            Vector2 size = new Vector2(600f, 800f);
+            int width = Screen.currentResolution.width;
+            int height = Screen.currentResolution.height;
+            Vector2 center = new Vector2((width - size.x) * 0.5f, (height - size.y) * 0.5f);
+            SetupWindow window = GetWindow<SetupWindow>(false, "Setup", true);
+            window.position = new Rect(center, size);
+            window.minSize = size;
             window.Show();
         }
 
