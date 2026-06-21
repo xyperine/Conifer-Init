@@ -100,7 +100,9 @@ namespace ProjectSetup.Editor.UI
 
         private void DrawExecuteSetup()
         {
-            if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Width(128f)))
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(new GUIStyle());
+
+            if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Height(32f)))
             {
                 _configuration.ExecuteSetup();
             }
