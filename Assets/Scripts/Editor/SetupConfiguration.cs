@@ -16,7 +16,8 @@ namespace ProjectSetup.Editor
     /// </summary>
     internal sealed class SetupConfiguration
     {
-        private ProjectSetupData _data;
+        private SetupConfigurationCache _configurationCache;
+        private SetupExecutionCache _executionCache;
         
         // Profiles
         public const string DEFAULT_PROFILE_NAME = "Default_Profile";
@@ -49,7 +50,8 @@ namespace ProjectSetup.Editor
         
         public void Initialize()
         {
-            _data = ProjectSetupData.instance;
+            _configurationCache = SetupConfigurationCache.instance;
+            _executionCache = SetupExecutionCache.instance;
             
             LoadSettingsProfiles();
 
@@ -73,7 +75,7 @@ namespace ProjectSetup.Editor
                 .Select(pp => SettingsProfileSerializer.ReadFile(Path.GetFileName(pp)))
                 .ToList();
             
-            string activeProfileName = _data.ActiveSettingsProfileName;
+            string activeProfileName = _configurationCache.ActiveSettingsProfileName;
             if (!string.IsNullOrEmpty(activeProfileName))
             {
                 var p = _profiles.Find(p => p.Name == activeProfileName);
@@ -121,13 +123,13 @@ namespace ProjectSetup.Editor
             ApplyingProfile?.Invoke();
             
             _activeProfile = profile;
-            _data.ActiveSettingsProfileName = _activeProfile.Name;
+            _configurationCache.ActiveSettingsProfileName = _activeProfile.Name;
             
-            _data.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_activeProfile.AssetsFolderStructureEntry, null);
-            _data.QueuedPackagesIDs = new List<string>(_activeProfile.QueuedPackagesIDs);
-            _data.QueuedAssets = new List<AssetImportEntry>(_activeProfile.QueuedAssets);
-            _data.ProjectSettings = _activeProfile.ProjectSettings;
-            _data.MiscSettings = _activeProfile.MiscSettings;
+            _configurationCache.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_activeProfile.AssetsFolderStructureEntry, null);
+            _configurationCache.QueuedPackagesIDs = new List<string>(_activeProfile.QueuedPackagesIDs);
+            _configurationCache.QueuedAssets = new List<AssetImportEntry>(_activeProfile.QueuedAssets);
+            _configurationCache.ProjectSettings = _activeProfile.ProjectSettings;
+            _configurationCache.MiscSettings = _activeProfile.MiscSettings;
             
             GenerateAvailablePackages();
             GenerateAvailableAssets();
@@ -136,11 +138,11 @@ namespace ProjectSetup.Editor
 
         public void SaveProfile(SettingsProfile profile)
         {
-            profile.AssetsFolderStructureEntry = _data.AssetsFolderStructureEntry;
-            profile.QueuedPackagesIDs = new List<string>(_data.QueuedPackagesIDs);
-            profile.QueuedAssets = new List<AssetImportEntry>(_data.QueuedAssets);
-            profile.ProjectSettings = _data.ProjectSettings;
-            profile.MiscSettings = _data.MiscSettings;
+            profile.AssetsFolderStructureEntry = _configurationCache.AssetsFolderStructureEntry;
+            profile.QueuedPackagesIDs = new List<string>(_configurationCache.QueuedPackagesIDs);
+            profile.QueuedAssets = new List<AssetImportEntry>(_configurationCache.QueuedAssets);
+            profile.ProjectSettings = _configurationCache.ProjectSettings;
+            profile.MiscSettings = _configurationCache.MiscSettings;
             
             SettingsProfileSerializer.SaveFile(profile, profile.Name);
             
@@ -213,13 +215,13 @@ namespace ProjectSetup.Editor
 
         public FolderStructureEntry GetAssetsFSE()
         {
-            return _data.AssetsFolderStructureEntry;
+            return _configurationCache.AssetsFolderStructureEntry;
         }
         
         
         public void ResetFolderStructure()
         {
-            _data.AssetsFolderStructureEntry =
+            _configurationCache.AssetsFolderStructureEntry =
                 FolderStructureEntry.DeepCopy(ActiveProfile.AssetsFolderStructureEntry, null);
         }
 
@@ -244,7 +246,7 @@ namespace ProjectSetup.Editor
 
         public List<string> GetQueuedPackageIDs()
         {
-            return _data.QueuedPackagesIDs;
+            return _configurationCache.QueuedPackagesIDs;
         }
         
         
@@ -281,7 +283,7 @@ namespace ProjectSetup.Editor
         {
             AvailablePackages = _successfullyRetrievedPackages && _allPackages != null
                 ? _allPackages.Keys.Where(id =>
-                    !_data.QueuedPackagesIDs.Contains(id)).ToList()
+                    !_configurationCache.QueuedPackagesIDs.Contains(id)).ToList()
                 : new List<string>();
         }
 
@@ -303,7 +305,7 @@ namespace ProjectSetup.Editor
 
         public void QueuePackage(string id)
         {
-            _data.QueuedPackagesIDs.Add(id);
+            _configurationCache.QueuedPackagesIDs.Add(id);
 
             GenerateAvailablePackages();
         }
@@ -311,7 +313,7 @@ namespace ProjectSetup.Editor
 
         public void DequeuePackage(string id)
         {
-            _data.QueuedPackagesIDs.Remove(id);
+            _configurationCache.QueuedPackagesIDs.Remove(id);
             
             GenerateAvailablePackages();
         }
@@ -370,14 +372,14 @@ namespace ProjectSetup.Editor
         {
             AvailableAssets = SuccessfullyRetrievedAssets && _assets != null
                 ? _assets.Keys.Where(id =>
-                    !_data.QueuedAssets.Exists(a => a.ID == id)).ToList()
+                    !_configurationCache.QueuedAssets.Exists(a => a.ID == id)).ToList()
                 : new List<string>();
         }
 
 
         public List<AssetImportEntry> GetQueuedAssets()
         {
-            return _data.QueuedAssets;
+            return _configurationCache.QueuedAssets;
         }
         
         
@@ -397,7 +399,7 @@ namespace ProjectSetup.Editor
 
         public void QueueAsset(string id)
         {
-            _data.QueuedAssets.Add(new AssetImportEntry(_assets[id], false));
+            _configurationCache.QueuedAssets.Add(new AssetImportEntry(_assets[id], false));
             
             GenerateAvailableAssets();
         }
@@ -405,7 +407,7 @@ namespace ProjectSetup.Editor
 
         public void DequeueAsset(string id)
         {
-            _data.QueuedAssets.Remove(_data.QueuedAssets.Find(a => a.ID == id));
+            _configurationCache.QueuedAssets.Remove(_configurationCache.QueuedAssets.Find(a => a.ID == id));
             
             GenerateAvailableAssets();
         }
@@ -413,51 +415,51 @@ namespace ProjectSetup.Editor
 
         public void SetInteractiveImportForAsset(string id, bool interactive)
         {
-            int index = _data.QueuedAssets.FindIndex(a => a.ID == id);
-            AssetImportEntry entry = _data.QueuedAssets[index];
-            _data.QueuedAssets[index] =
+            int index = _configurationCache.QueuedAssets.FindIndex(a => a.ID == id);
+            AssetImportEntry entry = _configurationCache.QueuedAssets[index];
+            _configurationCache.QueuedAssets[index] =
                 new AssetImportEntry(entry.Path, entry.Name, entry.ID, interactive);
         }
 
 
         public ProjectSettings GetProjectSettings()
         {
-            return _data.ProjectSettings;
+            return _configurationCache.ProjectSettings;
         }
 
 
         public void SetProjectSettings(ProjectSettings projectSettings)
         {
-            _data.ProjectSettings = projectSettings;
+            _configurationCache.ProjectSettings = projectSettings;
         }
 
 
         public MiscSettings GetMiscSettings()
         {
-            return _data.MiscSettings;
+            return _configurationCache.MiscSettings;
         }
 
 
         public void SetMiscSettings(MiscSettings miscSettings)
         {
-            _data.MiscSettings = miscSettings;
+            _configurationCache.MiscSettings = miscSettings;
         }
 
 
         public void ExecuteSetup()
         {
-            _data.SetupInProgress = true;
+            _executionCache.SetupInProgress = true;
         }
 
 
         public void Update()
         {
-            if (!_data.SetupInProgress)
+            if (!_executionCache.SetupInProgress)
             {
-                _data.Save();
+                _configurationCache.Save();
             }
             
-            if (_data.SetupInProgress)
+            if (_executionCache.SetupInProgress)
             {
                 PerformSetup();
             }
@@ -467,70 +469,70 @@ namespace ProjectSetup.Editor
         // Move this to SetupExecution?
         private void PerformSetup()
         {
-            if (!_data.SetupInProgress)
+            if (!_executionCache.SetupInProgress)
             {
                 return;
             }
 
-            if (!_data.PreInteractiveOperationsInProgress)
+            if (!_executionCache.PreInteractiveOperationsInProgress)
             {
-                _data.PreInteractiveOperationsInProgress = true;
+                _executionCache.PreInteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting pre-interactive operations...");
                 
-                string[] folders = _data.AssetsFolderStructureEntry.ToFolderNames();
+                string[] folders = _configurationCache.AssetsFolderStructureEntry.ToFolderNames();
                 SetupExecution.CreateFolders(folders);
 
-                _data.PreInteractiveOperationsFinished = true;
-                _data.PreInteractiveOperationsInProgress = false;
+                _executionCache.PreInteractiveOperationsFinished = true;
+                _executionCache.PreInteractiveOperationsInProgress = false;
             }
 
-            if (!_data.InteractiveOperationsInProgress && _data.PreInteractiveOperationsFinished)
+            if (!_executionCache.InteractiveOperationsInProgress && _executionCache.PreInteractiveOperationsFinished)
             {
-                _data.InteractiveOperationsInProgress = true;
+                _executionCache.InteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting interactive operations...");
 
-                IEnumerable<AssetImportEntry> assets = _data.QueuedAssets.Where(a => a.Interactive);
+                IEnumerable<AssetImportEntry> assets = _configurationCache.QueuedAssets.Where(a => a.Interactive);
                 if (assets.Any())
                 {
                     SetupExecution.ImportAssetsInteractive(assets);
                 }
                 else
                 {
-                    _data.InteractiveOperationsFinished = true;
-                    _data.InteractiveOperationsInProgress = false;
+                    _executionCache.InteractiveOperationsFinished = true;
+                    _executionCache.InteractiveOperationsInProgress = false;
                 }
             }
                 
-            if (!_data.NonInteractiveOperationsInProgress && _data.InteractiveOperationsFinished && _data.PreInteractiveOperationsFinished)
+            if (!_executionCache.NonInteractiveOperationsInProgress && _executionCache.InteractiveOperationsFinished && _executionCache.PreInteractiveOperationsFinished)
             {
-                _data.NonInteractiveOperationsInProgress = true;
+                _executionCache.NonInteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting non-interactive operations...");
 
                 IEnumerable<AssetImportEntry> assets =
-                    _data.QueuedAssets.Where(a => !a.Interactive);
+                    _configurationCache.QueuedAssets.Where(a => !a.Interactive);
                 if (assets.Any())
                 {
                     SetupExecution.ImportAssetsNonInteractive(assets);
                 }
 
-                IEnumerable<string> packages = GetFullPackagesID(_data.QueuedPackagesIDs);
+                IEnumerable<string> packages = GetFullPackagesID(_configurationCache.QueuedPackagesIDs);
                 SetupExecution.ImportPackages(packages);
                     
-                SetupExecution.SetProjectSettings(_data.ProjectSettings);
+                SetupExecution.SetProjectSettings(_configurationCache.ProjectSettings);
                     
-                SetupExecution.ExecuteMisc(_data.MiscSettings);
+                SetupExecution.ExecuteMisc(_configurationCache.MiscSettings);
 
                 // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
-                _data.NonInteractiveOperationsInProgress = false;
-                _data.NonInteractiveOperationsFinished = true;
+                _executionCache.NonInteractiveOperationsInProgress = false;
+                _executionCache.NonInteractiveOperationsFinished = true;
             }
 
-            if (_data.AllSetupStagesComplete)
+            if (_executionCache.AllSetupStagesComplete)
             {
-                _data.ResetSetup();
+                _executionCache.ResetSetup();
                 
                 Debug.Log("Setup finished!");
             }

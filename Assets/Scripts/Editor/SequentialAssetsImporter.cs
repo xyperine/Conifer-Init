@@ -12,13 +12,13 @@ namespace ProjectSetup.Editor
     /// </summary>
     internal static class SequentialAssetsImporter
     {
-        private static ProjectSetupData _data;
+        private static SetupExecutionCache _data;
 
 
         [InitializeOnLoadMethod]
         private static void SubscribeToEvents()
         {
-            _data = ProjectSetupData.instance;
+            _data = SetupExecutionCache.instance;
 
             if (!_data.ImportRequested)
             {
@@ -36,7 +36,7 @@ namespace ProjectSetup.Editor
         {
             Assert.IsTrue(assets.Any());
             
-            _data = ProjectSetupData.instance;
+            _data = SetupExecutionCache.instance;
             _data.AssetsToImport = assets.ToList();
             _data.ImportRequested = true;
             _data.InteractiveOperationsFinished = false;
