@@ -85,8 +85,6 @@ namespace ProjectSetup.Editor
             {
                 PlayerSettings.SetScriptingBackend(buildTarget, projectSettings.ScriptingBackend);
             }
-            
-            Debug.Log("Project settings set");
         }
 
 

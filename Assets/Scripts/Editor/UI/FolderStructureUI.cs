@@ -161,16 +161,12 @@ namespace ProjectSetup.Editor.UI
                         _isAddingChild = true;
                         _newChildParentFullName = entry.FullName;
                         _newChildName = string.Empty;
-
-                        Debug.Log("Adding child...");
                     }
 
                     if (entry.FullName != "Assets")
                     {
                         if (GUILayout.Button("-", _buttonStyle, GUILayout.Width(16f), GUILayout.Height(16f)))
                         {
-                            Debug.Log("Removing folder...");
-                            
                             _entriesToRemove.Enqueue(entry);
                         }
                     }

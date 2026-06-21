@@ -132,11 +132,9 @@ namespace ProjectSetup.Editor.UI
                     GUILayout.Label("Retrieving packages...");
                     break;
                 case StatusCode.Success:
-                    //Debug.Log("Successfully retrieved packages.");
                     GUILayout.Label($"Retrieved packages: {_configuration.PackagesListRequest.Result.Length}", _successStyle);
                     break;
                 case StatusCode.Failure:
-                    //Debug.Log("Failed to retrieve packages.");
                     GUILayout.Label($"Error while retrieving packages: {_configuration.PackagesListRequest.Error.message}", _errorStyle);
                     break;
                 default:

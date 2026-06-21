@@ -126,8 +126,6 @@ namespace ProjectSetup.Editor.UI
 
         private void SaveAsProfile(string newProfileName)
         {
-            Debug.Log($"Saving as {newProfileName} profile");
-            
             if (newProfileName == string.Empty)
             {
                 return;

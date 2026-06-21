@@ -74,7 +74,6 @@ namespace ProjectSetup.Editor
                 .ToList();
             
             string activeProfileName = _data.ActiveSettingsProfileName;
-            Debug.Log(activeProfileName);
             if (!string.IsNullOrEmpty(activeProfileName))
             {
                 var p = _profiles.Find(p => p.Name == activeProfileName);
@@ -145,8 +144,6 @@ namespace ProjectSetup.Editor
             
             SettingsProfileSerializer.SaveFile(profile, profile.Name);
             
-            Debug.Log($"Saved {profile.Name} profile");
-            
             LoadSettingsProfiles();
             
             ApplyProfile(profile);
@@ -158,8 +155,6 @@ namespace ProjectSetup.Editor
             ApplyProfile(DefaultProfile);
             
             SettingsProfileSerializer.DeleteFile(profile.Name);
-            
-            Debug.Log($"Deleted {profile.Name} profile");
             
             LoadSettingsProfiles();
             
@@ -515,7 +510,6 @@ namespace ProjectSetup.Editor
                 _data.InteractiveOperationsInProgress = false;
                 _data.InteractiveOperationsFinished = false;
                 _data.NonInteractiveOperationsInProgress = false;
-                Debug.Log("Setup finished");
             }
         }
     }

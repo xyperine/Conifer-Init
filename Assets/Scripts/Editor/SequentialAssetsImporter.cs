@@ -82,21 +82,17 @@ namespace ProjectSetup.Editor
         {
             if (!_data.Stable)
             {
-                Debug.Log("Unstable");
                 return;
             }
             
             if (EditorApplication.isCompiling || EditorApplication.isUpdating || AssetDatabase.IsAssetImportWorkerProcess())
             {
-                Debug.Log("Working");
                 return;
             }
             
             // Halt the importer if there are no more assets to import
             if (_data.AssetsToImport.Count == 0)
             {
-                Debug.Log("Nothing to import");
-                
                 End();
             
                 return;
@@ -110,15 +106,12 @@ namespace ProjectSetup.Editor
         {
             if (_data.Importing)
             {
-                Debug.Log("Already importing");
-                
                 return;
             }
             
             _data.Importing = true;
 
             AssetImportEntry asset = _data.AssetsToImport.First();
-            Debug.Log($"Importing: {asset.Name}");
             try
             {
                 if (UnityPackageUtility.AllPluginAssetsAlreadyImported(asset.Path))
@@ -152,8 +145,6 @@ namespace ProjectSetup.Editor
                 return;
             }
             
-            Debug.Log($"Canceled: {packageName}");
-            
             _data.Importing = false;
             _data.AssetsToImport.RemoveAt(0);
             
@@ -167,9 +158,7 @@ namespace ProjectSetup.Editor
             {
                 return;
             }
-            
-            Debug.Log($"Imported: {packageName}");
-            
+
             _data.Importing = false;
             _data.AssetsToImport.RemoveAt(0);
             
@@ -196,9 +185,6 @@ namespace ProjectSetup.Editor
         private static bool IsTheQueuedPackage(string packageName)
         {
             AssetImportEntry asset = _data.AssetsToImport.First();
-            
-            //Debug.Log(packageName);
-            //Debug.Log(asset.Path);
             
             Assert.IsTrue(asset.Path.EndsWith(UnityPackageUtility.UNITY_PACKAGE_FILE_EXTENSION));
             

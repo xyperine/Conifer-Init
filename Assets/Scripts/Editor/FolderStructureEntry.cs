@@ -74,7 +74,6 @@ namespace ProjectSetup.Editor
                 folderStructureEntry.Parent = this;
                 Children.Add(folderStructureEntry);
                 Children = Children.OrderBy(c => c.Name).ToList();
-                //Debug.Log($"Added child: {folderStructureEntry.Name}");
             }
         }
 
