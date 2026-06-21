@@ -474,7 +474,7 @@ namespace ProjectSetup.Editor
                 return;
             }
 
-            if (!_executionCache.PreInteractiveOperationsInProgress)
+            if (!_executionCache.PreInteractiveOperationsInProgress && !_executionCache.PreInteractiveOperationsFinished)
             {
                 _executionCache.PreInteractiveOperationsInProgress = true;
                 
