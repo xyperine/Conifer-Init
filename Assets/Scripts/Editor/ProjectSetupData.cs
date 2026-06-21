@@ -71,5 +71,20 @@ namespace ProjectSetup.Editor
         {
             Save(true);
         }
+
+
+        public void ResetSetup()
+        {
+            SetupInProgress = false;
+            PreInteractiveOperationsInProgress = false;
+            PreInteractiveOperationsFinished = false;
+            InteractiveOperationsInProgress = false;
+            AssetsToImport.Clear();
+            Importing = false;
+            Stable = true;
+            ImportRequested = false;
+            InteractiveOperationsFinished = false;
+            NonInteractiveOperationsInProgress = false;
+        }
     }
 }

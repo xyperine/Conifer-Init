@@ -32,6 +32,7 @@ namespace ProjectSetup.Editor
 
         public static void ImportAssetsNonInteractive(IEnumerable<AssetImportEntry> assets)
         {
+            Assert.IsTrue(assets.Any());
             Assert.IsTrue(assets.All(a => !a.Interactive));
             
             foreach (AssetImportEntry asset in assets)

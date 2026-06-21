@@ -452,7 +452,10 @@ namespace ProjectSetup.Editor
 
         public void Update()
         {
-            _data.Save();
+            if (!_data.SetupInProgress)
+            {
+                _data.Save();
+            }
             
             if (_data.SetupInProgress)
             {
@@ -473,23 +476,34 @@ namespace ProjectSetup.Editor
             {
                 _data.PreInteractiveOperationsInProgress = true;
                 
+                Debug.Log("Starting pre-interactive operations...");
+                
                 string[] folders = _data.AssetsFolderStructureEntry.ToFolderNames();
                 SetupExecution.CreateFolders(folders);
 
                 _data.PreInteractiveOperationsFinished = true;
+                _data.PreInteractiveOperationsInProgress = false;
             }
 
-            if (!_data.InteractiveOperationsInProgress)
+            if (!_data.InteractiveOperationsInProgress && _data.PreInteractiveOperationsFinished)
             {
                 _data.InteractiveOperationsInProgress = true;
                 
                 Debug.Log("Starting interactive operations...");
 
                 IEnumerable<AssetImportEntry> assets = _data.QueuedAssets.Where(a => a.Interactive);
-                SetupExecution.ImportAssetsInteractive(assets);
+                if (assets.Any())
+                {
+                    SetupExecution.ImportAssetsInteractive(assets);
+                }
+                else
+                {
+                    _data.InteractiveOperationsFinished = true;
+                    _data.InteractiveOperationsInProgress = false;
+                }
             }
                 
-            if (!_data.NonInteractiveOperationsInProgress && _data.InteractiveOperationsFinished)
+            if (!_data.NonInteractiveOperationsInProgress && _data.InteractiveOperationsFinished && _data.PreInteractiveOperationsFinished)
             {
                 _data.NonInteractiveOperationsInProgress = true;
                 
@@ -497,7 +511,10 @@ namespace ProjectSetup.Editor
 
                 IEnumerable<AssetImportEntry> assets =
                     _data.QueuedAssets.Where(a => !a.Interactive);
-                SetupExecution.ImportAssetsNonInteractive(assets);
+                if (assets.Any())
+                {
+                    SetupExecution.ImportAssetsNonInteractive(assets);
+                }
 
                 IEnumerable<string> packages = GetFullPackagesID(_data.QueuedPackagesIDs);
                 SetupExecution.ImportPackages(packages);
@@ -506,10 +523,7 @@ namespace ProjectSetup.Editor
                     
                 SetupExecution.ExecuteMisc(_data.MiscSettings);
 
-                _data.SetupInProgress = false;
-                _data.InteractiveOperationsInProgress = false;
-                _data.InteractiveOperationsFinished = false;
-                _data.NonInteractiveOperationsInProgress = false;
+                _data.ResetSetup();
             }
         }
     }
