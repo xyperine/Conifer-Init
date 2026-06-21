@@ -523,7 +523,16 @@ namespace ProjectSetup.Editor
                     
                 SetupExecution.ExecuteMisc(_data.MiscSettings);
 
+                // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
+                _data.NonInteractiveOperationsInProgress = false;
+                _data.NonInteractiveOperationsFinished = true;
+            }
+
+            if (_data.AllSetupStagesComplete)
+            {
                 _data.ResetSetup();
+                
+                Debug.Log("Setup finished!");
             }
         }
     }

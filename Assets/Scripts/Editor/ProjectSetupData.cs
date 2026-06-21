@@ -65,6 +65,10 @@ namespace ProjectSetup.Editor
         [field: SerializeField] public bool InteractiveOperationsFinished { get; set; }
         
         [field: SerializeField] public bool NonInteractiveOperationsInProgress { get; set; }
+        [field: SerializeField] public bool NonInteractiveOperationsFinished { get; set; }
+
+        public bool AllSetupStagesComplete => PreInteractiveOperationsFinished && InteractiveOperationsFinished &&
+                                              NonInteractiveOperationsFinished;
 
 
         public void Save()
@@ -85,6 +89,7 @@ namespace ProjectSetup.Editor
             ImportRequested = false;
             InteractiveOperationsFinished = false;
             NonInteractiveOperationsInProgress = false;
+            NonInteractiveOperationsFinished = false;
         }
     }
 }
