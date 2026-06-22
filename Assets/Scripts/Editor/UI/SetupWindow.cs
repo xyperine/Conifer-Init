@@ -9,6 +9,7 @@ namespace ProjectSetup.Editor.UI
     internal sealed class SetupWindow : EditorWindow
     {
         private readonly SetupConfiguration _configuration = new SetupConfiguration();
+        private readonly SetupExecution _execution = new SetupExecution();
 
         private GUIStyle _entireWindowStyle;
 
@@ -40,6 +41,8 @@ namespace ProjectSetup.Editor.UI
         {
             _configuration.Initialize();
             _configuration.ApplyingProfile += ResetTemporaryState;
+            
+            _execution.Initialize();
             
             _profileSettingsUI = new ProfileSettingsUI(_configuration);
             _folderStructureUI = new FolderStructureUI(_configuration);
@@ -109,7 +112,7 @@ namespace ProjectSetup.Editor.UI
 
             if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Height(32f)))
             {
-                _configuration.ExecuteSetup();
+                _execution.ExecuteSetup();
             }
         }
         
@@ -117,6 +120,7 @@ namespace ProjectSetup.Editor.UI
         private void Update()
         {
             _configuration.Update();
+            _execution.Update();
         }
 
 

@@ -12,8 +12,105 @@ namespace ProjectSetup.Editor
     /// <summary>
     /// Handles high-level logic of executing the setup by coordinating other components.
     /// </summary>
-    internal static class SetupExecution
+    internal sealed class SetupExecution
     {
+        private SetupExecutionCache _executionCache;
+        private SetupConfigurationCache _configurationCache;
+        
+
+        public void Initialize()
+        {
+            _executionCache = SetupExecutionCache.instance;
+            _configurationCache = SetupConfigurationCache.instance;
+        }
+        
+        
+        public void ExecuteSetup()
+        {
+            _executionCache.SetupInProgress = true;
+        }
+        
+        
+        public void Update()
+        {
+            if (_executionCache.SetupInProgress)
+            {
+                PerformSetup();
+            }
+        }
+        
+        
+        private void PerformSetup()
+        {
+            if (!_executionCache.SetupInProgress)
+            {
+                return;
+            }
+
+            if (!_executionCache.PreInteractiveOperationsInProgress && !_executionCache.PreInteractiveOperationsFinished)
+            {
+                _executionCache.PreInteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting pre-interactive operations...");
+                
+                string[] folders = _configurationCache.AssetsFolderStructureEntry.ToFolderNames();
+                SetupExecution.CreateFolders(folders);
+
+                _executionCache.PreInteractiveOperationsFinished = true;
+                _executionCache.PreInteractiveOperationsInProgress = false;
+            }
+
+            if (!_executionCache.InteractiveOperationsInProgress && _executionCache.PreInteractiveOperationsFinished)
+            {
+                _executionCache.InteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets = _configurationCache.QueuedAssets.Where(a => a.Interactive);
+                if (assets.Any())
+                {
+                    SetupExecution.ImportAssetsInteractive(assets);
+                }
+                else
+                {
+                    _executionCache.InteractiveOperationsFinished = true;
+                    _executionCache.InteractiveOperationsInProgress = false;
+                }
+            }
+                
+            if (!_executionCache.NonInteractiveOperationsInProgress && _executionCache.InteractiveOperationsFinished && _executionCache.PreInteractiveOperationsFinished)
+            {
+                _executionCache.NonInteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting non-interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets =
+                    _configurationCache.QueuedAssets.Where(a => !a.Interactive);
+                if (assets.Any())
+                {
+                    SetupExecution.ImportAssetsNonInteractive(assets);
+                }
+                
+                SetupExecution.ImportPackages(_configurationCache.QueuedPackages);
+                    
+                SetupExecution.SetProjectSettings(_configurationCache.ProjectSettings);
+                    
+                SetupExecution.ExecuteMisc(_configurationCache.MiscSettings);
+
+                // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
+                _executionCache.NonInteractiveOperationsInProgress = false;
+                _executionCache.NonInteractiveOperationsFinished = true;
+            }
+
+            if (_executionCache.AllSetupStagesComplete)
+            {
+                _executionCache.ResetSetup();
+                
+                Debug.Log("Setup finished!");
+            }
+        }
+        
+        
         public static void CreateFolders(string[] folders)
         {
             Folders.Create(string.Empty, folders);
@@ -42,13 +139,13 @@ namespace ProjectSetup.Editor
         }
 
 
-        public static void ImportPackages(IEnumerable<string> packages)
+        public static void ImportPackages(IEnumerable<PackageImportEntry> packages)
         {
             TMP_PackageResourceImporter.ImportResources(true, false, false);
 
             if (packages.Any())
             {
-                Packages.ImportAsync(packages);
+                Packages.ImportAsync(packages.Select(p => p.FullID));
             }
         }
 

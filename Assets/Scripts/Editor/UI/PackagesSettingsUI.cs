@@ -106,10 +106,10 @@ namespace ProjectSetup.Editor.UI
             SetupWindowElements.DrawRegularSpace();
 
             // Queued list
-            List<string> queuedPackageIDs = _configuration.GetQueuedPackageIDs();
-            _queuedListDrawer.Draw(queuedPackageIDs, id =>
+            List<PackageImportEntry> queuedPackages = _configuration.GetQueuedPackageIDs();
+            _queuedListDrawer.Draw(queuedPackages, entry =>
             {
-                PackageInfo packageInfo = _configuration.GetPackageByID(id);
+                PackageInfo packageInfo = _configuration.GetPackageByID(entry.ShortID);
 
                 GUILayout.Label(packageInfo.displayName, _labelStyle, GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT),
                     GUILayout.MinWidth(128f));
@@ -117,9 +117,9 @@ namespace ProjectSetup.Editor.UI
                 if (GUILayout.Button("Remove", _buttonStyle, GUILayout.Width(64f),
                         GUILayout.Height(SetupWindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
-                    _configuration.DequeuePackage(id);
+                    _configuration.DequeuePackage(entry.ShortID);
                 }
-            }, $"Queued ({queuedPackageIDs.Count})");
+            }, $"Queued ({queuedPackages.Count})");
         }
 
 

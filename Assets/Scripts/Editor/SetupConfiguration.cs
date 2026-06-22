@@ -103,7 +103,7 @@ namespace ProjectSetup.Editor
                 {
                     Name = DEFAULT_PROFILE_NAME,
                     AssetsFolderStructureEntry = FolderStructureEntry.Default(),
-                    QueuedPackagesIDs = new List<string>(),
+                    QueuedPackages = new List<PackageImportEntry>(),
                     QueuedAssets = new List<AssetImportEntry>(),
                     ProjectSettings = ProjectSettings.Default(),
                     MiscSettings = MiscSettings.Default(),
@@ -126,7 +126,7 @@ namespace ProjectSetup.Editor
             _configurationCache.ActiveSettingsProfileName = _activeProfile.Name;
             
             _configurationCache.AssetsFolderStructureEntry = FolderStructureEntry.DeepCopy(_activeProfile.AssetsFolderStructureEntry, null);
-            _configurationCache.QueuedPackagesIDs = new List<string>(_activeProfile.QueuedPackagesIDs);
+            _configurationCache.QueuedPackages = new List<PackageImportEntry>(_activeProfile.QueuedPackages);
             _configurationCache.QueuedAssets = new List<AssetImportEntry>(_activeProfile.QueuedAssets);
             _configurationCache.ProjectSettings = _activeProfile.ProjectSettings;
             _configurationCache.MiscSettings = _activeProfile.MiscSettings;
@@ -139,7 +139,7 @@ namespace ProjectSetup.Editor
         public void SaveProfile(SettingsProfile profile)
         {
             profile.AssetsFolderStructureEntry = _configurationCache.AssetsFolderStructureEntry;
-            profile.QueuedPackagesIDs = new List<string>(_configurationCache.QueuedPackagesIDs);
+            profile.QueuedPackages = new List<PackageImportEntry>(_configurationCache.QueuedPackages);
             profile.QueuedAssets = new List<AssetImportEntry>(_configurationCache.QueuedAssets);
             profile.ProjectSettings = _configurationCache.ProjectSettings;
             profile.MiscSettings = _configurationCache.MiscSettings;
@@ -244,9 +244,9 @@ namespace ProjectSetup.Editor
         }
 
 
-        public List<string> GetQueuedPackageIDs()
+        public List<PackageImportEntry> GetQueuedPackageIDs()
         {
-            return _configurationCache.QueuedPackagesIDs;
+            return _configurationCache.QueuedPackages;
         }
         
         
@@ -283,7 +283,7 @@ namespace ProjectSetup.Editor
         {
             AvailablePackages = _successfullyRetrievedPackages && _allPackages != null
                 ? _allPackages.Keys.Where(id =>
-                    !_configurationCache.QueuedPackagesIDs.Contains(id)).ToList()
+                    !_configurationCache.QueuedPackages.Exists(p => p.ShortID == id)).ToList()
                 : new List<string>();
         }
 
@@ -305,7 +305,7 @@ namespace ProjectSetup.Editor
 
         public void QueuePackage(string id)
         {
-            _configurationCache.QueuedPackagesIDs.Add(id);
+            _configurationCache.QueuedPackages.Add(new PackageImportEntry(_allPackages[id]));
 
             GenerateAvailablePackages();
         }
@@ -313,20 +313,9 @@ namespace ProjectSetup.Editor
 
         public void DequeuePackage(string id)
         {
-            _configurationCache.QueuedPackagesIDs.Remove(id);
+            _configurationCache.QueuedPackages.Remove(_configurationCache.QueuedPackages.Find(p => p.ShortID == id));
             
             GenerateAvailablePackages();
-        }
-
-
-        /// <summary>
-        /// Converts list of shorter package ids to a list of full package ids.
-        /// </summary>
-        /// <param name="packageIDs">List of shorter package ids, equivalent to PackageInfo.name.</param>
-        /// <returns>List of full package ids, equivalent of PackageInfo.packageId.</returns>
-        public IEnumerable<string> GetFullPackagesID(IEnumerable<string> packageIDs)
-        {
-            return packageIDs.Select(id => _allPackages[id].packageId);
         }
         
         
@@ -444,97 +433,13 @@ namespace ProjectSetup.Editor
         {
             _configurationCache.MiscSettings = miscSettings;
         }
-
-
-        public void ExecuteSetup()
-        {
-            _executionCache.SetupInProgress = true;
-        }
-
+        
 
         public void Update()
         {
             if (!_executionCache.SetupInProgress)
             {
                 _configurationCache.Save();
-            }
-            
-            if (_executionCache.SetupInProgress)
-            {
-                PerformSetup();
-            }
-        }
-        
-        
-        // Move this to SetupExecution?
-        private void PerformSetup()
-        {
-            if (!_executionCache.SetupInProgress)
-            {
-                return;
-            }
-
-            if (!_executionCache.PreInteractiveOperationsInProgress && !_executionCache.PreInteractiveOperationsFinished)
-            {
-                _executionCache.PreInteractiveOperationsInProgress = true;
-                
-                Debug.Log("Starting pre-interactive operations...");
-                
-                string[] folders = _configurationCache.AssetsFolderStructureEntry.ToFolderNames();
-                SetupExecution.CreateFolders(folders);
-
-                _executionCache.PreInteractiveOperationsFinished = true;
-                _executionCache.PreInteractiveOperationsInProgress = false;
-            }
-
-            if (!_executionCache.InteractiveOperationsInProgress && _executionCache.PreInteractiveOperationsFinished)
-            {
-                _executionCache.InteractiveOperationsInProgress = true;
-                
-                Debug.Log("Starting interactive operations...");
-
-                IEnumerable<AssetImportEntry> assets = _configurationCache.QueuedAssets.Where(a => a.Interactive);
-                if (assets.Any())
-                {
-                    SetupExecution.ImportAssetsInteractive(assets);
-                }
-                else
-                {
-                    _executionCache.InteractiveOperationsFinished = true;
-                    _executionCache.InteractiveOperationsInProgress = false;
-                }
-            }
-                
-            if (!_executionCache.NonInteractiveOperationsInProgress && _executionCache.InteractiveOperationsFinished && _executionCache.PreInteractiveOperationsFinished)
-            {
-                _executionCache.NonInteractiveOperationsInProgress = true;
-                
-                Debug.Log("Starting non-interactive operations...");
-
-                IEnumerable<AssetImportEntry> assets =
-                    _configurationCache.QueuedAssets.Where(a => !a.Interactive);
-                if (assets.Any())
-                {
-                    SetupExecution.ImportAssetsNonInteractive(assets);
-                }
-
-                IEnumerable<string> packages = GetFullPackagesID(_configurationCache.QueuedPackagesIDs);
-                SetupExecution.ImportPackages(packages);
-                    
-                SetupExecution.SetProjectSettings(_configurationCache.ProjectSettings);
-                    
-                SetupExecution.ExecuteMisc(_configurationCache.MiscSettings);
-
-                // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
-                _executionCache.NonInteractiveOperationsInProgress = false;
-                _executionCache.NonInteractiveOperationsFinished = true;
-            }
-
-            if (_executionCache.AllSetupStagesComplete)
-            {
-                _executionCache.ResetSetup();
-                
-                Debug.Log("Setup finished!");
             }
         }
     }
