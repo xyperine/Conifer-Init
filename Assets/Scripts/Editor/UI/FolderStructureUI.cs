@@ -69,10 +69,6 @@ namespace ProjectSetup.Editor.UI
             
             GUILayout.Label("Folder Structure", _titleStyle);
 
-            if (GUILayout.Button("Reset Structure", _buttonStyle, GUILayout.Width(128f)))
-            {
-                _configuration.ResetFolderStructure();
-            }
             
             SetupWindowElements.DrawSmallSpace();
 
@@ -80,6 +76,11 @@ namespace ProjectSetup.Editor.UI
             using (new GUILayout.VerticalScope("Hierarchy", _windowStyle))
             {
                 DrawHierarchyRecursively(_configuration.GetAssetsFSE());
+            }
+            
+            if (GUILayout.Button("Reset", _buttonStyle, GUILayout.Width(128f)))
+            {
+                _configuration.ResetFolderStructure();
             }
 
             while (_entriesToRemove.Count > 0)

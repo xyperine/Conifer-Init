@@ -193,7 +193,7 @@ namespace ProjectSetup.Editor
                 DeleteTutorialAssets();
             }
 
-            if (miscSettings.DeleteTutorial)
+            if (miscSettings.ConfigureScene)
             {
                 SetupScene(miscSettings.SceneName);
             }
