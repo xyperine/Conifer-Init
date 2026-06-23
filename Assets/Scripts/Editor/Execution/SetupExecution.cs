@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ProjectSetup.Editor.Configuration;
 using TMPro;
 using UnityEditor;
 using UnityEditor.Build;
@@ -7,7 +8,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     /// <summary>
     /// Handles high-level logic of executing the setup by coordinating other components.

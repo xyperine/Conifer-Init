@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using ProjectSetup.Editor.Configuration;
+using UnityEditor;
 using UnityEngine;
 
 namespace ProjectSetup.Editor.UI

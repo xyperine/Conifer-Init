@@ -1,7 +1,10 @@
-﻿using UnityEditor;
+﻿using ProjectSetup.Editor.Configuration;
+using ProjectSetup.Editor.Execution;
+using ProjectSetup.Editor.UI;
+using UnityEditor;
 using UnityEngine;
 
-namespace ProjectSetup.Editor.UI
+namespace ProjectSetup.Editor
 {
     /// <summary>
     /// Coordinates draw logic, handling user inputs, and setup execution. Also acts as a composition root.

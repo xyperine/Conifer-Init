@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using ProjectSetup.Editor.Configuration;
 using UnityEditor;
 using UnityEngine;
 

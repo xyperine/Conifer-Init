@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using ProjectSetup.Editor.Configuration;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;

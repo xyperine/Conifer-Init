@@ -2,7 +2,7 @@
 using UnityEditor.PackageManager;
 using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Configuration
 {
     /// <summary>
     /// Information about a package scheduled for import.

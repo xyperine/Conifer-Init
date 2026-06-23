@@ -6,7 +6,7 @@ using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     internal static class Packages
     {

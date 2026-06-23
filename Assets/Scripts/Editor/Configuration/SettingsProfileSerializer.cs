@@ -3,7 +3,7 @@ using System.IO;
 using Newtonsoft.Json;
 using UnityEngine.Assertions;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Configuration
 {
     /// <summary>
     /// Serializes passed settings profile a JSON file. Asserts that passed file names are valid.

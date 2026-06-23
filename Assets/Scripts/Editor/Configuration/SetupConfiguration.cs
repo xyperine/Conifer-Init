@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ProjectSetup.Editor.Execution;
 using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
@@ -9,7 +10,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Configuration
 {
     /// <summary>
     /// Handles the configuration of the setup and setup execution flow.

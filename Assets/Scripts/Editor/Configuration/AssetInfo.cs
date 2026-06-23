@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Configuration
 {
     /// <summary>
     /// Information about an asset in the storage.

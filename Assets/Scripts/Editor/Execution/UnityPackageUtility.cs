@@ -7,7 +7,7 @@ using ICSharpCode.SharpZipLib.Tar;
 using UnityEditor;
 using UnityEngine.Assertions;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     internal static class UnityPackageUtility
     {

@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     // TODO: Create assembly definition files
     internal static class Folders

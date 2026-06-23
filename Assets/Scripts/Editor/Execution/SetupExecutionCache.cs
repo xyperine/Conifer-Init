@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using ProjectSetup.Editor.Configuration;
 using UnityEditor;
 using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     /// <summary>
     /// Contains tool data that exists only during the setup process and needs to survive domain reloads.

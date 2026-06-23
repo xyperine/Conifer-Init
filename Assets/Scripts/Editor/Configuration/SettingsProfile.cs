@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Configuration
 {
     [Serializable]
     internal sealed class SettingsProfile

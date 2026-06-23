@@ -5,7 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Configuration
 {
     /// <summary>
     /// Describes a folder in the Assets directory. Paths are relative to the Assets directory. Implements a tree structure.

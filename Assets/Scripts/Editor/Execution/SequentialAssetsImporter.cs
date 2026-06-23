@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ProjectSetup.Editor.Configuration;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     /// <summary>
     /// Handles sequential interactive assets import.

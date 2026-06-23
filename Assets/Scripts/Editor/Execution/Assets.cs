@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ProjectSetup.Editor.Configuration;
 using UnityEditor;
 using UnityEngine.Assertions;
 
-namespace ProjectSetup.Editor
+namespace ProjectSetup.Editor.Execution
 {
     // TODO: Add support for interactive import
     // TODO: Automatically move imported assets to the plugins folder
