@@ -54,7 +54,7 @@ namespace ProjectSetup.Editor
                 Debug.Log("Starting pre-interactive operations...");
                 
                 string[] folders = _configurationCache.AssetsFolderStructureEntry.ToFolderNames();
-                SetupExecution.CreateFolders(folders);
+                CreateFolders(folders);
 
                 _executionCache.PreInteractiveOperationsFinished = true;
                 _executionCache.PreInteractiveOperationsInProgress = false;
@@ -69,7 +69,7 @@ namespace ProjectSetup.Editor
                 IEnumerable<AssetImportEntry> assets = _configurationCache.QueuedAssets.Where(a => a.Interactive);
                 if (assets.Any())
                 {
-                    SetupExecution.ImportAssetsInteractive(assets);
+                    ImportAssetsInteractive(assets);
                 }
                 else
                 {
@@ -88,14 +88,14 @@ namespace ProjectSetup.Editor
                     _configurationCache.QueuedAssets.Where(a => !a.Interactive);
                 if (assets.Any())
                 {
-                    SetupExecution.ImportAssetsNonInteractive(assets);
+                    ImportAssetsNonInteractive(assets);
                 }
                 
-                SetupExecution.ImportPackages(_configurationCache.QueuedPackages);
+                ImportPackages(_configurationCache.QueuedPackages);
                     
-                SetupExecution.SetProjectSettings(_configurationCache.ProjectSettings);
+                SetProjectSettings(_configurationCache.ProjectSettings);
                     
-                SetupExecution.ExecuteMisc(_configurationCache.MiscSettings);
+                ExecuteMisc(_configurationCache.MiscSettings);
 
                 // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
                 _executionCache.NonInteractiveOperationsInProgress = false;
@@ -109,9 +109,9 @@ namespace ProjectSetup.Editor
                 Debug.Log("Setup finished!");
             }
         }
-        
-        
-        public static void CreateFolders(string[] folders)
+
+
+        private void CreateFolders(string[] folders)
         {
             Folders.Create(string.Empty, folders);
             
@@ -119,7 +119,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public static void ImportAssetsInteractive(IEnumerable<AssetImportEntry> assets)
+        private void ImportAssetsInteractive(IEnumerable<AssetImportEntry> assets)
         {
             Assert.IsTrue(assets.All(a => a.Interactive));
             
@@ -127,7 +127,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public static void ImportAssetsNonInteractive(IEnumerable<AssetImportEntry> assets)
+        private void ImportAssetsNonInteractive(IEnumerable<AssetImportEntry> assets)
         {
             Assert.IsTrue(assets.Any());
             Assert.IsTrue(assets.All(a => !a.Interactive));
@@ -139,7 +139,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public static void ImportPackages(IEnumerable<PackageImportEntry> packages)
+        private void ImportPackages(IEnumerable<PackageImportEntry> packages)
         {
             TMP_PackageResourceImporter.ImportResources(true, false, false);
 
@@ -150,7 +150,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public static void SetProjectSettings(ProjectSettings projectSettings)
+        private void SetProjectSettings(ProjectSettings projectSettings)
         {
             EditorSettings.projectGenerationRootNamespace = projectSettings.DefaultNamespace;
             EditorSettings.gameObjectNamingScheme = projectSettings.GameObjectNamingScheme;
@@ -186,7 +186,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        public static void ExecuteMisc(MiscSettings miscSettings)
+        private void ExecuteMisc(MiscSettings miscSettings)
         {
             if (miscSettings.DeleteTutorial)
             {
@@ -200,7 +200,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        private static void SetupScene(string sceneName)
+        private void SetupScene(string sceneName)
         {
             if (!sceneName.EndsWith(".unity"))
             {
@@ -215,7 +215,7 @@ namespace ProjectSetup.Editor
         }
 
 
-        private static void DeleteTutorialAssets()
+        private void DeleteTutorialAssets()
         {
             const string tutorialDirectory = "Assets/TutorialInfo";
             FileUtil.DeleteFileOrDirectory(tutorialDirectory);
