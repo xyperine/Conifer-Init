@@ -19,7 +19,6 @@ namespace ProjectSetupTool.Editor.Execution
             {
                 CreateSubFolders(fullPath, folder);
             }
-                
         }
             
             
@@ -63,6 +62,13 @@ namespace ProjectSetupTool.Editor.Execution
                     Debug.LogError($"Failed to move {folderName} under {newParent}: {moveResult}");
                 }
             }
+        }
+        
+        
+        private static bool IsValidFolderName(string name)
+        {
+            bool valid = !string.IsNullOrWhiteSpace(name) && name.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
+            return valid;
         }
     }
 }
