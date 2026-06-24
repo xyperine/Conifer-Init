@@ -59,5 +59,16 @@ namespace ProjectSetup.Editor.UI
         {
             GUILayout.Space(SECTION_SPACE_SIZE);
         }
+
+
+        public static void DrawHorizontalLine(float pxWidth)
+        {
+            Rect rect = EditorGUILayout.GetControlRect(GUILayout.Height(pxWidth));
+            rect.height = pxWidth;
+
+            Color color = new Color(1f, 1f, 1f, 0.1f);
+            
+            EditorGUI.DrawRect(rect, color);
+        }
     }
 }

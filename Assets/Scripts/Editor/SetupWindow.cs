@@ -97,6 +97,12 @@ namespace ProjectSetup.Editor
             
             DrawExecuteSetup();
             
+            SetupWindowElements.DrawSectionSpace();
+            SetupWindowElements.DrawHorizontalLine(1f);
+            SetupWindowElements.DrawRegularSpace();
+            
+            DrawFooter();
+            
             GUILayout.FlexibleSpace();
         }
         
@@ -117,6 +123,32 @@ namespace ProjectSetup.Editor
             {
                 _execution.ExecuteSetup();
             }
+        }
+
+
+        private void DrawFooter()
+        {
+            const string githubUrl = "https://github.com/xyperine";
+            const string itchIoUrl = "https://xyperine.itch.io/";
+            string version = PlayerSettings.bundleVersion;
+            
+            using var s = new GUILayout.HorizontalScope(new GUIStyle());
+            
+            if (EditorGUILayout.LinkButton("GitHub"))
+            {
+                Application.OpenURL(githubUrl);
+            }
+
+            SetupWindowElements.DrawRegularSpace();
+            
+            if (EditorGUILayout.LinkButton("itch.io"))
+            {
+                Application.OpenURL(itchIoUrl);
+            }
+            
+            GUILayout.FlexibleSpace();
+            
+            GUILayout.Label(version);
         }
         
         
