@@ -5,7 +5,7 @@ using UnityEngine;
 namespace ProjectSetupTool.Editor.Configuration
 {
     [Serializable]
-    internal struct ProjectSettings
+    internal struct ProjectSettings : IEquatable<ProjectSettings>
     {
         [field: SerializeField] public string DefaultNamespace { get; set; }
         [field: SerializeField] public EditorSettings.NamingScheme GameObjectNamingScheme { get; set; }
@@ -31,7 +31,8 @@ namespace ProjectSetupTool.Editor.Configuration
         }
         
         
-        public ProjectSettings(string defaultNamespace, EditorSettings.NamingScheme gameObjectNamingScheme, string companyName, string productName, string version, ScriptingImplementation scriptingBackend)
+        public ProjectSettings(string defaultNamespace, EditorSettings.NamingScheme gameObjectNamingScheme, 
+            string companyName, string productName, string version, ScriptingImplementation scriptingBackend)
         {
             DefaultNamespace = defaultNamespace;
             GameObjectNamingScheme = gameObjectNamingScheme;
@@ -39,6 +40,28 @@ namespace ProjectSetupTool.Editor.Configuration
             ProductName = productName;
             Version = version;
             ScriptingBackend = scriptingBackend;
+        }
+
+
+        public bool Equals(ProjectSettings other)
+        {
+            return DefaultNamespace == other.DefaultNamespace &&
+                   GameObjectNamingScheme == other.GameObjectNamingScheme && CompanyName == other.CompanyName &&
+                   ProductName == other.ProductName && Version == other.Version &&
+                   ScriptingBackend == other.ScriptingBackend;
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            return obj is ProjectSettings other && Equals(other);
+        }
+
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(DefaultNamespace, (int) GameObjectNamingScheme, CompanyName, ProductName, Version,
+                (int) ScriptingBackend);
         }
     }
 }

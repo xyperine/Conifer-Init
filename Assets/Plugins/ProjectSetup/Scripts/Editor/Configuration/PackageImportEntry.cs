@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ namespace ProjectSetupTool.Editor.Configuration
         { }
         
         
+        [JsonConstructor]
         public PackageImportEntry(string shortID, string fullID)
         {
             ShortID = shortID;

@@ -4,7 +4,7 @@ using UnityEngine;
 namespace ProjectSetupTool.Editor.Configuration
 {
     [Serializable]
-    internal struct MiscSettings
+    internal struct MiscSettings : IEquatable<MiscSettings>
     {
         [field: SerializeField] public bool DeleteTutorial { get; set; }
         [field: SerializeField] public bool ConfigureScene { get; set; }
@@ -23,6 +23,25 @@ namespace ProjectSetupTool.Editor.Configuration
                 ConfigureScene = true,
                 SceneName = "Main",
             };
+        }
+
+
+        public bool Equals(MiscSettings other)
+        {
+            return DeleteTutorial == other.DeleteTutorial && ConfigureScene == other.ConfigureScene &&
+                   SceneName == other.SceneName;
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            return obj is MiscSettings other && Equals(other);
+        }
+
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(DeleteTutorial, ConfigureScene, SceneName);
         }
     }
 }
