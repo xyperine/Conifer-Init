@@ -64,16 +64,16 @@ namespace ProjectSetupTool.Editor.Configuration
         
         public void LoadSettingsProfiles()
         {
-            if (!Directory.Exists(SettingsProfileSerializer.ProfilesStoragePath))
+            if (!Directory.Exists(SettingsProfilePersistency.StoragePath))
             {
-                Directory.CreateDirectory(SettingsProfileSerializer.ProfilesStoragePath);
+                Directory.CreateDirectory(SettingsProfilePersistency.StoragePath);
             }
             
             IEnumerable<string> profilePaths =
-                Directory.EnumerateFiles(SettingsProfileSerializer.ProfilesStoragePath,
+                Directory.EnumerateFiles(SettingsProfilePersistency.StoragePath,
                     "*.json");
             _profiles = profilePaths
-                .Select(pp => SettingsProfileSerializer.ReadFile(Path.GetFileName(pp)))
+                .Select(pp => SettingsProfilePersistency.Restore(Path.GetFileName(pp)))
                 .ToList();
             
             string activeProfileName = _configurationCache.ActiveSettingsProfileName;
@@ -110,7 +110,7 @@ namespace ProjectSetupTool.Editor.Configuration
                     MiscSettings = MiscSettings.Default(),
                 };
                     
-                SettingsProfileSerializer.SaveFile(defaultProfile, defaultProfile.Name);
+                SettingsProfilePersistency.Save(defaultProfile);
                 
                 _profiles.Add(defaultProfile);
             }
@@ -145,7 +145,7 @@ namespace ProjectSetupTool.Editor.Configuration
             profile.ProjectSettings = _configurationCache.ProjectSettings;
             profile.MiscSettings = _configurationCache.MiscSettings;
             
-            SettingsProfileSerializer.SaveFile(profile, profile.Name);
+            SettingsProfilePersistency.Save(profile);
             
             LoadSettingsProfiles();
             
@@ -157,7 +157,7 @@ namespace ProjectSetupTool.Editor.Configuration
         {
             ApplyProfile(DefaultProfile);
             
-            SettingsProfileSerializer.DeleteFile(profile.Name);
+            SettingsProfilePersistency.Delete(profile.Name);
             
             LoadSettingsProfiles();
             
@@ -168,7 +168,7 @@ namespace ProjectSetupTool.Editor.Configuration
         public void TrySaveProfileAt(string path, Action<string> onSuccess)
         {
             // Extract all of this
-            bool insideProfileStorage = Directory.GetParent(path).FullName == SettingsProfileSerializer.ProfilesStoragePath;
+            bool insideProfileStorage = Directory.GetParent(path).FullName == SettingsProfilePersistency.StoragePath;
             bool hasRightExtension = Path.GetExtension(path) == ".json";
             bool isNotDefaultProfile = Path.GetFileNameWithoutExtension(path) != DEFAULT_PROFILE_NAME;
             bool valid = insideProfileStorage && hasRightExtension && isNotDefaultProfile;
@@ -179,7 +179,7 @@ namespace ProjectSetupTool.Editor.Configuration
             else if (!insideProfileStorage)
             {
                 Debug.LogError(
-                    $"Must be inside the profiles storage directory!: {SettingsProfileSerializer.ProfilesStoragePath}");
+                    $"Must be inside the profiles storage directory!: {SettingsProfilePersistency.StoragePath}");
             }
             else if (!hasRightExtension)
             {

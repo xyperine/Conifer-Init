@@ -5,7 +5,7 @@ using ProjectSetupTool.Editor.Configuration;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class SettingsProfileSerializerTests
+    public class SettingsProfilePersistencyTests
     {
         private const string TEST_PROFILE_NAME = "Test";
         
@@ -18,8 +18,8 @@ namespace ProjectSetupTool.Editor.Tests
             string fileName = profile.Name + ".json";
             
             // Act
-            SettingsProfileSerializer.SaveFile(profile, fileName);
-            SettingsProfile actual = SettingsProfileSerializer.ReadFile(fileName);
+            SettingsProfilePersistency.Save(profile);
+            SettingsProfile actual = SettingsProfilePersistency.Restore(fileName);
             
             // Assert
             SettingsProfile expected = CreateTestProfile();
@@ -32,13 +32,13 @@ namespace ProjectSetupTool.Editor.Tests
         {
             // Arrange
             SettingsProfile profile = CreateTestProfile();
-            string fileName = profile.Name + ".json";
             
             // Act
-            SettingsProfileSerializer.SaveFile(profile, fileName);
+            SettingsProfilePersistency.Save(profile);
             
             // Assert
-            string pathToFile = Path.Combine(SettingsProfileSerializer.ProfilesStoragePath, fileName);
+            string fileName = profile.Name + ".json";
+            string pathToFile = Path.Combine(SettingsProfilePersistency.StoragePath, fileName);
             bool result = File.Exists(pathToFile);
             Assert.IsTrue(result);
         }
@@ -49,14 +49,14 @@ namespace ProjectSetupTool.Editor.Tests
         {
             // Arrange
             SettingsProfile profile = CreateTestProfile();
-            string fileName = profile.Name + ".json";
             
             // Act
-            SettingsProfileSerializer.SaveFile(profile, fileName);
-            SettingsProfileSerializer.DeleteFile(fileName);
+            SettingsProfilePersistency.Save(profile);
+            SettingsProfilePersistency.Delete(profile);
             
             // Assert
-            string pathToFile = Path.Combine(SettingsProfileSerializer.ProfilesStoragePath, fileName);
+            string fileName = profile.Name + ".json";
+            string pathToFile = Path.Combine(SettingsProfilePersistency.StoragePath, fileName);
             bool result = File.Exists(pathToFile);
             Assert.IsFalse(result);
         }
@@ -85,7 +85,7 @@ namespace ProjectSetupTool.Editor.Tests
         [TearDown]
         public void CleanUp()
         {
-            SettingsProfileSerializer.DeleteFile(TEST_PROFILE_NAME);
+            SettingsProfilePersistency.Delete(TEST_PROFILE_NAME);
         }
     }
 }

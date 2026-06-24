@@ -8,7 +8,7 @@ namespace ProjectSetupTool.Editor.Configuration
     /// <summary>
     /// Serializes passed settings profile a JSON file. Asserts that passed file names are valid.
     /// </summary>
-    internal static class SettingsProfileSerializer
+    internal static class SettingsProfilePersistency
     {
         private static readonly JsonSerializerSettings SerializerSettings = new JsonSerializerSettings
         {
@@ -17,12 +17,12 @@ namespace ProjectSetupTool.Editor.Configuration
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
         };
 
-        public static readonly string ProfilesStoragePath = Path.Combine(
+        public static readonly string StoragePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "xyperine",
             "Project Setup Tool", "Profiles");
         
 
-        public static SettingsProfile ReadFile(string fileName)
+        public static SettingsProfile Restore(string fileName)
         {
             if (!fileName.EndsWith(".json"))
             {
@@ -41,18 +41,15 @@ namespace ProjectSetupTool.Editor.Configuration
         }
 
         
-        public static void SaveFile(SettingsProfile profile, string fileName)
+        public static void Save(SettingsProfile profile)
         {
-            if (!fileName.EndsWith(".json"))
-            {
-                fileName += ".json";
-            }
+            string fileName = profile.Name + ".json";
             
             Assert.IsTrue(IsValidFileName(fileName));
             
-            if (!Directory.Exists(ProfilesStoragePath))
+            if (!Directory.Exists(StoragePath))
             {
-                Directory.CreateDirectory(ProfilesStoragePath);
+                Directory.CreateDirectory(StoragePath);
             }
 
             string json = JsonConvert.SerializeObject(profile, SerializerSettings);
@@ -60,7 +57,13 @@ namespace ProjectSetupTool.Editor.Configuration
         }
 
 
-        public static void DeleteFile(string fileName)
+        public static void Delete(SettingsProfile profile)
+        {
+            Delete(profile.Name);
+        }
+        
+        
+        public static void Delete(string fileName)
         {
             if (!fileName.EndsWith(".json"))
             {
@@ -87,7 +90,7 @@ namespace ProjectSetupTool.Editor.Configuration
 
         private static string GetFullPath(string fileName)
         {
-            return Path.Combine(ProfilesStoragePath, fileName);
+            return Path.Combine(StoragePath, fileName);
         }
     }
 }
