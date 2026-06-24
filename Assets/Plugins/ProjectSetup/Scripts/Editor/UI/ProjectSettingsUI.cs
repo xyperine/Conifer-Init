@@ -31,8 +31,10 @@ namespace ProjectSetupTool.Editor.UI
             projectSettings.CompanyName = EditorGUILayout.TextField("Company Name", projectSettings.CompanyName);
             projectSettings.ProductName = EditorGUILayout.TextField("Product Name", projectSettings.ProductName);
             projectSettings.Version = EditorGUILayout.TextField("Version", projectSettings.Version);
-            projectSettings.ScriptingBackend =
-                (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend", projectSettings.ScriptingBackend);
+            ScriptingImplementation scriptingImplementation =
+                (ScriptingImplementation) EditorGUILayout.EnumPopup("Scripting Backend",
+                    projectSettings.Backends[0].Implementation);
+            projectSettings.SetBackend(scriptingImplementation);
 
             _configuration.SetProjectSettings(projectSettings);
         }

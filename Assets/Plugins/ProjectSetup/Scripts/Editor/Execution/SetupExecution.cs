@@ -153,37 +153,7 @@ namespace ProjectSetupTool.Editor.Execution
 
         private void SetProjectSettings(ProjectSettings projectSettings)
         {
-            EditorSettings.projectGenerationRootNamespace = projectSettings.DefaultNamespace;
-            EditorSettings.gameObjectNamingScheme = projectSettings.GameObjectNamingScheme;
-            
-            PlayerSettings.companyName = projectSettings.CompanyName;
-            PlayerSettings.productName = projectSettings.ProductName;
-            PlayerSettings.bundleVersion = projectSettings.Version;
-
-            NamedBuildTarget[] buildTargets =
-            {
-                NamedBuildTarget.Android,
-                NamedBuildTarget.EmbeddedLinux,
-                NamedBuildTarget.iOS,
-                NamedBuildTarget.LinuxHeadlessSimulation,
-                NamedBuildTarget.NintendoSwitch,
-                NamedBuildTarget.NintendoSwitch2,
-                NamedBuildTarget.PS4,
-                NamedBuildTarget.PS5,
-                NamedBuildTarget.QNX,
-                NamedBuildTarget.Server,
-                NamedBuildTarget.Standalone,
-                NamedBuildTarget.tvOS,
-                NamedBuildTarget.VisionOS,
-                NamedBuildTarget.WebGL,
-                NamedBuildTarget.WindowsStoreApps,
-                NamedBuildTarget.XboxOne,
-            };
-
-            foreach (NamedBuildTarget buildTarget in buildTargets)
-            {
-                PlayerSettings.SetScriptingBackend(buildTarget, projectSettings.ScriptingBackend);
-            }
+            ProjectSettingsExecution.Set(projectSettings);
         }
 
 

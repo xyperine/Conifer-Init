@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using UnityEditor.Build;
 using UnityEngine.Assertions;
 
 namespace ProjectSetupTool.Editor.Configuration
@@ -15,6 +18,10 @@ namespace ProjectSetupTool.Editor.Configuration
             TypeNameHandling = TypeNameHandling.All,
             Formatting = Formatting.Indented,
             PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            Converters =
+            {
+                new NamedBuildTargetConverter(),
+            },
         };
 
         public static readonly string StoragePath = Path.Combine(
@@ -91,6 +98,51 @@ namespace ProjectSetupTool.Editor.Configuration
         private static string GetFullPath(string fileName)
         {
             return Path.Combine(StoragePath, fileName);
+        }
+    }
+    
+    
+    internal class NamedBuildTargetConverter : JsonConverter<NamedBuildTarget>
+    {
+        private readonly Dictionary<string, NamedBuildTarget> _namedBuildTargets = new Dictionary<string, NamedBuildTarget>
+        {
+            {NamedBuildTarget.Android.TargetName, NamedBuildTarget.Android},
+            {NamedBuildTarget.EmbeddedLinux.TargetName, NamedBuildTarget.EmbeddedLinux},
+            {NamedBuildTarget.iOS.TargetName, NamedBuildTarget.iOS},
+            {NamedBuildTarget.LinuxHeadlessSimulation.TargetName, NamedBuildTarget.LinuxHeadlessSimulation},
+            {NamedBuildTarget.NintendoSwitch.TargetName, NamedBuildTarget.NintendoSwitch},
+            {NamedBuildTarget.NintendoSwitch2.TargetName, NamedBuildTarget.NintendoSwitch2},
+            {NamedBuildTarget.PS4.TargetName, NamedBuildTarget.PS4},
+            {NamedBuildTarget.PS5.TargetName, NamedBuildTarget.PS5},
+            {NamedBuildTarget.QNX.TargetName, NamedBuildTarget.QNX},
+            {NamedBuildTarget.Server.TargetName, NamedBuildTarget.Server},
+            {NamedBuildTarget.Standalone.TargetName, NamedBuildTarget.Standalone},
+            {NamedBuildTarget.tvOS.TargetName, NamedBuildTarget.tvOS},
+            {NamedBuildTarget.VisionOS.TargetName, NamedBuildTarget.VisionOS},
+            {NamedBuildTarget.WebGL.TargetName, NamedBuildTarget.WebGL},
+            {NamedBuildTarget.WindowsStoreApps.TargetName, NamedBuildTarget.WindowsStoreApps},
+            {NamedBuildTarget.XboxOne.TargetName, NamedBuildTarget.XboxOne},
+        };
+        
+        
+        public override void WriteJson(JsonWriter writer, NamedBuildTarget value, JsonSerializer serializer)
+        {
+            JObject obj = new JObject()
+            {
+                new JProperty("Name", value.TargetName),
+            };
+            
+            obj.WriteTo(writer);
+        }
+
+
+        public override NamedBuildTarget ReadJson(JsonReader reader, Type objectType, NamedBuildTarget existingValue, bool hasExistingValue,
+            JsonSerializer serializer)
+        {
+            JObject obj = JObject.Load(reader);
+            string name = obj.Value<string>("Name");
+
+            return _namedBuildTargets[name];
         }
     }
 }
