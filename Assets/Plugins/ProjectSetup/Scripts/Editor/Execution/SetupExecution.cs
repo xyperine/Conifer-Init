@@ -1,0 +1,231 @@
+using System.Collections.Generic;
+using System.Linq;
+using ProjectSetupTool.Editor.Configuration;
+using TMPro;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Assertions;
+
+namespace ProjectSetupTool.Editor.Execution
+{
+    /// <summary>
+    /// Handles high-level logic of executing the setup by coordinating other components.
+    /// </summary>
+    internal sealed class SetupExecution
+    {
+        private SetupExecutionCache _executionCache;
+        private SetupConfigurationCache _configurationCache;
+        
+
+        public void Initialize()
+        {
+            _executionCache = SetupExecutionCache.instance;
+            _configurationCache = SetupConfigurationCache.instance;
+        }
+        
+        
+        public void ExecuteSetup()
+        {
+            _executionCache.SetupInProgress = true;
+        }
+        
+        
+        public void Update()
+        {
+            if (_executionCache.SetupInProgress)
+            {
+                PerformSetup();
+            }
+        }
+        
+        
+        private void PerformSetup()
+        {
+            if (!_executionCache.SetupInProgress)
+            {
+                return;
+            }
+
+            if (!_executionCache.PreInteractiveOperationsInProgress && !_executionCache.PreInteractiveOperationsFinished)
+            {
+                _executionCache.PreInteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting pre-interactive operations...");
+                
+                string[] folders = _configurationCache.AssetsFolderStructureEntry.ToFolderNames();
+                CreateFolders(folders);
+
+                _executionCache.PreInteractiveOperationsFinished = true;
+                _executionCache.PreInteractiveOperationsInProgress = false;
+            }
+
+            if (!_executionCache.InteractiveOperationsInProgress && _executionCache.PreInteractiveOperationsFinished)
+            {
+                _executionCache.InteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets = _configurationCache.QueuedAssets.Where(a => a.Interactive);
+                if (assets.Any())
+                {
+                    ImportAssetsInteractive(assets);
+                }
+                else
+                {
+                    _executionCache.InteractiveOperationsFinished = true;
+                    _executionCache.InteractiveOperationsInProgress = false;
+                }
+            }
+                
+            if (!_executionCache.NonInteractiveOperationsInProgress && _executionCache.InteractiveOperationsFinished && _executionCache.PreInteractiveOperationsFinished)
+            {
+                _executionCache.NonInteractiveOperationsInProgress = true;
+                
+                Debug.Log("Starting non-interactive operations...");
+
+                IEnumerable<AssetImportEntry> assets =
+                    _configurationCache.QueuedAssets.Where(a => !a.Interactive);
+                if (assets.Any())
+                {
+                    ImportAssetsNonInteractive(assets);
+                }
+                
+                ImportPackages(_configurationCache.QueuedPackages);
+                    
+                SetProjectSettings(_configurationCache.ProjectSettings);
+                    
+                ExecuteMisc(_configurationCache.MiscSettings);
+
+                // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
+                _executionCache.NonInteractiveOperationsInProgress = false;
+                _executionCache.NonInteractiveOperationsFinished = true;
+            }
+
+            if (_executionCache.AllSetupStagesComplete)
+            {
+                _executionCache.ResetSetup();
+                
+                Debug.Log("Setup finished!");
+            }
+        }
+
+
+        private void CreateFolders(string[] folders)
+        {
+            Folders.Create(string.Empty, folders);
+            
+            AssetDatabase.Refresh();
+        }
+
+
+        private void ImportAssetsInteractive(IEnumerable<AssetImportEntry> assets)
+        {
+            Assert.IsTrue(assets.All(a => a.Interactive));
+            
+            Assets.ImportInteractive(assets);
+        }
+
+
+        private void ImportAssetsNonInteractive(IEnumerable<AssetImportEntry> assets)
+        {
+            Assert.IsTrue(assets.Any());
+            Assert.IsTrue(assets.All(a => !a.Interactive));
+            
+            foreach (AssetImportEntry asset in assets)
+            {
+                Assets.Import(asset.Path, asset.Interactive);
+            }
+        }
+
+
+        private void ImportPackages(IEnumerable<PackageImportEntry> packages)
+        {
+            TMP_PackageResourceImporter.ImportResources(true, false, false);
+
+            if (packages.Any())
+            {
+                Packages.ImportAsync(packages.Select(p => p.FullID));
+            }
+        }
+
+
+        private void SetProjectSettings(ProjectSettings projectSettings)
+        {
+            EditorSettings.projectGenerationRootNamespace = projectSettings.DefaultNamespace;
+            EditorSettings.gameObjectNamingScheme = projectSettings.GameObjectNamingScheme;
+            
+            PlayerSettings.companyName = projectSettings.CompanyName;
+            PlayerSettings.productName = projectSettings.ProductName;
+            PlayerSettings.bundleVersion = projectSettings.Version;
+
+            NamedBuildTarget[] buildTargets =
+            {
+                NamedBuildTarget.Android,
+                NamedBuildTarget.EmbeddedLinux,
+                NamedBuildTarget.iOS,
+                NamedBuildTarget.LinuxHeadlessSimulation,
+                NamedBuildTarget.NintendoSwitch,
+                NamedBuildTarget.NintendoSwitch2,
+                NamedBuildTarget.PS4,
+                NamedBuildTarget.PS5,
+                NamedBuildTarget.QNX,
+                NamedBuildTarget.Server,
+                NamedBuildTarget.Standalone,
+                NamedBuildTarget.tvOS,
+                NamedBuildTarget.VisionOS,
+                NamedBuildTarget.WebGL,
+                NamedBuildTarget.WindowsStoreApps,
+                NamedBuildTarget.XboxOne,
+            };
+
+            foreach (NamedBuildTarget buildTarget in buildTargets)
+            {
+                PlayerSettings.SetScriptingBackend(buildTarget, projectSettings.ScriptingBackend);
+            }
+        }
+
+
+        private void ExecuteMisc(MiscSettings miscSettings)
+        {
+            if (miscSettings.DeleteTutorial)
+            {
+                DeleteTutorialAssets();
+            }
+
+            if (miscSettings.ConfigureScene)
+            {
+                SetupScene(miscSettings.SceneName);
+            }
+        }
+
+
+        private void SetupScene(string sceneName)
+        {
+            if (!sceneName.EndsWith(".unity"))
+            {
+                sceneName += ".unity";
+            }
+            
+            AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", sceneName);
+            
+            AssetDatabase.Refresh();
+            
+            EditorSceneManager.OpenScene($"Assets/Scenes/{sceneName}");
+        }
+
+
+        private void DeleteTutorialAssets()
+        {
+            const string tutorialDirectory = "Assets/TutorialInfo";
+            FileUtil.DeleteFileOrDirectory(tutorialDirectory);
+            FileUtil.DeleteFileOrDirectory(tutorialDirectory + ".meta");
+            const string readmeAssetPath = "Assets/Readme.asset";
+            FileUtil.DeleteFileOrDirectory(readmeAssetPath + ".meta");
+            FileUtil.DeleteFileOrDirectory(readmeAssetPath);
+            
+            AssetDatabase.Refresh();
+        }
+    }
+}
