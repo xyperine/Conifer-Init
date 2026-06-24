@@ -11,7 +11,7 @@ namespace ProjectSetupTool.Editor.Tests
         
         
         [Test]
-        public void Saved_profile_deserializes_correctly()
+        public void Saved_profile_restores_correctly()
         {
             // Arrange
             SettingsProfile profile = CreateTestProfile();
