@@ -34,7 +34,7 @@ namespace ProjectSetup.Editor.Execution
             PreInteractiveOperationsInProgress = false;
             PreInteractiveOperationsFinished = false;
             InteractiveOperationsInProgress = false;
-            AssetsToImport.Clear();
+            AssetsToImport = new List<AssetImportEntry>();
             Importing = false;
             Stable = true;
             ImportRequested = false;
