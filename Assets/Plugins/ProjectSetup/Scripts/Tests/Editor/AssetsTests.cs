@@ -46,6 +46,34 @@ namespace ProjectSetupTool.Editor.Tests
                 Assert.IsTrue(AssetDatabase.AssetPathExists(importedFile));
             }
         }
+        
+        
+        [UnityTest]
+        public IEnumerator Correctly_identifies_all_package_assets_within_project()
+        {
+            // Arrange
+            string[] assetsToImport = _assets[..2];
+            string assetNotToImport = _assets[^1];
+            
+            // Act
+            foreach (string asset in assetsToImport)
+            {
+                string fullPath = Path.Combine(_pathToTestAssets, asset);
+                Assets.Import(fullPath);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+            
+            // Assert
+            foreach (string asset in assetsToImport)
+            {
+                string fullPath = Path.Combine(_pathToTestAssets, asset);
+                Assert.IsTrue(UnityPackageUtility.AllPluginAssetsAlreadyImported(fullPath));
+            }
+
+            string notImportedAssetFullPath = Path.Combine(_pathToTestAssets, assetNotToImport);
+            Assert.IsFalse(UnityPackageUtility.AllPluginAssetsAlreadyImported(notImportedAssetFullPath));
+        }
 
 
         [TearDown]
