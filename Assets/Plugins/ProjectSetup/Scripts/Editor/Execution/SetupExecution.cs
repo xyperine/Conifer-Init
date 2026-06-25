@@ -133,7 +133,7 @@ namespace ProjectSetupTool.Editor.Execution
             
             foreach (AssetImportEntry asset in assets)
             {
-                Assets.Import(asset.Path, asset.Interactive);
+                Assets.Import(asset.Path);
             }
         }
 
