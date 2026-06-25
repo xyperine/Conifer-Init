@@ -3,8 +3,6 @@ using System.Linq;
 using ProjectSetupTool.Editor.Configuration;
 using TMPro;
 using UnityEditor;
-using UnityEditor.Build;
-using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.Assertions;
 
