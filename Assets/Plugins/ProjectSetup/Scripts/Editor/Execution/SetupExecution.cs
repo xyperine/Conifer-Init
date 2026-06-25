@@ -159,43 +159,7 @@ namespace ProjectSetupTool.Editor.Execution
 
         private void ExecuteMisc(MiscSettings miscSettings)
         {
-            if (miscSettings.DeleteTutorial)
-            {
-                DeleteTutorialAssets();
-            }
-
-            if (miscSettings.ConfigureScene)
-            {
-                SetupScene(miscSettings.SceneName);
-            }
-        }
-
-
-        private void SetupScene(string sceneName)
-        {
-            if (!sceneName.EndsWith(".unity"))
-            {
-                sceneName += ".unity";
-            }
-            
-            AssetDatabase.RenameAsset("Assets/Scenes/SampleScene.unity", sceneName);
-            
-            AssetDatabase.Refresh();
-            
-            EditorSceneManager.OpenScene($"Assets/Scenes/{sceneName}");
-        }
-
-
-        private void DeleteTutorialAssets()
-        {
-            const string tutorialDirectory = "Assets/TutorialInfo";
-            FileUtil.DeleteFileOrDirectory(tutorialDirectory);
-            FileUtil.DeleteFileOrDirectory(tutorialDirectory + ".meta");
-            const string readmeAssetPath = "Assets/Readme.asset";
-            FileUtil.DeleteFileOrDirectory(readmeAssetPath + ".meta");
-            FileUtil.DeleteFileOrDirectory(readmeAssetPath);
-            
-            AssetDatabase.Refresh();
+            MiscSettingsExecution.Execute(miscSettings);
         }
     }
 }
