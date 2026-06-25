@@ -1,0 +1,60 @@
+﻿using System.Collections;
+using System.IO;
+using NUnit.Framework;
+using ProjectSetupTool.Editor.Execution;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.TestTools;
+
+namespace ProjectSetupTool.Editor.Tests
+{
+    public class AssetsTests
+    {
+        private readonly string[] _assets =
+        {
+            "Test_Asset_1.unitypackage",
+            "Test_Asset_2.unitypackage",
+            "Test_Asset_3.unitypackage",
+        };
+
+        private readonly string[] _importedFiles =
+        {
+            "Assets/Test1.txt",
+            "Assets/Test2.txt",
+            "Assets/Test3.txt",
+        };
+
+        private readonly string _pathToTestAssets =
+            Path.Combine(Application.dataPath, "Plugins", "ProjectSetup", "Scripts", "Tests", "Editor");
+        
+        
+        [UnityTest]
+        public IEnumerator Specified_assets_that_dont_trigger_domain_reload_were_imported_successfully()
+        {
+            // Act
+            foreach (string asset in _assets)
+            {
+                string fullPath = Path.Combine(_pathToTestAssets, asset);
+                Assets.Import(fullPath);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+            
+            // Assert
+            foreach (string importedFile in _importedFiles)
+            {
+                Assert.IsTrue(AssetDatabase.AssetPathExists(importedFile));
+            }
+        }
+
+
+        [TearDown]
+        public void CleanUp()
+        {
+            foreach (string importedFile in _importedFiles)
+            {
+                AssetDatabase.DeleteAsset(importedFile);
+            }
+        }
+    }
+}
