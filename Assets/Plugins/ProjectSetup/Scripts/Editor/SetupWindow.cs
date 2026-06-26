@@ -133,7 +133,8 @@ namespace ProjectSetupTool.Editor
         {
             const string githubUrl = "https://github.com/xyperine";
             const string itchIoUrl = "https://xyperine.itch.io/";
-            string version = PlayerSettings.bundleVersion;
+            // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
+            const string version = "v0.1.0";
             
             using var s = new GUILayout.HorizontalScope(new GUIStyle());
             

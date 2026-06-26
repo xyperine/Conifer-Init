@@ -170,7 +170,8 @@ namespace ProjectSetupTool.Editor.Configuration
         public static FolderStructureEntry Default()
         {
             FolderStructureEntry assetsFolderStructureEntry = new FolderStructureEntry("Assets", (FolderStructureEntry) null);
-            
+
+#if SETUP_TOOL_DEV
             Create(assetsFolderStructureEntry, "Animations");
             Create(assetsFolderStructureEntry, "Audio");
             Create(assetsFolderStructureEntry, "Data/Inputs");
@@ -183,6 +184,18 @@ namespace ProjectSetupTool.Editor.Configuration
             Create(assetsFolderStructureEntry, "Scripts/Tests/Editor");
             Create(assetsFolderStructureEntry, "Scripts/Tests/Runtime");
             Create(assetsFolderStructureEntry, "Textures");
+#else
+            Create(assetsFolderStructureEntry, "Animations");
+            Create(assetsFolderStructureEntry, "Audio");
+            Create(assetsFolderStructureEntry, "Data");
+            Create(assetsFolderStructureEntry, "Materials");
+            Create(assetsFolderStructureEntry, "Meshes");
+            Create(assetsFolderStructureEntry, "Plugins");
+            Create(assetsFolderStructureEntry, "Prefabs");
+            Create(assetsFolderStructureEntry, "Shaders");
+            Create(assetsFolderStructureEntry, "Scripts");
+            Create(assetsFolderStructureEntry, "Textures");
+#endif
 
             return assetsFolderStructureEntry;
         }

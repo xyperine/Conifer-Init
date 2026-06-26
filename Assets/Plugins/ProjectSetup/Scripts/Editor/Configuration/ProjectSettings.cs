@@ -78,13 +78,13 @@ namespace ProjectSetupTool.Editor.Configuration
         /// <returns>Configured ProjectSettings instance.</returns>
         public static ProjectSettings Default()
         {
-            // Actual default
-            //return new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
-            //    "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
-            
-            // For development
+#if SETUP_TOOL_DEV
             return new ProjectSettings("ProjectSetup", EditorSettings.NamingScheme.Underscore, "xyperine",
                 "Project Setup", "v0.1.0", ScriptingImplementation.IL2CPP);
+#else
+            return new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
+                "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
+#endif
         }
         
 

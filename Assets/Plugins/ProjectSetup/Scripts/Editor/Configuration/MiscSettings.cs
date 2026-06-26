@@ -17,12 +17,21 @@ namespace ProjectSetupTool.Editor.Configuration
         /// <returns>Configured MiscSettings instance.</returns>
         public static MiscSettings Default()
         {
+#if SETUP_TOOL_DEV
             return new MiscSettings
             {
                 DeleteTutorial = true,
                 ConfigureScene = true,
                 SceneName = "Main",
             };
+#else
+            return new MiscSettings
+            {
+                DeleteTutorial = false,
+                ConfigureScene = false,
+                SceneName = string.Empty,
+            };
+#endif
         }
 
 
