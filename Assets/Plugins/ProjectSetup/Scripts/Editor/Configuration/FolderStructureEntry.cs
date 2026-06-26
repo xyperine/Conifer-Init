@@ -192,7 +192,7 @@ namespace ProjectSetupTool.Editor.Configuration
         /// Creates a deep copy of the given entry.
         /// </summary>
         /// <param name="original">Entry to copy.</param>
-        /// <param name="parent">Parent of the passed entry.</param>
+        /// <param name="parent">Parent of the passed entry. Use null if shouldn't have parent.</param>
         /// <returns>Copied entry.</returns>
         public static FolderStructureEntry DeepCopy(FolderStructureEntry original, FolderStructureEntry parent)
         {
