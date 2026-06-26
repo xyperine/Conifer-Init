@@ -1,10 +1,8 @@
 ﻿using System.IO;
-using UnityEditor;
 using UnityEngine;
 
 namespace ProjectSetupTool.Editor.Execution
 {
-    // TODO: Create assembly definition files
     internal static class Folders
     {
         public static void Create(string destination, string[] folders)
@@ -35,40 +33,6 @@ namespace ProjectSetupTool.Editor.Execution
                     Directory.CreateDirectory(currentPath);
                 }
             }
-        }
-            
-            
-        public static void Delete(string folderName)
-        {
-            string path = $"Assets/{folderName}";
-            if (AssetDatabase.IsValidFolder(path))
-            {
-                AssetDatabase.DeleteAsset(path);
-            }
-        }
-
-
-        // TODO: Consider checking with AssetDatabase.ValidateMoveAsset()
-        public static void Move(string newParent, string folderName)
-        {
-            string sourcePath = $"Assets/{folderName}";
-            if (AssetDatabase.IsValidFolder(sourcePath))
-            {
-                string destinationPath = $"Assets/{newParent}/{folderName}";
-                string moveResult = AssetDatabase.MoveAsset(sourcePath, destinationPath);
-                bool movedSuccessfully = string.IsNullOrEmpty(moveResult);
-                if (!movedSuccessfully)
-                {
-                    Debug.LogError($"Failed to move {folderName} under {newParent}: {moveResult}");
-                }
-            }
-        }
-        
-        
-        private static bool IsValidFolderName(string name)
-        {
-            bool valid = !string.IsNullOrWhiteSpace(name) && name.IndexOfAny(Path.GetInvalidFileNameChars()) == -1;
-            return valid;
         }
     }
 }

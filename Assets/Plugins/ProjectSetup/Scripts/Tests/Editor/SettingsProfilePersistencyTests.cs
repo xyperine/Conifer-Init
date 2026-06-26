@@ -5,7 +5,7 @@ using ProjectSetupTool.Editor.Configuration;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class SettingsProfilePersistencyTests
+    internal sealed class SettingsProfilePersistencyTests
     {
         private const string TEST_PROFILE_NAME = "Test";
         

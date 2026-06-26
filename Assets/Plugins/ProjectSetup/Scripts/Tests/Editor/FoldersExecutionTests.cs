@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class FoldersExecutionTests
+    internal sealed class FoldersExecutionTests
     {
         private readonly string[] _folderNames = 
         {

@@ -102,7 +102,7 @@ namespace ProjectSetupTool.Editor.Configuration
     }
     
     
-    internal class NamedBuildTargetConverter : JsonConverter<NamedBuildTarget>
+    internal sealed class NamedBuildTargetConverter : JsonConverter<NamedBuildTarget>
     {
         private readonly Dictionary<string, NamedBuildTarget> _namedBuildTargets = new Dictionary<string, NamedBuildTarget>
         {

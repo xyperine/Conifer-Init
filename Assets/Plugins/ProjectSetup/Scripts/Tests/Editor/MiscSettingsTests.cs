@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class MiscSettingsTests
+    internal sealed class MiscSettingsTests
     {
         [Test]
         public void Scene_is_renamed_from_SampleScene_to_TestScene()

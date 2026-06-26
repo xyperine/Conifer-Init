@@ -4,11 +4,10 @@ using ProjectSetupTool.Editor.Configuration;
 using ProjectSetupTool.Editor.Execution;
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEngine;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class ProjectSettingsTests
+    internal sealed class ProjectSettingsTests
     {
         private ProjectSettings _temp;
 

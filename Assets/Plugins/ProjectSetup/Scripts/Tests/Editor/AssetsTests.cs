@@ -8,7 +8,7 @@ using UnityEngine.TestTools;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class AssetsTests
+    internal sealed class AssetsTests
     {
         private readonly string[] _assets =
         {

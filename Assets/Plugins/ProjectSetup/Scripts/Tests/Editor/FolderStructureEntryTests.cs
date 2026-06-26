@@ -1,11 +1,10 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using NUnit.Framework;
 using ProjectSetupTool.Editor.Configuration;
 
 namespace ProjectSetupTool.Editor.Tests
 {
-    public class FolderStructureEntryTests
+    internal sealed class FolderStructureEntryTests
     {
         private readonly string[] _folderNames = 
         {
