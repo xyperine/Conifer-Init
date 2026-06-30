@@ -829,7 +829,7 @@ PlayerSettings:
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
-    Standalone: SETUP_TOOL_DEV
+    Standalone: CONIFER_INIT_DEV
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
