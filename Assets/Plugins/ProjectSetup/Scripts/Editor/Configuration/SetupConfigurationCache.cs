@@ -52,6 +52,19 @@ namespace ProjectSetupTool.Editor.Configuration
             get => activeSettingsProfileName;
             set => activeSettingsProfileName = value;
         }
+
+
+        public void Clear()
+        {
+            activeSettingsProfileName = "Default_Profile";
+            miscSettings = MiscSettings.Default();
+            projectSettings = ProjectSettings.Default();
+            queuedAssets = new List<AssetImportEntry>();
+            queuedPackages = new List<PackageImportEntry>();
+            assetsFolderStructureEntry = FolderStructureEntry.Default();
+            
+            Save();
+        }
         
         
         public void Save()

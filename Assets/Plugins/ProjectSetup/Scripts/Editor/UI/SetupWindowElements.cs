@@ -49,6 +49,14 @@ namespace ProjectSetupTool.Editor.UI
         }
 
 
+        public static void DrawSectionSeparator()
+        {
+            DrawSectionSpace();
+            DrawHorizontalLine(1f);
+            DrawRegularSpace();
+        }
+
+
         public static void DrawSmallSpace()
         {
             GUILayout.Space(SMALL_SPACE_SIZE);

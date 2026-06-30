@@ -74,8 +74,6 @@ namespace ProjectSetupTool.Editor.Execution
             EditorApplication.update -= Update;
 
             _data.InteractiveOperationsFinished = true;
-            
-            Debug.Log("All assets imported!");
         }
 
 

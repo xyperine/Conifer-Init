@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.IO;
+using System.Runtime.CompilerServices;
 using ProjectSetupTool.Editor.Configuration;
 using ProjectSetupTool.Editor.Execution;
 using ProjectSetupTool.Editor.UI;
@@ -74,6 +75,14 @@ namespace ProjectSetupTool.Editor
                 new GUILayout.ScrollViewScope(_scrollPosition, _entireWindowStyle);
             _scrollPosition = scrollViewScope.scrollPosition;
             
+            DrawHeader();
+            
+            SetupWindowElements.DrawSectionSpace();
+            
+            DrawToolsOptions();
+            
+            SetupWindowElements.DrawSectionSeparator();
+            
             _profileSettingsUI.Draw();
             
             SetupWindowElements.DrawSectionSpace();
@@ -100,9 +109,7 @@ namespace ProjectSetupTool.Editor
             
             DrawExecuteSetup();
             
-            SetupWindowElements.DrawSectionSpace();
-            SetupWindowElements.DrawHorizontalLine(1f);
-            SetupWindowElements.DrawRegularSpace();
+            SetupWindowElements.DrawSectionSeparator();
             
             DrawFooter();
             
@@ -115,6 +122,57 @@ namespace ProjectSetupTool.Editor
             _folderStructureUI.ResetTemporaryState();
             _packagesSettingsUI.ResetTemporaryState();
             _assetsSettingsUI.ResetTemporaryState();
+        }
+
+
+        private void DrawHeader()
+        {
+            // Contains branding
+         
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(new GUIStyle());
+            
+            GUILayout.Label("Conifer Init", new GUIStyle(GUI.skin.label) {fontSize = 36, alignment = TextAnchor.MiddleCenter});
+        }
+
+
+        private void DrawToolsOptions()
+        {
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(new GUIStyle());
+
+            GUIStyle style = new GUIStyle(GUI.skin.button);
+            
+            GUILayout.FlexibleSpace();
+
+            if (GUILayout.Button("Reset Configuration", style, GUILayout.Height(20f), GUILayout.Width(128f)))
+            {
+                SetupConfigurationCache.instance.Clear();
+            }
+            
+            GUILayout.Space(16f);
+
+            if (GUILayout.Button("Reset Execution", style, GUILayout.Height(20f), GUILayout.Width(128f)))
+            {
+                SetupExecutionCache.instance.Clear();
+            }
+            
+            GUILayout.Space(16f);
+
+            if (GUILayout.Button("Uninstall", style, GUILayout.Height(20f), GUILayout.Width(128f)))
+            {
+                bool wantToUninstall = EditorDialog.DisplayDecisionDialog("Uninstall?",
+                    "Do you want to remove Conifer Init from your project?", "Yes", "No");
+                if (wantToUninstall)
+                {
+                    Close();
+
+                    string cachePath = Path.Combine(Application.dataPath.Replace("Assets", "Library"),
+                        "ProjectSetupTool");
+                    Directory.Delete(cachePath, true);
+                    AssetDatabase.DeleteAsset("Assets/Plugins/ProjectSetup");
+                }
+            }
+            
+            GUILayout.FlexibleSpace();
         }
 
 

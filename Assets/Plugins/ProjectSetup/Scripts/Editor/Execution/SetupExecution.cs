@@ -88,6 +88,8 @@ namespace ProjectSetupTool.Editor.Execution
                 if (assets.Any())
                 {
                     ImportAssetsNonInteractive(assets);
+
+                    Debug.Log("All assets imported!");
                 }
                 
                 ImportPackages(_configurationCache.QueuedPackages);
@@ -103,7 +105,7 @@ namespace ProjectSetupTool.Editor.Execution
 
             if (_executionCache.AllSetupStagesComplete)
             {
-                _executionCache.ResetSetup();
+                _executionCache.Clear();
                 
                 Debug.Log("Setup finished!");
             }

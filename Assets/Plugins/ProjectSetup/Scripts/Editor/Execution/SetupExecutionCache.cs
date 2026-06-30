@@ -28,7 +28,7 @@ namespace ProjectSetupTool.Editor.Execution
                                               NonInteractiveOperationsFinished;
         
         
-        public void ResetSetup()
+        public void Clear()
         {
             SetupInProgress = false;
             PreInteractiveOperationsInProgress = false;
