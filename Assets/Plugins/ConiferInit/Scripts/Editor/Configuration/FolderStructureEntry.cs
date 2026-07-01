@@ -16,8 +16,9 @@ namespace ConiferInit.Editor.Configuration
         [field: JsonProperty, SerializeReference] public List<FolderStructureEntry> Children { get; private set; }
             
         [field: SerializeField] public string Name { get; private set; }
-        [field: SerializeReference] public FolderStructureEntry Parent { get; private set; }
         
+        public FolderStructureEntry Parent { get; private set; }
+
         public string FullName =>
             Path.Combine(Parent == null || Parent.FullName == "Assets" 
                 ? string.Empty 
@@ -82,6 +83,7 @@ namespace ConiferInit.Editor.Configuration
         {
             if (Children.Contains(folderStructureEntry))
             {
+                folderStructureEntry.Parent = null;
                 Children.Remove(folderStructureEntry);
             }
         }

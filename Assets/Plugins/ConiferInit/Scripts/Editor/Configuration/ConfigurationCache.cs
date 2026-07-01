@@ -65,8 +65,15 @@ namespace ConiferInit.Editor.Configuration
             
             Save();
         }
+
         
-        
+        // A way to fix incorrect deserialization causing a "ghost" parent issue.
+        private void OnEnable()
+        {
+            assetsFolderStructureEntry = FolderStructureEntry.DeepCopy(assetsFolderStructureEntry, null);
+        }
+
+
         public void Save()
         {
             Save(true);
