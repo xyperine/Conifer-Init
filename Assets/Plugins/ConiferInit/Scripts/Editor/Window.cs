@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Runtime.CompilerServices;
 using ConiferInit.Editor.Configuration;
 using ConiferInit.Editor.Execution;
@@ -54,6 +55,15 @@ namespace ConiferInit.Editor
             window.minSize = size;
             window.Show();
         }
+
+
+#if CONIFER_INIT_DEV
+        [MenuItem("Tools/Open Conifer Init profiles storage")]
+        private static void OpenProfilesStorage()
+        {
+            Process.Start(SettingsProfilePersistency.StoragePath);
+        }
+#endif
 
 
         private void OnEnable()
