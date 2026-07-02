@@ -32,6 +32,12 @@ namespace ConiferInit.Editor
         
         private Vector2 _scrollPosition;
 
+        private GUIStyle _scopeStyle;
+        private GUIStyle _titleStyle;
+        private GUIStyle _buttonStyle;
+
+        private bool _stylesInitialized;
+
         private Texture2D _logo;
         private Font _font;
         
@@ -80,6 +86,20 @@ namespace ConiferInit.Editor
         
         private void OnGUI()
         {
+            if (!_stylesInitialized)
+            {
+                _scopeStyle = new GUIStyle();
+                _titleStyle = new GUIStyle(GUI.skin.label)
+                {
+                    fontSize = 42,
+                    alignment = TextAnchor.MiddleLeft,
+                    font = _font,
+                };
+                _buttonStyle = new GUIStyle(GUI.skin.button);
+
+                _stylesInitialized = true;
+            }
+            
             using GUILayout.ScrollViewScope scrollViewScope =
                 new GUILayout.ScrollViewScope(_scrollPosition, _entireWindowStyle);
             _scrollPosition = scrollViewScope.scrollPosition;
@@ -132,15 +152,13 @@ namespace ConiferInit.Editor
 
         private void DrawHeader()
         {
-            using (new GUILayout.HorizontalScope(new GUIStyle()))
+            using (new GUILayout.HorizontalScope(_scopeStyle))
             {
                 const float maxSize = 96f;
                 GUILayout.FlexibleSpace();
                 GUILayout.Label(_logo, GUILayout.MaxHeight(maxSize), GUILayout.MaxWidth(maxSize));
                 GUILayout.Space(16f);
-                GUILayout.Label("Conifer Init",
-                    new GUIStyle(GUI.skin.label) {fontSize = 42, alignment = TextAnchor.MiddleLeft, font = _font},
-                    GUILayout.Height(maxSize));
+                GUILayout.Label("Conifer Init", _titleStyle, GUILayout.Height(maxSize));
                 GUILayout.FlexibleSpace();
             }
             
@@ -152,27 +170,25 @@ namespace ConiferInit.Editor
 
         private void DrawToolsOptions()
         {
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(new GUIStyle());
-
-            GUIStyle style = new GUIStyle(GUI.skin.button);
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
             
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Reset Configuration", style, GUILayout.Height(20f), GUILayout.Width(128f)))
+            if (GUILayout.Button("Reset Configuration", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
                 ConfigurationCache.instance.Clear();
             }
             
             GUILayout.Space(16f);
 
-            if (GUILayout.Button("Reset Execution", style, GUILayout.Height(20f), GUILayout.Width(128f)))
+            if (GUILayout.Button("Reset Execution", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
                 ExecutionCache.instance.Clear();
             }
             
             GUILayout.Space(16f);
 
-            if (GUILayout.Button("Uninstall", style, GUILayout.Height(20f), GUILayout.Width(128f)))
+            if (GUILayout.Button("Uninstall", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
                 bool wantToUninstall = EditorDialog.DisplayDecisionDialog("Uninstall?",
                     "Do you want to remove Conifer Init from your project?", "Yes", "No");
@@ -193,9 +209,9 @@ namespace ConiferInit.Editor
 
         private void DrawExecuteSetup()
         {
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(new GUIStyle());
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
 
-            if (GUILayout.Button("Execute Setup", new GUIStyle(GUI.skin.button), GUILayout.Height(32f)))
+            if (GUILayout.Button("Execute Setup", _buttonStyle, GUILayout.Height(32f)))
             {
                 _execution.ExecuteSetup();
             }
@@ -209,7 +225,7 @@ namespace ConiferInit.Editor
             // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
             const string version = "v0.1.0";
             
-            using var s = new GUILayout.HorizontalScope(new GUIStyle());
+            using var s = new GUILayout.HorizontalScope(_scopeStyle);
             
             if (EditorGUILayout.LinkButton("GitHub"))
             {
