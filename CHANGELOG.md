@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v0.1.0] - YYYY-Mon-DD
+## [0.1.0] - YYYY-Mon-DD
 
 - Initial release.
 
 [unreleased]: https://github.com/xyperine/Project-Setup/compare/v0.1.0...HEAD
-[v0.1.0]: https://github.com/xyperine/Project-Setup/releases/tag/v0.1.0
+[0.1.0]: https://github.com/xyperine/Project-Setup/releases/tag/v0.1.0
