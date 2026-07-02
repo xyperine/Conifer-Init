@@ -15,6 +15,9 @@ namespace ConiferInit.Editor
     /// </summary>
     internal sealed class Window : EditorWindow
     {
+        private const string LOGO_PATH = "Assets/Plugins/ConiferInit/Textures/Logo.png";
+        private const string TITLE_FONT_PATH = "Assets/Plugins/ConiferInit/Fonts/KodeMono-Regular.ttf";
+        
         private readonly SetupConfiguration _configuration = new SetupConfiguration();
         private readonly SetupExecution _execution = new SetupExecution();
 
@@ -28,6 +31,9 @@ namespace ConiferInit.Editor
         private MiscSettingsUI _miscSettingsUI;
         
         private Vector2 _scrollPosition;
+
+        private Texture2D _logo;
+        private Font _font;
         
         
         [MenuItem("Tools/Conifer Init")]
@@ -60,6 +66,9 @@ namespace ConiferInit.Editor
             
             _entireWindowStyle = new GUIStyle();
             _entireWindowStyle.padding = new RectOffset(16, 16, 16, 16);
+
+            _logo = AssetDatabase.LoadAssetAtPath<Texture2D>(LOGO_PATH);
+            _font = AssetDatabase.LoadAssetAtPath<Font>(TITLE_FONT_PATH);
         }
 
 
@@ -76,10 +85,6 @@ namespace ConiferInit.Editor
             _scrollPosition = scrollViewScope.scrollPosition;
             
             DrawHeader();
-            
-            WindowElements.DrawSectionSpace();
-            
-            DrawToolsOptions();
             
             WindowElements.DrawSectionSeparator();
             
@@ -127,11 +132,21 @@ namespace ConiferInit.Editor
 
         private void DrawHeader()
         {
-            // Contains branding
-         
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(new GUIStyle());
+            using (new GUILayout.HorizontalScope(new GUIStyle()))
+            {
+                const float maxSize = 96f;
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(_logo, GUILayout.MaxHeight(maxSize), GUILayout.MaxWidth(maxSize));
+                GUILayout.Space(16f);
+                GUILayout.Label("Conifer Init",
+                    new GUIStyle(GUI.skin.label) {fontSize = 42, alignment = TextAnchor.MiddleLeft, font = _font},
+                    GUILayout.Height(maxSize));
+                GUILayout.FlexibleSpace();
+            }
             
-            GUILayout.Label("Conifer Init", new GUIStyle(GUI.skin.label) {fontSize = 36, alignment = TextAnchor.MiddleCenter});
+            WindowElements.DrawSectionSpace();
+
+            DrawToolsOptions();
         }
 
 
