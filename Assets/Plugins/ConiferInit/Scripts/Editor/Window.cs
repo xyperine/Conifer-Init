@@ -234,7 +234,7 @@ namespace ConiferInit.Editor
             const string itchIoUrl = "https://xyperine.itch.io/";
             const string sourceCodeUrl = "https://github.com/xyperine/Conifer-Init";
             // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
-            const string version = "v0.1.0";
+            const string version = "0.1.0";
             
             using var s = new GUILayout.HorizontalScope(_scopeStyle);
             

@@ -80,7 +80,7 @@ namespace ConiferInit.Editor.Configuration
         {
 #if CONIFER_INIT_DEV
             return new ProjectSettings("ConiferInit", EditorSettings.NamingScheme.Underscore, "xyperine",
-                "Conifer Init", "v0.1.0", ScriptingImplementation.IL2CPP);
+                "Conifer Init", "0.1.0", ScriptingImplementation.IL2CPP);
 #else
             return new ProjectSettings(string.Empty, EditorSettings.NamingScheme.SpaceParenthesis,
                 "CompanyName", "ProductName", "0.1.0", ScriptingImplementation.IL2CPP);
