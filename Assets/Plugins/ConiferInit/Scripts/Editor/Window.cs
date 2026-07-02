@@ -222,6 +222,7 @@ namespace ConiferInit.Editor
         {
             const string githubUrl = "https://github.com/xyperine";
             const string itchIoUrl = "https://xyperine.itch.io/";
+            const string sourceCodeUrl = "https://github.com/xyperine/Conifer-Init";
             // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
             const string version = "v0.1.0";
             
@@ -237,6 +238,13 @@ namespace ConiferInit.Editor
             if (EditorGUILayout.LinkButton("itch.io"))
             {
                 Application.OpenURL(itchIoUrl);
+            }
+            
+            WindowElements.DrawRegularSpace();
+            
+            if (EditorGUILayout.LinkButton("Source Code"))
+            {
+                Application.OpenURL(sourceCodeUrl);
             }
             
             GUILayout.FlexibleSpace();
