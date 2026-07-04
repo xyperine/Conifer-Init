@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace ConiferInit.Editor.Configuration
 {
@@ -211,6 +212,8 @@ namespace ConiferInit.Editor.Configuration
         /// <returns>Copied entry.</returns>
         public static FolderStructureEntry DeepCopy(FolderStructureEntry original, FolderStructureEntry parent)
         {
+            Assert.IsNotNull(original);
+            
             string name = original.Name;
             List<FolderStructureEntry> children = new List<FolderStructureEntry>();
             FolderStructureEntry copy = new FolderStructureEntry(name, parent, children);
