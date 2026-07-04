@@ -1,18 +1,15 @@
 ﻿using System.Diagnostics;
 using System.IO;
-using System.Runtime.CompilerServices;
 using ConiferInit.Editor.Configuration;
 using ConiferInit.Editor.Execution;
 using ConiferInit.Editor.UI;
 using UnityEditor;
 using UnityEngine;
 
-[assembly: InternalsVisibleTo("ConiferInit.Editor.Tests", AllInternalsVisible = true)]
-
 namespace ConiferInit.Editor
 {
     /// <summary>
-    /// Coordinates draw logic, handling user inputs, and setup execution. Also acts as a composition root.
+    /// Coordinates draw logic and handling user inputs. Also acts as a composition root.
     /// </summary>
     internal sealed class Window : EditorWindow
     {
