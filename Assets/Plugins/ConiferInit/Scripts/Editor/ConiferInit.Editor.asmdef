@@ -15,7 +15,15 @@
         "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "CONIFER_INIT_DEPS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.nuget.newtonsoft-json",
+            "expression": "3.2.0",
+            "define": "CONIFER_INIT_DEPS"
+        }
+    ],
     "noEngineReferences": false
 }
