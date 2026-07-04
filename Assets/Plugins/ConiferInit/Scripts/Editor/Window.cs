@@ -207,6 +207,7 @@ namespace ConiferInit.Editor
                         "ConiferInit");
                     Directory.Delete(cachePath, true);
                     AssetDatabase.DeleteAsset("Assets/Plugins/ConiferInit");
+                    AssetDatabase.DeleteAsset("Assets/Editor/ICSharpCode.SharpZipLib.dll");
                 }
             }
             
