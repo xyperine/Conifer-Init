@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using UnityEditor.Build;
 using UnityEngine.Assertions;
 
 namespace ConiferInit.Editor
 {
-    public static class NamedBuildTargetHelpers
+    internal static class NamedBuildTargetHelpers
     {
         public static IReadOnlyCollection<NamedBuildTarget> AllTargets { get; } = new []
         {

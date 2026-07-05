@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ConiferInit.Editor.Configuration;
@@ -50,7 +51,7 @@ namespace ConiferInit.Editor.Execution
             {
                 _executionCache.PreInteractiveOperationsInProgress = true;
                 
-                Debug.Log("Starting pre-interactive operations...");
+                //Debug.Log("Starting pre-interactive operations...");
                 
                 string[] folders = _configurationCache.AssetsFolderStructureEntry.ToFolderNames();
                 CreateFolders(folders);
@@ -59,11 +60,12 @@ namespace ConiferInit.Editor.Execution
                 _executionCache.PreInteractiveOperationsInProgress = false;
             }
 
-            if (!_executionCache.InteractiveOperationsInProgress && _executionCache.PreInteractiveOperationsFinished)
+            if (!_executionCache.InteractiveOperationsInProgress && _executionCache.PreInteractiveOperationsFinished &&
+                !_executionCache.InteractiveOperationsFinished)
             {
                 _executionCache.InteractiveOperationsInProgress = true;
                 
-                Debug.Log("Starting interactive operations...");
+                //Debug.Log("Starting interactive operations...");
 
                 IEnumerable<AssetImportEntry> assets = _configurationCache.QueuedAssets.Where(a => a.Interactive);
                 if (assets.Any())
@@ -77,19 +79,20 @@ namespace ConiferInit.Editor.Execution
                 }
             }
                 
-            if (!_executionCache.NonInteractiveOperationsInProgress && _executionCache.InteractiveOperationsFinished && _executionCache.PreInteractiveOperationsFinished)
+            if (!_executionCache.NonInteractiveOperationsInProgress && _executionCache.InteractiveOperationsFinished &&
+                _executionCache.PreInteractiveOperationsFinished && !_executionCache.NonInteractiveOperationsFinished)
             {
                 _executionCache.NonInteractiveOperationsInProgress = true;
                 
-                Debug.Log("Starting non-interactive operations...");
+                //Debug.Log("Starting non-interactive operations...");
 
                 IEnumerable<AssetImportEntry> assets =
                     _configurationCache.QueuedAssets.Where(a => !a.Interactive);
                 if (assets.Any())
                 {
+                    Debug.Log("Importing assets...");
+                    
                     ImportAssetsNonInteractive(assets);
-
-                    Debug.Log("All assets imported!");
                 }
                 
                 ImportPackages(_configurationCache.QueuedPackages);
@@ -99,8 +102,8 @@ namespace ConiferInit.Editor.Execution
                 ExecuteMisc(_configurationCache.MiscSettings);
 
                 // Not really how it is supposed to work, as we need to actually wait for these operations to complete.
-                _executionCache.NonInteractiveOperationsInProgress = false;
-                _executionCache.NonInteractiveOperationsFinished = true;
+                //_executionCache.NonInteractiveOperationsInProgress = false;
+                //_executionCache.NonInteractiveOperationsFinished = true;
             }
 
             if (_executionCache.AllSetupStagesComplete)
@@ -146,7 +149,13 @@ namespace ConiferInit.Editor.Execution
 
             if (packages.Any())
             {
-                Packages.ImportAsync(packages.Select(p => p.FullID));
+                PackagesImporter.Begin(packages.Select(p => p.FullID));
+            }
+            else
+            {
+                ExecutionCache.instance.NonInteractiveOperationsInProgress = false;
+                ExecutionCache.instance.NonInteractiveOperationsFinished = true;
+                ExecutionCache.instance.PackagesToImport = new List<string>();
             }
         }
 

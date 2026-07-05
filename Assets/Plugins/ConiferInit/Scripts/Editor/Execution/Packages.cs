@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEditor.PackageManager.Requests;
 using UnityEngine;
+using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace ConiferInit.Editor.Execution
 {
@@ -12,8 +13,8 @@ namespace ConiferInit.Editor.Execution
     {
         private static AddAndRemoveRequest _request;
         
-            
-        public static async Task ImportAsync(IEnumerable<string> packages)
+        
+        public static void ImportMany(IEnumerable<string> packages)
         {
             //Assert
             if (!packages.Any())
@@ -22,22 +23,34 @@ namespace ConiferInit.Editor.Execution
                 return;
             }
 
-            await ImportManyAsync(packages);
+            Debug.Log("Importing packages...");
+            _request = Client.AddAndRemove(packages.ToArray(), new string[] { });
+            
+            EditorUtility.DisplayProgressBar("Importing Packages", "Preparing...", 0.1f);
+            
+            EditorApplication.update += Update;
         }
 
 
-        private static async Task ImportManyAsync(IEnumerable<string> packages)
+        private static void Update()
         {
-            Debug.Log("Importing packages, please wait...");
-            
-            _request = Client.AddAndRemove(packages.ToArray(), new string[] { });
-
-            while (!_request.IsCompleted)
+            if (_request == null)
             {
-                await Task.Delay(10);
+                return;
             }
+            
+            if (!_request.IsCompleted)
+            {
+                return;
+            }
+            
+            EditorUtility.ClearProgressBar();
 
-            await Task.Delay(1000);
+            EditorApplication.update -= Update;
+            
+            ExecutionCache.instance.NonInteractiveOperationsInProgress = false;
+            ExecutionCache.instance.NonInteractiveOperationsFinished = true;
+            ExecutionCache.instance.PackagesToImport = new List<string>();
 
             switch (_request.Status)
             {

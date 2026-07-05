@@ -20,6 +20,7 @@ namespace ConiferInit.Editor.Execution
         [field: SerializeField] public bool Stable { get; set; }
         [field: SerializeField] public bool ImportRequested { get; set; }
         [field: SerializeField] public bool InteractiveOperationsFinished { get; set; }
+        [field: SerializeField] public List<string> PackagesToImport { get; set; }
         
         [field: SerializeField] public bool NonInteractiveOperationsInProgress { get; set; }
         [field: SerializeField] public bool NonInteractiveOperationsFinished { get; set; }
@@ -35,6 +36,7 @@ namespace ConiferInit.Editor.Execution
             PreInteractiveOperationsFinished = false;
             InteractiveOperationsInProgress = false;
             AssetsToImport = new List<AssetImportEntry>();
+            PackagesToImport = new List<string>();
             Importing = false;
             Stable = true;
             ImportRequested = false;
