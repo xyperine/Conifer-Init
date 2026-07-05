@@ -37,6 +37,7 @@ namespace ConiferInit.Initialization
                         break;
                     case StatusCode.Failure:
                         Debug.LogError(ListRequest.Error.message);
+                        EditorApplication.update -= Update;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -60,6 +61,10 @@ namespace ConiferInit.Initialization
             if (!alreadyInstalled)
             {
                 InstallDependencies();
+            }
+            else
+            {
+                EditorApplication.update -= Update;
             }
         }
         
