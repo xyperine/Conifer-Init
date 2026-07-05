@@ -10,9 +10,8 @@ namespace ConiferInit.Editor.Execution
 {
     internal static class Packages
     {
-        private static AddRequest _request;
-        private static readonly Queue<string> PackagesToInstall = new Queue<string>();
-            
+        private static AddAndRemoveRequest _request;
+        
             
         public static async Task ImportAsync(IEnumerable<string> packages)
         {
@@ -22,44 +21,40 @@ namespace ConiferInit.Editor.Execution
                 Debug.LogError("Empty package list!");
                 return;
             }
-            
-            foreach (string package in packages)
-            {
-                PackagesToInstall.Enqueue(package);
-            }
 
-            while (PackagesToInstall.Count >= 1)
-            {
-                await ImportAsync(PackagesToInstall.Dequeue());
-                await Task.Delay(1000);
-            }
-            
-            Debug.Log("All packages imported!");
+            await ImportManyAsync(packages);
         }
 
 
-        public static async Task ImportAsync(string package)
+        private static async Task ImportManyAsync(IEnumerable<string> packages)
         {
-            _request = Client.Add(package);
+            Debug.Log("Importing packages, please wait...");
+            
+            _request = Client.AddAndRemove(packages.ToArray(), new string[] { });
 
             while (!_request.IsCompleted)
             {
                 await Task.Delay(10);
             }
 
+            await Task.Delay(1000);
+
             switch (_request.Status)
             {
                 case StatusCode.InProgress:
-                    Debug.LogError("The import is considered to be in progress!");
+                    Debug.LogError("Invalid status!");
                     break;
                 case StatusCode.Success:
-                    Debug.Log($"Successfully installed: {_request.Result.packageId}");
+                    Debug.Log("Imported packages, including dependencies:");
+                    foreach (PackageInfo packageInfo in _request.Result)
+                    {
+                        Debug.Log($"Successfully imported {packageInfo.displayName}.");
+                    }
                     break;
                 case StatusCode.Failure:
                     Debug.LogError(_request.Error.message);
                     break;
                 default:
-                    Debug.LogError("Invalid status!");
                     throw new ArgumentOutOfRangeException();
             }
         }
