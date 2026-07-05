@@ -1,5 +1,6 @@
 ﻿using ConiferInit.Editor.Configuration;
 using UnityEditor;
+using UnityEditor.Build;
 
 namespace ConiferInit.Editor.Execution
 {
@@ -16,7 +17,8 @@ namespace ConiferInit.Editor.Execution
             
             foreach (ProjectSettings.ScriptingBackendEntry backend in projectSettings.Backends)
             {
-                PlayerSettings.SetScriptingBackend(backend.Target, backend.Implementation);
+                NamedBuildTarget target = NamedBuildTargetHelpers.FindByName(backend.TargetName);
+                PlayerSettings.SetScriptingBackend(target, backend.Implementation);
             }
         }
     }

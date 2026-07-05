@@ -21,20 +21,20 @@ namespace ConiferInit.Editor.Configuration
         [Serializable]
         public struct ScriptingBackendEntry : IEquatable<ScriptingBackendEntry>
         {
-            [field: SerializeField] public NamedBuildTarget Target { get; private set; }
+            [field: SerializeField] public string TargetName { get; private set; }
             [field: SerializeField] public ScriptingImplementation Implementation { get; private set; }
 
 
-            public ScriptingBackendEntry(NamedBuildTarget target, ScriptingImplementation implementation)
+            public ScriptingBackendEntry(string targetName, ScriptingImplementation implementation)
             {
-                Target = target;
+                TargetName = targetName;
                 Implementation = implementation;
             }
 
 
             public bool Equals(ScriptingBackendEntry other)
             {
-                return Target.Equals(other.Target) && Implementation == other.Implementation;
+                return TargetName.Equals(other.TargetName) && Implementation == other.Implementation;
             }
 
 
@@ -46,30 +46,9 @@ namespace ConiferInit.Editor.Configuration
 
             public override int GetHashCode()
             {
-                return HashCode.Combine(Target, (int) Implementation);
+                return HashCode.Combine(TargetName, (int) Implementation);
             }
         }
-        
-        
-        public static NamedBuildTarget[] AllTargets { get; } =
-        {
-            NamedBuildTarget.Android,
-            NamedBuildTarget.EmbeddedLinux,
-            NamedBuildTarget.iOS,
-            NamedBuildTarget.LinuxHeadlessSimulation,
-            NamedBuildTarget.NintendoSwitch,
-            NamedBuildTarget.NintendoSwitch2,
-            NamedBuildTarget.PS4,
-            NamedBuildTarget.PS5,
-            NamedBuildTarget.QNX,
-            NamedBuildTarget.Server,
-            NamedBuildTarget.Standalone,
-            NamedBuildTarget.tvOS,
-            NamedBuildTarget.VisionOS,
-            NamedBuildTarget.WebGL,
-            NamedBuildTarget.WindowsStoreApps,
-            NamedBuildTarget.XboxOne,
-        };
         
         
         /// <summary>
@@ -97,13 +76,14 @@ namespace ConiferInit.Editor.Configuration
             ProductName = productName;
             Version = version;
 
-            Backends = AllTargets.Select(t => new ScriptingBackendEntry(t, scriptingBackend)).ToList();
+            Backends = NamedBuildTargetHelpers.AllTargets
+                .Select(t => new ScriptingBackendEntry(t.TargetName, scriptingBackend)).ToList();
         }
 
 
         public ProjectSettings(string defaultNamespace, EditorSettings.NamingScheme gameObjectNamingScheme,
             string companyName, string productName, string version,
-            Dictionary<NamedBuildTarget, ScriptingImplementation> backends)
+            Dictionary<string, ScriptingImplementation> backends)
         {
             DefaultNamespace = defaultNamespace;
             GameObjectNamingScheme = gameObjectNamingScheme;
@@ -143,7 +123,7 @@ namespace ConiferInit.Editor.Configuration
             for (int i = 0; i < Backends.Count; i++)
             {
                 ScriptingBackendEntry backend = Backends[i];
-                Backends[i] = new ScriptingBackendEntry(backend.Target, implementation);
+                Backends[i] = new ScriptingBackendEntry(backend.TargetName, implementation);
             }
         }
     }

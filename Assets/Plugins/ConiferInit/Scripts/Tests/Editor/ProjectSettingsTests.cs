@@ -36,7 +36,7 @@ namespace ConiferInit.Editor.Tests
             
             // Not sure about scripting backends testing, not all targets can have any of the 3 options, so if we set
             // test scripting implementation to anything other than IL2CPP it will fail.
-            foreach (NamedBuildTarget target in ProjectSettings.AllTargets)
+            foreach (NamedBuildTarget target in NamedBuildTargetHelpers.AllTargets)
             {
                 Assert.AreEqual(ScriptingImplementation.IL2CPP, PlayerSettings.GetScriptingBackend(target));
             }
@@ -52,12 +52,12 @@ namespace ConiferInit.Editor.Tests
 
         private ProjectSettings GetCurrentSettings()
         {
-            Dictionary<NamedBuildTarget, ScriptingImplementation> backends =
-                new Dictionary<NamedBuildTarget, ScriptingImplementation>();
+            Dictionary<string, ScriptingImplementation> backends =
+                new Dictionary<string, ScriptingImplementation>();
 
-            foreach (NamedBuildTarget target in ProjectSettings.AllTargets)
+            foreach (NamedBuildTarget target in NamedBuildTargetHelpers.AllTargets)
             {
-                backends.Add(target, PlayerSettings.GetScriptingBackend(target));
+                backends.Add(target.TargetName, PlayerSettings.GetScriptingBackend(target));
             }
             
             return new ProjectSettings(EditorSettings.projectGenerationRootNamespace,
@@ -78,7 +78,8 @@ namespace ConiferInit.Editor.Tests
 
             foreach (ProjectSettings.ScriptingBackendEntry backend in _temp.Backends)
             {
-                PlayerSettings.SetScriptingBackend(backend.Target, backend.Implementation);
+                NamedBuildTarget target = NamedBuildTargetHelpers.FindByName(backend.TargetName);
+                PlayerSettings.SetScriptingBackend(target, backend.Implementation);
             }
         }
     }
