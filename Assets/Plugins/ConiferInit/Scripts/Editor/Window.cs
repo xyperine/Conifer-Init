@@ -236,6 +236,8 @@ namespace ConiferInit.Editor
             const string githubUrl = "https://github.com/xyperine";
             const string itchIoUrl = "https://xyperine.itch.io/";
             const string sourceCodeUrl = "https://github.com/xyperine/Conifer-Init";
+            const string userGuidedUrl = "https://github.com/xyperine/Conifer-Init/blob/main/User Guide.pdf";
+            const string userGuideLocalPath = "Assets/Plugins/ConiferInit/User Guide.pdf";
             // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
             const string version = "0.1.0";
             
@@ -258,6 +260,21 @@ namespace ConiferInit.Editor
             if (EditorGUILayout.LinkButton("Source Code"))
             {
                 Application.OpenURL(sourceCodeUrl);
+            }
+            
+            WindowElements.DrawRegularSpace();
+            
+            if (EditorGUILayout.LinkButton("User Guide"))
+            {
+                if (AssetDatabase.AssetPathExists(userGuideLocalPath))
+                {
+                    string userGuideFullPath = Path.Combine(System.Environment.CurrentDirectory, userGuideLocalPath);
+                    Process.Start(userGuideFullPath);
+                }
+                else
+                {
+                    Application.OpenURL(userGuidedUrl);
+                }
             }
             
             GUILayout.FlexibleSpace();
