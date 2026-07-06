@@ -33,6 +33,7 @@ namespace ConiferInit.Editor
         private GUIStyle _scopeStyle;
         private GUIStyle _titleStyle;
         private GUIStyle _buttonStyle;
+        private GUIStyle _executeButtonStyle;
 
         private bool _stylesInitialized;
 
@@ -103,6 +104,10 @@ namespace ConiferInit.Editor
                     font = _font,
                 };
                 _buttonStyle = new GUIStyle(GUI.skin.button);
+                _executeButtonStyle = new GUIStyle(GUI.skin.button)
+                {
+                    fontSize = 16,
+                };
 
                 _stylesInitialized = true;
             }
@@ -218,8 +223,8 @@ namespace ConiferInit.Editor
         private void DrawExecuteSetup()
         {
             using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
-
-            if (GUILayout.Button("Execute Setup", _buttonStyle, GUILayout.Height(32f)))
+            
+            if (GUILayout.Button("Execute Setup", _executeButtonStyle, GUILayout.Height(32f)))
             {
                 _execution.ExecuteSetup();
             }
