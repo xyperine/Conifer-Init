@@ -82,10 +82,18 @@ namespace ConiferInit.Editor.UI
         private void ConfirmDeleteProfileDialog(SettingsProfile profile)
         {
             Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
+
+#if UNITY_6000_3_OR_NEWER
+            bool wantToDeleteProfile = EditorDialog.DisplayDecisionDialog("Delete Profile?",
+                $"{profile.Name} profile will be irreversibly deleted. Proceed?",
+                "Yes", "No");
+#else
+            bool wantToDeleteProfile = EditorUtility.DisplayDialog("Delete Profile?",
+                $"{profile.Name} profile will be irreversibly deleted. Proceed?",
+                "Yes", "No");
+#endif
             
-            if (EditorDialog.DisplayDecisionDialog("Delete Profile?",
-                    $"{profile.Name} profile will be irreversibly deleted. Proceed?",
-                    "Yes", "No"))
+            if (wantToDeleteProfile)
             {
                 _configuration.DeleteProfile(profile);
             }
@@ -98,9 +106,18 @@ namespace ConiferInit.Editor.UI
             
             if (_configuration.Profiles.Exists(p => p.Name == profile.Name))
             {
-                if (EditorDialog.DisplayDecisionDialog("Save Profile?",
-                        $"This will override the existing {profile.Name} profile. Proceed?",
-                        "Yes", "No"))
+                
+#if UNITY_6000_3_OR_NEWER
+                bool wantToSaveProfile = EditorDialog.DisplayDecisionDialog("Save Profile?",
+                    $"This will override the existing {profile.Name} profile. Proceed?",
+                    "Yes", "No");
+#else
+                bool wantToSaveProfile = EditorUtility.DisplayDialog("Save Profile?",
+                    $"This will override the existing {profile.Name} profile. Proceed?",
+                    "Yes", "No");
+#endif
+                
+                if (wantToSaveProfile)
                 {
                     _configuration.SaveProfile(profile);
                 }

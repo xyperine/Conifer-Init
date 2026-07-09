@@ -110,7 +110,12 @@ namespace ConiferInit.Editor.Execution
             {
                 _executionCache.Clear();
                 
-                Debug.Log("Setup finished!");
+#if UNITY_6000_1_OR_NEWER
+                Color successColor = Color.limeGreen;
+#else
+                Color successColor = new Color(0.1960784f, 0.8039216f, 0.1960784f, 1f);
+#endif
+                Debug.Log($"<color=#{ColorUtility.ToHtmlStringRGB(successColor)}>Setup finished!</color>");
             }
         }
 

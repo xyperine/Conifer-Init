@@ -202,8 +202,13 @@ namespace ConiferInit.Editor
 
             if (GUILayout.Button("Uninstall", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
+#if UNITY_6000_3_OR_NEWER
                 bool wantToUninstall = EditorDialog.DisplayDecisionDialog("Uninstall?",
                     "Do you want to remove Conifer Init from your project?", "Yes", "No");
+#else
+                bool wantToUninstall = EditorUtility.DisplayDialog("Uninstall?",
+                    "Do you want to remove Conifer Init from your project?", "Yes", "No");
+#endif
                 if (wantToUninstall)
                 {
                     Close();

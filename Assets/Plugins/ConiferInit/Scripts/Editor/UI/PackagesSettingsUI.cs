@@ -53,19 +53,29 @@ namespace ConiferInit.Editor.UI
                 _searchBarStyle = new GUIStyle(EditorStyles.toolbarSearchField);
                 _labelStyle = new GUIStyle(GUI.skin.label);
                 _buttonStyle = new GUIStyle(GUI.skin.button);
-                
+
+#if UNITY_6000_1_OR_NEWER
+                Color successColor = Color.limeGreen;
+#else
+                Color successColor = new Color(0.1960784f, 0.8039216f, 0.1960784f, 1f);
+#endif
                 _successStyle = new GUIStyle(GUI.skin.label);
-                _successStyle.normal = new GUIStyleState() {textColor = Color.limeGreen};
-                _successStyle.hover = new GUIStyleState() {textColor = Color.limeGreen};
-                _successStyle.active = new GUIStyleState() {textColor = Color.limeGreen};
-                _successStyle.focused = new GUIStyleState() {textColor = Color.limeGreen};
+                _successStyle.normal = new GUIStyleState() {textColor = successColor};
+                _successStyle.hover = new GUIStyleState() {textColor = successColor};
+                _successStyle.active = new GUIStyleState() {textColor = successColor};
+                _successStyle.focused = new GUIStyleState() {textColor = successColor};
                 _successStyle.wordWrap = true;
                 
+#if UNITY_6000_1_OR_NEWER
+                Color errorColor = Color.crimson;
+#else
+                Color errorColor = new Color(0.8627452f, 0.07843138f, 0.2352941f, 1);
+#endif
                 _errorStyle = new GUIStyle(GUI.skin.label);
-                _errorStyle.normal = new GUIStyleState() {textColor = Color.crimson};
-                _errorStyle.hover = new GUIStyleState() {textColor = Color.crimson};
-                _errorStyle.active = new GUIStyleState() {textColor = Color.crimson};
-                _errorStyle.focused = new GUIStyleState() {textColor = Color.crimson};
+                _errorStyle.normal = new GUIStyleState() {textColor = errorColor};
+                _errorStyle.hover = new GUIStyleState() {textColor = errorColor};
+                _errorStyle.active = new GUIStyleState() {textColor = errorColor};
+                _errorStyle.focused = new GUIStyleState() {textColor = errorColor};
                 _errorStyle.wordWrap = true;
                 
                 _stylesInitialized = true;

@@ -59,10 +59,16 @@ namespace ConiferInit.Editor.UI
                 _windowStyle = new GUIStyle(GUI.skin.window);
                 _scopeStyle = new GUIStyle();
                 _labelStyle = new GUIStyle(GUI.skin.label);
+
+#if UNITY_6000_1_OR_NEWER
+                Color hoveredLabelColor = Color.cornflowerBlue; 
+#else
+                Color hoveredLabelColor = new Color(0.3921569f, 0.5843138f, 0.9294118f, 1f);
+#endif
                 _hoverableLabelStyle = new GUIStyle(GUI.skin.label)
                 {
-                    hover = new GUIStyleState() {textColor = Color.cornflowerBlue},
-                    active = new GUIStyleState() {textColor = Color.cornflowerBlue},
+                    hover = new GUIStyleState() {textColor = hoveredLabelColor},
+                    active = new GUIStyleState() {textColor = hoveredLabelColor},
                 };
                 
                 _stylesInitialized = true;

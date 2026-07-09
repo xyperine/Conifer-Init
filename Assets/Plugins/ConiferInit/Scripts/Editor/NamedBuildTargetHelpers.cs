@@ -15,7 +15,9 @@ namespace ConiferInit.Editor
             NamedBuildTarget.iOS,
             NamedBuildTarget.LinuxHeadlessSimulation,
             NamedBuildTarget.NintendoSwitch,
+#if UNITY_6000_0 || UNITY_6000_3_OR_NEWER
             NamedBuildTarget.NintendoSwitch2,
+#endif
             NamedBuildTarget.PS4,
             NamedBuildTarget.PS5,
             NamedBuildTarget.QNX,
