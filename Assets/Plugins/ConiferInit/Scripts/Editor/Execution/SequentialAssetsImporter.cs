@@ -118,7 +118,7 @@ namespace ConiferInit.Editor.Execution
                     _data.Importing = false;
                     _data.AssetsToImport.RemoveAt(0);
                 
-                    Debug.Log($"{asset.Name} is fully imported already");
+                    Debug.Log($"{asset.Name} is fully imported already.");
                 
                     return;
                 }

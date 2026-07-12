@@ -134,7 +134,6 @@ namespace ConiferInit.Editor.UI
         }
 
 
-        // This routine is poorly designed so I don't know what to do with it 
         private bool SuccessfullyRetrievedPackages()
         {
             switch (_configuration.PackagesListRequest.Status)

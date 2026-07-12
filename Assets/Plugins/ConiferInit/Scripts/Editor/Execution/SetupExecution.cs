@@ -141,10 +141,7 @@ namespace ConiferInit.Editor.Execution
             Assert.IsTrue(assets.Any());
             Assert.IsTrue(assets.All(a => !a.Interactive));
             
-            foreach (AssetImportEntry asset in assets)
-            {
-                Assets.Import(asset.Path);
-            }
+            Assets.ImportNonInteractive(assets);
         }
 
 
