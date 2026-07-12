@@ -13,28 +13,28 @@
 ![Demonstration GIF](img/Demo.gif)
 
 ## Table of Contents :clipboard:
-* [About :information_source:](#about-information_source)
-* [Features :star2:](#features-star2)
-* [Getting started :rocket:](#getting-started-rocket)
+* [About ℹ️](#about-ℹ️)
+* [Features 🌟](#features-)
+* [Getting started 🚀](#getting-started-)
   * [Compatibility](#compatibility)
   * [Important Notes](#important-notes)
   * [Install](#install)
-* [Future :crystal_ball:](#future-crystal_ball)
-* [Credits :copyright:](#credits-copyright)
-* [For developers :wrench:](#for-developers-wrench)
+* [Future 🔮](#future-)
+* [Credits ©️](#credits-%EF%B8%8F)
+* [For developers 🔧](#for-developers-)
   * [Contributing](#contributing)
   * [Documentation](#documentation)
   * [Testing](#testing)
-* [Support :gift_heart:](#support-gift_heart)
+* [Support 💝](#support-)
 
-## About :information_source:
+## About ℹ️
 Conifer Init automates some common Unity project setup tasks such as folder structure creation, package installation, asset import, and project configuration.
 
 The feature set is based solely on what I need to do to set up a Unity project. I made this tool to automate and standardize the setup process for my future Unity projects, saving time and resources that can be spent on more important tasks.
 
-Hope you'll find this tool useful! :green_heart:
+Hope you'll find this tool useful! 💚
 
-## Features :star2:
+## Features 🌟
 * Create project folder structure
 * Install multiple packages automatically
 * Import multiple assets automatically
@@ -43,7 +43,7 @@ Hope you'll find this tool useful! :green_heart:
 
 Short video demonstration - https://youtu.be/5E8Atag36eY
 
-## Getting Started :rocket:
+## Getting Started 🚀
 ### Compatibility
 Editor version - Unity 6.0+
 
@@ -54,7 +54,7 @@ See the *Important Notes* section in the [User Guide](https://github.com/xyperin
 1. Download the .unitypackage file from the [latest release](https://github.com/xyperine/Conifer-Init/releases/latest)
 2. [Import](https://docs.unity3d.com/Manual/AssetPackagesImport.html) it in Unity
 
-## Future :crystal_ball:
+## Future 🔮
 I am planning to add a few more features. The project will be receiving occasional bug fixes, compatibility updates, and maybe QoL updates.
 
 Potential features:
@@ -62,10 +62,10 @@ Potential features:
 * Report generation - the tool will generate a nicely formatted log.
 * Delete packages - support for scheduling pre-installed packages for deletion.
 
-## Credits :copyright:
+## Credits ©️
 See the [Third Party Notices](https://github.com/xyperine/Conifer-Init/blob/main/THIRD_PARTY_NOTICES.txt).
 
-## For developers :wrench:
+## For developers 🔧
 ### Contributing
 This project is intended to be a solo project, and I am not accepting external code contributions. If you want to modify this tool, feel free to fork it or just make local changes.
 
@@ -77,5 +77,5 @@ See the online [documentation](https://xyperine.github.io/Conifer-Init).
 ### Testing
 The project has some tests, however the coverage is pretty low, so they are not particularly useful at the moment.
 
-## Support :gift_heart:
-Enjoying this tool? Consider giving it a :star:!
+## Support 💝
+Enjoying this tool? Consider giving it a ⭐!
