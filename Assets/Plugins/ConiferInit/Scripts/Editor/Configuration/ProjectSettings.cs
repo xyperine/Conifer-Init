@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.Build;
 using UnityEngine;
 
 namespace ConiferInit.Editor.Configuration
@@ -19,7 +18,7 @@ namespace ConiferInit.Editor.Configuration
         
         
         [Serializable]
-        public struct ScriptingBackendEntry : IEquatable<ScriptingBackendEntry>
+        internal struct ScriptingBackendEntry : IEquatable<ScriptingBackendEntry>
         {
             [field: SerializeField] public string TargetName { get; private set; }
             [field: SerializeField] public ScriptingImplementation Implementation { get; private set; }
