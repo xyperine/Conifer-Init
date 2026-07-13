@@ -71,7 +71,7 @@ Potential features:
 * Delete packages - support for scheduling pre-installed packages for deletion.
 
 ## Credits ©️
-See the [Third Party Notices](https://github.com/xyperine/Conifer-Init/blob/main/THIRD_PARTY_NOTICES.txt).
+See the [Notices](https://github.com/xyperine/Conifer-Init/blob/main/NOTICES).
 
 ## For developers 🔧
 ### Contributing

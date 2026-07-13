@@ -72,7 +72,7 @@ namespace ConiferInit.Editor
         private static async void ExportPackage()
         {
             string[] auxFileNames =
-                {"LICENSE", "CHANGELOG.md", "THIRD_PARTY_NOTICES.txt", "User Guide.pdf"};
+                {"LICENSE", "CHANGELOG.md", "NOTICES", "User Guide.pdf"};
             
             // Move all auxiliary files in
             foreach (string fileName in auxFileNames)
