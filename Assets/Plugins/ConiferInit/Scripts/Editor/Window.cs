@@ -30,6 +30,7 @@ namespace ConiferInit.Editor
         private AssetsSettingsUI _assetsSettingsUI;
         private ProjectSettingsUI _projectSettingsUI;
         private MiscSettingsUI _miscSettingsUI;
+        private FooterUI _footerUI;
         
         private Vector2 _scrollPosition;
 
@@ -128,6 +129,7 @@ namespace ConiferInit.Editor
             _assetsSettingsUI = new AssetsSettingsUI(_configuration);
             _projectSettingsUI = new ProjectSettingsUI(_configuration);
             _miscSettingsUI = new MiscSettingsUI(_configuration);
+            _footerUI = new FooterUI();
             
             _entireWindowStyle = new GUIStyle();
             _entireWindowStyle.padding = new RectOffset(16, 16, 16, 16);
@@ -201,7 +203,7 @@ namespace ConiferInit.Editor
             
             WindowElements.DrawSectionSeparator();
             
-            DrawFooter();
+            _footerUI.Draw();
             
             GUILayout.FlexibleSpace();
         }
@@ -223,58 +225,6 @@ namespace ConiferInit.Editor
             {
                 _execution.ExecuteSetup();
             }
-        }
-
-
-        private void DrawFooter()
-        {
-            const string githubUrl = "https://github.com/xyperine";
-            const string itchIoUrl = "https://xyperine.itch.io/";
-            const string sourceCodeUrl = "https://github.com/xyperine/Conifer-Init";
-            const string userGuidedUrl = "https://github.com/xyperine/Conifer-Init/blob/main/User Guide.pdf";
-            const string userGuideLocalPath = "Assets/Plugins/ConiferInit/User Guide.pdf";
-            // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
-            const string version = "0.1.0";
-            
-            using var s = new GUILayout.HorizontalScope(_scopeStyle);
-            
-            if (EditorGUILayout.LinkButton("GitHub"))
-            {
-                Application.OpenURL(githubUrl);
-            }
-
-            WindowElements.DrawRegularSpace();
-            
-            if (EditorGUILayout.LinkButton("itch.io"))
-            {
-                Application.OpenURL(itchIoUrl);
-            }
-            
-            WindowElements.DrawRegularSpace();
-            
-            if (EditorGUILayout.LinkButton("Source Code"))
-            {
-                Application.OpenURL(sourceCodeUrl);
-            }
-            
-            WindowElements.DrawRegularSpace();
-            
-            if (EditorGUILayout.LinkButton("User Guide"))
-            {
-                if (AssetDatabase.AssetPathExists(userGuideLocalPath))
-                {
-                    string userGuideFullPath = Path.Combine(System.Environment.CurrentDirectory, userGuideLocalPath);
-                    Process.Start(userGuideFullPath);
-                }
-                else
-                {
-                    Application.OpenURL(userGuidedUrl);
-                }
-            }
-            
-            GUILayout.FlexibleSpace();
-            
-            GUILayout.Label(version);
         }
         
         
