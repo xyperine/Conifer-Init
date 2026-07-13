@@ -434,6 +434,12 @@ namespace ConiferInit.Editor.Configuration
         {
             _configurationCache.MiscSettings = miscSettings;
         }
+
+
+        public void ClearCache()
+        {
+            _configurationCache.Clear();
+        }
         
 
         public void Update()

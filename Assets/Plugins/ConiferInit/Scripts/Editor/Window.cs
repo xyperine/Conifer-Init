@@ -18,14 +18,12 @@ namespace ConiferInit.Editor
     /// </summary>
     internal sealed class Window : EditorWindow
     {
-        private const string LOGO_PATH = "Assets/Plugins/ConiferInit/Textures/Logo.png";
-        private const string TITLE_FONT_PATH = "Assets/Plugins/ConiferInit/Fonts/KodeMono-Regular.ttf";
-        
         private readonly SetupConfiguration _configuration = new SetupConfiguration();
         private readonly SetupExecution _execution = new SetupExecution();
 
         private GUIStyle _entireWindowStyle;
 
+        private HeaderUI _headerUI;
         private ProfileSettingsUI _profileSettingsUI;
         private FolderStructureUI _folderStructureUI;
         private PackagesSettingsUI _packagesSettingsUI;
@@ -36,14 +34,9 @@ namespace ConiferInit.Editor
         private Vector2 _scrollPosition;
 
         private GUIStyle _scopeStyle;
-        private GUIStyle _titleStyle;
-        private GUIStyle _buttonStyle;
         private GUIStyle _executeButtonStyle;
 
         private bool _stylesInitialized;
-
-        private Texture2D _logo;
-        private Font _font;
         
         
         [MenuItem("Tools/Conifer Init")]
@@ -126,7 +119,9 @@ namespace ConiferInit.Editor
             _configuration.ApplyingProfile += ResetTemporaryState;
             
             _execution.Initialize();
-            
+
+            _headerUI = new HeaderUI(_configuration, _execution);
+            _headerUI.UninstallRequested += OnUninstallRequested;
             _profileSettingsUI = new ProfileSettingsUI(_configuration);
             _folderStructureUI = new FolderStructureUI(_configuration);
             _packagesSettingsUI = new PackagesSettingsUI(_configuration);
@@ -136,9 +131,6 @@ namespace ConiferInit.Editor
             
             _entireWindowStyle = new GUIStyle();
             _entireWindowStyle.padding = new RectOffset(16, 16, 16, 16);
-
-            _logo = AssetDatabase.LoadAssetAtPath<Texture2D>(LOGO_PATH);
-            _font = AssetDatabase.LoadAssetAtPath<Font>(TITLE_FONT_PATH);
         }
 
 
@@ -147,19 +139,24 @@ namespace ConiferInit.Editor
             Repaint();
         }
 
+
+        private void OnUninstallRequested()
+        {
+            Close();
+
+            string cachePath = Path.Combine(Application.dataPath.Replace("Assets", "Library"),
+                "ConiferInit");
+            Directory.Delete(cachePath, true);
+            AssetDatabase.DeleteAsset("Assets/Plugins/ConiferInit");
+            AssetDatabase.DeleteAsset("Assets/Editor/ICSharpCode.SharpZipLib.dll");
+        }
+
         
         private void OnGUI()
         {
             if (!_stylesInitialized)
             {
                 _scopeStyle = new GUIStyle();
-                _titleStyle = new GUIStyle(GUI.skin.label)
-                {
-                    fontSize = 42,
-                    alignment = TextAnchor.MiddleLeft,
-                    font = _font,
-                };
-                _buttonStyle = new GUIStyle(GUI.skin.button);
                 _executeButtonStyle = new GUIStyle(GUI.skin.button)
                 {
                     fontSize = 16,
@@ -172,7 +169,7 @@ namespace ConiferInit.Editor
                 new GUILayout.ScrollViewScope(_scrollPosition, _entireWindowStyle);
             _scrollPosition = scrollViewScope.scrollPosition;
             
-            DrawHeader();
+            _headerUI.Draw();
             
             WindowElements.DrawSectionSeparator();
             
@@ -215,69 +212,6 @@ namespace ConiferInit.Editor
             _folderStructureUI.ResetTemporaryState();
             _packagesSettingsUI.ResetTemporaryState();
             _assetsSettingsUI.ResetTemporaryState();
-        }
-
-
-        private void DrawHeader()
-        {
-            using (new GUILayout.HorizontalScope(_scopeStyle))
-            {
-                const float maxSize = 96f;
-                GUILayout.FlexibleSpace();
-                GUILayout.Label(_logo, GUILayout.MaxHeight(maxSize), GUILayout.MaxWidth(maxSize));
-                GUILayout.Space(16f);
-                GUILayout.Label("Conifer Init", _titleStyle, GUILayout.Height(maxSize));
-                GUILayout.FlexibleSpace();
-            }
-            
-            WindowElements.DrawSectionSpace();
-
-            DrawToolsOptions();
-        }
-
-
-        private void DrawToolsOptions()
-        {
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
-            
-            GUILayout.FlexibleSpace();
-
-            if (GUILayout.Button("Reset Configuration", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
-            {
-                ConfigurationCache.instance.Clear();
-            }
-            
-            GUILayout.Space(16f);
-
-            if (GUILayout.Button("Reset Execution", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
-            {
-                ExecutionCache.instance.Clear();
-            }
-            
-            GUILayout.Space(16f);
-
-            if (GUILayout.Button("Uninstall", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
-            {
-#if UNITY_6000_3_OR_NEWER
-                bool wantToUninstall = EditorDialog.DisplayDecisionDialog("Uninstall?",
-                    "Do you want to remove Conifer Init from your project?", "Yes", "No");
-#else
-                bool wantToUninstall = EditorUtility.DisplayDialog("Uninstall?",
-                    "Do you want to remove Conifer Init from your project?", "Yes", "No");
-#endif
-                if (wantToUninstall)
-                {
-                    Close();
-
-                    string cachePath = Path.Combine(Application.dataPath.Replace("Assets", "Library"),
-                        "ConiferInit");
-                    Directory.Delete(cachePath, true);
-                    AssetDatabase.DeleteAsset("Assets/Plugins/ConiferInit");
-                    AssetDatabase.DeleteAsset("Assets/Editor/ICSharpCode.SharpZipLib.dll");
-                }
-            }
-            
-            GUILayout.FlexibleSpace();
         }
 
 
@@ -354,6 +288,7 @@ namespace ConiferInit.Editor
         private void OnDisable()
         {
             _configuration.ApplyingProfile -= ResetTemporaryState;
+            _headerUI.UninstallRequested -= OnUninstallRequested;
         }
     }
 }

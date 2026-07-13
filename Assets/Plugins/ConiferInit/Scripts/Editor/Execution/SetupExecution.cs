@@ -172,5 +172,11 @@ namespace ConiferInit.Editor.Execution
         {
             MiscSettingsExecution.Execute(miscSettings);
         }
+
+
+        public void ClearCache()
+        {
+            _executionCache.Clear();
+        }
     }
 }
