@@ -70,6 +70,11 @@ Potential features:
 * Report generation - the tool will generate a nicely formatted log.
 * Delete packages - support for scheduling pre-installed packages for deletion.
 
+## License 📜
+The source code in this repository is licensed under the MIT license. See the [License](https://github.com/xyperine/Conifer-Init/blob/main/LICENSE) file for details.
+
+All rights are reserved for branding assets contained in this repository.
+
 ## Credits ©️
 See the [Notices](https://github.com/xyperine/Conifer-Init/blob/main/NOTICES).
 
