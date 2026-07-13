@@ -1,6 +1,3 @@
-> [!CAUTION]
-> 🚧 UNDER CONSTRUCTION 🚧
-
 <div class="readme-image">
 
 ![Banner](img/Banner.png)
@@ -20,7 +17,7 @@
 
 </div>
 
-## Table of Contents :clipboard:
+## Table of Contents 📋
 * [About ℹ️](#about-ℹ️)
 * [Features 🌟](#features-)
 * [Getting started 🚀](#getting-started-)
