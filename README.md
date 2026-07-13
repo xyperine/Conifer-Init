@@ -25,6 +25,7 @@
   * [Important Notes](#important-notes)
   * [Install](#install)
 * [Future 🔮](#future-)
+* [License 📜](#license-)
 * [Credits ©️](#credits-%EF%B8%8F)
 * [For developers 🔧](#for-developers-)
   * [Contributing](#contributing)
