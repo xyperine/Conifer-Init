@@ -90,3 +90,7 @@ The project has some tests, however the coverage is pretty low, so they are not 
 
 ## Support 💝
 Enjoying this tool? Consider giving it a ⭐!
+
+Check out my other projects:
+- [Icons Creator 📸🖼️](https://github.com/xyperine/Icons-Creator) - Tool for creating icons of 3D objects in Unity
+- [Games 🎮](https://xyperine.itch.io/)
