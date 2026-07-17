@@ -24,7 +24,7 @@ namespace ConiferInit.Editor.UI
             const string userGuidedUrl = "https://github.com/xyperine/Conifer-Init/blob/main/User Guide.pdf";
             const string userGuideLocalPath = "Assets/Plugins/ConiferInit/User Guide.pdf";
             // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
-            const string version = "0.1.0";
+            const string version = "0.1.1";
             
             using var s = new GUILayout.HorizontalScope(_styles.Scope);
 
