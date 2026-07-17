@@ -39,6 +39,11 @@ namespace ConiferInit.Editor.UI
             
             using (new GUILayout.HorizontalScope(new GUIStyle()))
             {
+                if (GUILayout.Button("New"))
+                {
+                    ShowCreateNewProfileFilePanel();
+                }
+
                 using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_configuration.ActiveProfile.Name == _configuration.DefaultProfile.Name))
                 {
                     if (GUILayout.Button("Save"))
@@ -49,14 +54,9 @@ namespace ConiferInit.Editor.UI
 
                 if (GUILayout.Button("Save as..."))
                 {
-                    ShowSaveProfileFilePanel(path => SaveAsProfile(Path.GetFileNameWithoutExtension(path)));
+                    ShowSaveProfileFilePanel();
                 }
-                
-                if (GUILayout.Button("New"))
-                {
-                    ShowSaveProfileFilePanel(path => CreateNewProfile(Path.GetFileNameWithoutExtension(path)));
-                }
-                
+
                 using (EditorGUI.DisabledGroupScope s = new EditorGUI.DisabledGroupScope(_configuration.ActiveProfile.Name == _configuration.DefaultProfile.Name))
                 {
                     if (GUILayout.Button("Delete"))
@@ -76,20 +76,6 @@ namespace ConiferInit.Editor.UI
         private void ApplyProfile(SettingsProfile profile)
         {
             _configuration.ApplyProfile(profile);
-        }
-
-
-        private void ConfirmDeleteProfileDialog(SettingsProfile profile)
-        {
-            Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
-
-            bool wantToDeleteProfile = Dialog.DisplayDecisionDialog("Delete Profile?",
-                $"{profile.Name} profile will be irreversibly deleted. Proceed?",
-                "Yes", "No");
-            if (wantToDeleteProfile)
-            {
-                _configuration.DeleteProfile(profile);
-            }
         }
 
 
@@ -114,7 +100,21 @@ namespace ConiferInit.Editor.UI
         }
 
 
-        private void ShowSaveProfileFilePanel(Action<string> onSuccess)
+        private void ConfirmDeleteProfileDialog(SettingsProfile profile)
+        {
+            Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
+
+            bool wantToDeleteProfile = Dialog.DisplayDecisionDialog("Delete Profile?",
+                $"{profile.Name} profile will be irreversibly deleted. Proceed?",
+                "Yes", "No");
+            if (wantToDeleteProfile)
+            {
+                _configuration.DeleteProfile(profile);
+            }
+        }
+
+
+        private void ShowSaveProfileFilePanel()
         {
             string newName = _configuration.ConstructNewProfileName();
             
@@ -122,12 +122,13 @@ namespace ConiferInit.Editor.UI
                 SettingsProfilePersistency.StoragePath, newName, "json");
             if (savedPath != string.Empty)
             {
-                _configuration.TrySaveProfileAt(savedPath, onSuccess);
+                _configuration.TrySaveProfileAt(savedPath,
+                    path => TrySaveAsProfile(Path.GetFileNameWithoutExtension(path)));
             }
         }
 
 
-        private void SaveAsProfile(string newProfileName)
+        private void TrySaveAsProfile(string newProfileName)
         {
             if (newProfileName == string.Empty)
             {
@@ -141,12 +142,52 @@ namespace ConiferInit.Editor.UI
             
             ConfirmSaveProfileDialog(profile);
         }
-
-
-        private void CreateNewProfile(string newProfileName)
+        
+        
+        private void ShowCreateNewProfileFilePanel()
         {
-            ApplyProfile(_configuration.DefaultProfile);
-            SaveAsProfile(newProfileName);
+            bool wantToCreateNewProfile = Dialog.DisplayDecisionDialog("New Profile",
+                $"Unsaved changes to the {_configuration.ActiveProfile.Name} will be lost.",
+                "Continue", "Cancel");
+            if (!wantToCreateNewProfile)
+            {
+                return;
+            }
+            
+            string newName = _configuration.ConstructNewProfileName();
+            
+            string savedPath = EditorUtility.SaveFilePanel("New Profile",
+                SettingsProfilePersistency.StoragePath, newName, "json");
+            if (savedPath != string.Empty)
+            {
+                _configuration.TrySaveProfileAt(savedPath,
+                    path => TryCreateNewProfile(Path.GetFileNameWithoutExtension(path)));
+            }
+        }
+        
+
+        private void TryCreateNewProfile(string newProfileName)
+        {
+            if (!_configuration.Profiles.Exists(p => p.Name == newProfileName))
+            {
+                if (newProfileName == string.Empty)
+                {
+                    return;
+                }
+            
+                ApplyProfile(_configuration.DefaultProfile);
+                
+                SettingsProfile profile = new SettingsProfile()
+                {
+                    Name = newProfileName,
+                };
+            
+                _configuration.SaveProfile(profile);
+            }
+            else
+            {
+                Debug.LogError("Can't override profiles with the \"New\" option!");
+            }
         }
     }
 }

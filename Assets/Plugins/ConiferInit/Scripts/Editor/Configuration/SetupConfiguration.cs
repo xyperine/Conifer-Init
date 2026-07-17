@@ -167,7 +167,6 @@ namespace ConiferInit.Editor.Configuration
 
         public void TrySaveProfileAt(string path, Action<string> onSuccess)
         {
-            // Extract all of this
             bool insideProfileStorage = Directory.GetParent(path).FullName == SettingsProfilePersistency.StoragePath;
             bool hasRightExtension = Path.GetExtension(path) == ".json";
             bool isNotDefaultProfile = Path.GetFileNameWithoutExtension(path) != DEFAULT_PROFILE_NAME;
@@ -189,7 +188,6 @@ namespace ConiferInit.Editor.Configuration
             {
                 Debug.LogError("Can't override the default profile!");
             }
-
         }
 
 
