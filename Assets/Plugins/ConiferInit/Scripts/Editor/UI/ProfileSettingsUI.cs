@@ -11,24 +11,26 @@ namespace ConiferInit.Editor.UI
     internal sealed class ProfileSettingsUI
     {
         private readonly SetupConfiguration _configuration;
+        private readonly Styles _styles;
         
 
-        public ProfileSettingsUI(SetupConfiguration configuration)
+        public ProfileSettingsUI(SetupConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
+            _styles = styles;
         }
 
 
         public void Draw()
         {
-            GUILayout.Label("Profile", new GUIStyle(EditorStyles.boldLabel));
+            GUILayout.Label("Profile", _styles.SectionTitle);
 
             using (EditorGUI.ChangeCheckScope changeScope = new EditorGUI.ChangeCheckScope())
             {
                 string[] profileNames = _configuration.Profiles.Select(p => p.Name).ToArray();
                 int selectedIndex = Array.IndexOf(profileNames, _configuration.ActiveProfile.Name);
                 selectedIndex = EditorGUILayout.Popup("Active Profile", selectedIndex, profileNames,
-                    new GUIStyle(EditorStyles.popup),GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT));
+                    _styles.Popup,GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT));
 
                 if (changeScope.changed)
                 {
@@ -37,7 +39,7 @@ namespace ConiferInit.Editor.UI
                 }
             }
             
-            using (new GUILayout.HorizontalScope(new GUIStyle()))
+            using (new GUILayout.HorizontalScope(_styles.Scope))
             {
                 if (GUILayout.Button("New"))
                 {

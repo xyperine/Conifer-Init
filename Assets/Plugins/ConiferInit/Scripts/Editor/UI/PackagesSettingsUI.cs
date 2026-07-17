@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using ConiferInit.Editor.Configuration;
-using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using PackageInfo = UnityEditor.PackageManager.PackageInfo;
@@ -11,28 +10,21 @@ namespace ConiferInit.Editor.UI
     internal sealed class PackagesSettingsUI
     {
         private readonly SetupConfiguration _configuration;
+        private readonly Styles _styles;
 
         private readonly ListDrawer _availableListDrawer;
         private readonly ListDrawer _queuedListDrawer;
 
-        private GUIStyle _titleStyle;
-        private GUIStyle _searchBarStyle;
-        private GUIStyle _labelStyle;
-        private GUIStyle _buttonStyle;
-        private GUIStyle _successStyle;
-        private GUIStyle _errorStyle;
-
-        private bool _stylesInitialized;
-
         private string _searchString;
 
 
-        public PackagesSettingsUI(SetupConfiguration configuration)
+        public PackagesSettingsUI(SetupConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
+            _styles = styles;
 
-            _availableListDrawer = new ListDrawer();
-            _queuedListDrawer = new ListDrawer();
+            _availableListDrawer = new ListDrawer(_styles);
+            _queuedListDrawer = new ListDrawer(_styles);
         }
 
 
@@ -47,41 +39,7 @@ namespace ConiferInit.Editor.UI
         
         public void Draw()
         {
-            if (!_stylesInitialized)
-            {
-                _titleStyle = new GUIStyle(EditorStyles.boldLabel);
-                _searchBarStyle = new GUIStyle(EditorStyles.toolbarSearchField);
-                _labelStyle = new GUIStyle(GUI.skin.label);
-                _buttonStyle = new GUIStyle(GUI.skin.button);
-
-#if UNITY_6000_1_OR_NEWER
-                Color successColor = Color.limeGreen;
-#else
-                Color successColor = new Color(0.1960784f, 0.8039216f, 0.1960784f, 1f);
-#endif
-                _successStyle = new GUIStyle(GUI.skin.label);
-                _successStyle.normal = new GUIStyleState() {textColor = successColor};
-                _successStyle.hover = new GUIStyleState() {textColor = successColor};
-                _successStyle.active = new GUIStyleState() {textColor = successColor};
-                _successStyle.focused = new GUIStyleState() {textColor = successColor};
-                _successStyle.wordWrap = true;
-                
-#if UNITY_6000_1_OR_NEWER
-                Color errorColor = Color.crimson;
-#else
-                Color errorColor = new Color(0.8627452f, 0.07843138f, 0.2352941f, 1);
-#endif
-                _errorStyle = new GUIStyle(GUI.skin.label);
-                _errorStyle.normal = new GUIStyleState() {textColor = errorColor};
-                _errorStyle.hover = new GUIStyleState() {textColor = errorColor};
-                _errorStyle.active = new GUIStyleState() {textColor = errorColor};
-                _errorStyle.focused = new GUIStyleState() {textColor = errorColor};
-                _errorStyle.wordWrap = true;
-                
-                _stylesInitialized = true;
-            }
-
-            GUILayout.Label("Packages Settings", _titleStyle);
+            GUILayout.Label("Packages Settings", _styles.SectionTitle);
 
             if (!SuccessfullyRetrievedPackages())
             {
@@ -90,7 +48,7 @@ namespace ConiferInit.Editor.UI
 
             // Search feature
             _searchString =
-                GUILayout.TextField(_searchString, _searchBarStyle, GUILayout.MaxWidth(256f));
+                GUILayout.TextField(_searchString, _styles.SearchBar, GUILayout.MaxWidth(256f));
             
             WindowElements.DrawRegularSpace();
             
@@ -107,8 +65,8 @@ namespace ConiferInit.Editor.UI
             {
                 PackageInfo packageInfo = _configuration.GetPackageByID(id);
                                 
-                GUILayout.Label(packageInfo.displayName, _labelStyle, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
-                if (GUILayout.Button("Import", _buttonStyle, GUILayout.Width(64f), GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)))
+                GUILayout.Label(packageInfo.displayName, _styles.Label, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
+                if (GUILayout.Button("Import", _styles.Button, GUILayout.Width(64f), GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
                     _configuration.QueuePackage(id);
                 }
@@ -122,10 +80,10 @@ namespace ConiferInit.Editor.UI
             {
                 PackageInfo packageInfo = _configuration.GetPackageByID(entry.ShortID);
 
-                GUILayout.Label(packageInfo.displayName, _labelStyle, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT),
+                GUILayout.Label(packageInfo.displayName, _styles.Label, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT),
                     GUILayout.MinWidth(128f));
 
-                if (GUILayout.Button("Remove", _buttonStyle, GUILayout.Width(64f),
+                if (GUILayout.Button("Remove", _styles.Button, GUILayout.Width(64f),
                         GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
                     _configuration.DequeuePackage(entry.ShortID);
@@ -142,10 +100,13 @@ namespace ConiferInit.Editor.UI
                     GUILayout.Label("Retrieving packages...");
                     break;
                 case StatusCode.Success:
-                    GUILayout.Label($"Retrieved packages: {_configuration.PackagesListRequest.Result.Length}", _successStyle);
+                    GUILayout.Label($"Retrieved packages: {_configuration.PackagesListRequest.Result.Length}",
+                        _styles.SuccessMessage);
                     break;
                 case StatusCode.Failure:
-                    GUILayout.Label($"Error while retrieving packages: {_configuration.PackagesListRequest.Error.message}", _errorStyle);
+                    GUILayout.Label(
+                        $"Error while retrieving packages: {_configuration.PackagesListRequest.Error.message}",
+                        _styles.ErrorMessage);
                     break;
                 default:
                     Debug.LogError("Invalid request");

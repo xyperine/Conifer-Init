@@ -7,19 +7,21 @@ namespace ConiferInit.Editor.UI
     internal sealed class ProjectSettingsUI
     {
         private readonly SetupConfiguration _configuration;
+        private readonly Styles _styles;
 
 
-        public ProjectSettingsUI(SetupConfiguration configuration)
+        public ProjectSettingsUI(SetupConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
+            _styles = styles;
         }
         
         
         public void Draw()
         {
-            GUILayout.Label("Project Settings", new GUIStyle(EditorStyles.boldLabel));
+            GUILayout.Label("Project Settings", _styles.SectionTitle);
 
-            using GUILayout.VerticalScope s = new GUILayout.VerticalScope(new GUIStyle());
+            using GUILayout.VerticalScope s = new GUILayout.VerticalScope(_styles.Scope);
 
             ProjectSettings projectSettings = _configuration.GetProjectSettings();
             

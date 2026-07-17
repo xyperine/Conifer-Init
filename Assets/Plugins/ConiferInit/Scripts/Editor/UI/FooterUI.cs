@@ -7,9 +7,13 @@ namespace ConiferInit.Editor.UI
 {
     internal class FooterUI
     {
-        private GUIStyle _scopeStyle;
+        private readonly Styles _styles;
 
-        private bool _stylesInitialized;
+
+        public FooterUI(Styles styles)
+        {
+            _styles = styles;
+        }
         
         
         public void Draw()
@@ -21,15 +25,8 @@ namespace ConiferInit.Editor.UI
             const string userGuideLocalPath = "Assets/Plugins/ConiferInit/User Guide.pdf";
             // DON'T FORGET TO UPDATE THIS WHENEVER THE VERSION CHANGES
             const string version = "0.1.0";
-
-            if (!_stylesInitialized)
-            {
-                _scopeStyle = new GUIStyle();
-                
-                _stylesInitialized = true;
-            }
             
-            using var s = new GUILayout.HorizontalScope(_scopeStyle);
+            using var s = new GUILayout.HorizontalScope(_styles.Scope);
 
             if (EditorGUILayout.LinkButton("User Guide"))
             {

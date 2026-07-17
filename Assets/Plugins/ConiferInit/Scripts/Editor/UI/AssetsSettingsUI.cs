@@ -8,26 +8,21 @@ namespace ConiferInit.Editor.UI
     internal sealed class AssetsSettingsUI
     {
         private readonly SetupConfiguration _configuration;
+        private readonly Styles _styles;
         
         private readonly ListDrawer _availableListDrawer;
         private readonly ListDrawer _queuedListDrawer;
-
-        private GUIStyle _titleStyle;
-        private GUIStyle _searchBarStyle;
-        private GUIStyle _labelStyle;
-        private GUIStyle _buttonStyle;
-
-        private bool _stylesInitialized;
         
         private string _searchString;
         
 
-        public AssetsSettingsUI(SetupConfiguration configuration)
+        public AssetsSettingsUI(SetupConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
+            _styles = styles;
 
-            _availableListDrawer = new ListDrawer();
-            _queuedListDrawer = new ListDrawer();
+            _availableListDrawer = new ListDrawer(_styles);
+            _queuedListDrawer = new ListDrawer(_styles);
         }
 
 
@@ -42,17 +37,7 @@ namespace ConiferInit.Editor.UI
         
         public void Draw()
         {
-            if (!_stylesInitialized)
-            {
-                _titleStyle = new GUIStyle(EditorStyles.boldLabel);
-                _searchBarStyle = new GUIStyle(EditorStyles.toolbarSearchField);
-                _labelStyle = new GUIStyle(GUI.skin.label);
-                _buttonStyle = new GUIStyle(GUI.skin.button);
-
-                _stylesInitialized = true;
-            }
-
-            GUILayout.Label("Assets Settings", _titleStyle);
+            GUILayout.Label("Assets Settings", _styles.SectionTitle);
 
             if (!_configuration.SuccessfullyRetrievedAssets)
             {
@@ -62,9 +47,7 @@ namespace ConiferInit.Editor.UI
             }
             
             // Search feature
-            _searchString =
-                GUILayout.TextField(_searchString, _searchBarStyle,
-                    GUILayout.MaxWidth(256f));
+            _searchString = GUILayout.TextField(_searchString, _styles.SearchBar, GUILayout.MaxWidth(256f));
             
             WindowElements.DrawRegularSpace();
             
@@ -81,8 +64,8 @@ namespace ConiferInit.Editor.UI
             {
                 string assetName = _configuration.FindAssetByID(id).Name;
                                 
-                GUILayout.Label(assetName, _labelStyle, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
-                if (GUILayout.Button("Import", _buttonStyle, GUILayout.Width(64f), GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)))
+                GUILayout.Label(assetName, _styles.Label, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT), GUILayout.MinWidth(128f));
+                if (GUILayout.Button("Import", _styles.Button, GUILayout.Width(64f), GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
                     _configuration.QueueAsset(id);
                 }
@@ -94,7 +77,7 @@ namespace ConiferInit.Editor.UI
             List<AssetImportEntry> queuedAssets = _configuration.GetQueuedAssets();
             _queuedListDrawer.Draw(queuedAssets, entry =>
             {
-                GUILayout.Label(entry.Name, _labelStyle, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT),
+                GUILayout.Label(entry.Name, _styles.Label, GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT),
                     GUILayout.MinWidth(128f));
 
                 GUILayout.FlexibleSpace();
@@ -102,7 +85,7 @@ namespace ConiferInit.Editor.UI
                 bool interactive = GUILayout.Toggle(entry.Interactive, "Interactive");
                 _configuration.SetInteractiveImportForAsset(entry.ID, interactive);
 
-                if (GUILayout.Button("Remove", _buttonStyle, GUILayout.Width(64f),
+                if (GUILayout.Button("Remove", _styles.Button, GUILayout.Width(64f),
                         GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)))
                 {
                     _configuration.DequeueAsset(entry.ID);

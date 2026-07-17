@@ -13,22 +13,18 @@ namespace ConiferInit.Editor.UI
 
         private readonly SetupConfiguration _configuration;
         private readonly SetupExecution _execution;
+        private readonly Styles _styles;
         private readonly Texture2D _logo;
         private readonly Font _font;
         
-        private GUIStyle _scopeStyle;
-        private GUIStyle _titleStyle;
-        private GUIStyle _buttonStyle;
-
-        private bool _stylesInitialized;
-
         public event Action UninstallRequested;
         
         
-        public HeaderUI(SetupConfiguration configuration, SetupExecution execution)
+        public HeaderUI(SetupConfiguration configuration, SetupExecution execution, Styles styles)
         {
             _configuration = configuration;
             _execution = execution;
+            _styles = styles;
             _logo = AssetDatabase.LoadAssetAtPath<Texture2D>(LOGO_PATH);
             _font = AssetDatabase.LoadAssetAtPath<Font>(TITLE_FONT_PATH);
         }
@@ -36,57 +32,60 @@ namespace ConiferInit.Editor.UI
 
         public void Draw()
         {
-            if (!_stylesInitialized)
+            DrawBanner();
+
+            WindowElements.DrawSectionSpace();
+
+            DrawToolsOptions();
+        }
+
+
+        private void DrawBanner()
+        {
+            using (new GUILayout.HorizontalScope(_styles.Scope))
             {
-                _scopeStyle = new GUIStyle();
-                _titleStyle = new GUIStyle(GUI.skin.label)
+                const float maxSize = 96f;
+                
+                GUILayout.FlexibleSpace();
+                
+                GUILayout.Label(_logo, GUILayout.MaxHeight(maxSize), GUILayout.MaxWidth(maxSize));
+                
+                GUILayout.Space(16f);
+                
+                GUIStyle windowTitleStyle = new GUIStyle(GUI.skin.label)
                 {
                     fontSize = 42,
                     alignment = TextAnchor.MiddleLeft,
                     font = _font,
                 };
-                _buttonStyle = new GUIStyle(GUI.skin.button);
-
-                _stylesInitialized = true;
-            }
-            
-            using (new GUILayout.HorizontalScope(_scopeStyle))
-            {
-                const float maxSize = 96f;
-                GUILayout.FlexibleSpace();
-                GUILayout.Label(_logo, GUILayout.MaxHeight(maxSize), GUILayout.MaxWidth(maxSize));
-                GUILayout.Space(16f);
-                GUILayout.Label("Conifer Init", _titleStyle, GUILayout.Height(maxSize));
+                GUILayout.Label("Conifer Init", windowTitleStyle, GUILayout.Height(maxSize));
+                
                 GUILayout.FlexibleSpace();
             }
-            
-            WindowElements.DrawSectionSpace();
-
-            DrawToolsOptions();
         }
         
         
         private void DrawToolsOptions()
         {
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_styles.Scope);
             
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button("Reset Configuration", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
+            if (GUILayout.Button("Reset Configuration", _styles.Button, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
                 _configuration.ClearCache();
             }
             
             GUILayout.Space(16f);
 
-            if (GUILayout.Button("Reset Execution", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
+            if (GUILayout.Button("Reset Execution", _styles.Button, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
                 _execution.ClearCache();
             }
             
             GUILayout.Space(16f);
 
-            if (GUILayout.Button("Uninstall", _buttonStyle, GUILayout.Height(20f), GUILayout.Width(128f)))
+            if (GUILayout.Button("Uninstall", _styles.Button, GUILayout.Height(20f), GUILayout.Width(128f)))
             {
                 bool wantToUninstall = Dialog.DisplayDecisionDialog("Uninstall?",
                     "Do you want to remove Conifer Init from your project?", "Yes", "No");

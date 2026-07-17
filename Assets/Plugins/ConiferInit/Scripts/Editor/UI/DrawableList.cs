@@ -20,14 +20,16 @@ namespace ConiferInit.Editor.UI
     internal class ListDrawer
     {
         private const int MAX_ENTRIES_PER_PAGE = 10;
-        
-        private GUIStyle _windowStyle;
-        private GUIStyle _scopeStyle;
-        private GUIStyle _labelStyle;
 
-        private bool _stylesInitialized;
+        private readonly Styles _styles;
         
         private int _page = 1;
+
+
+        public ListDrawer(Styles styles)
+        {
+            _styles = styles;
+        }
 
 
         public void Reset()
@@ -38,20 +40,11 @@ namespace ConiferInit.Editor.UI
         
         public void Draw<T>(IList<T> list, Action<T> elementDrawFunction, string title)
         {
-            if (!_stylesInitialized)
-            {
-                _windowStyle = new GUIStyle(GUI.skin.window);
-                _scopeStyle = new GUIStyle();
-                _labelStyle = new GUIStyle(GUI.skin.label);
-
-                _stylesInitialized = true;
-            }
-
             // Workaround to avoid index out of range exceptions if the element is removed from the list
             // in elementDrawFunction.
             list = list.ToList();
             
-            using (new GUILayout.VerticalScope(title, _windowStyle))
+            using (new GUILayout.VerticalScope(title, _styles.List))
             {
                 if (list.Count <= 0)
                 {
@@ -72,7 +65,7 @@ namespace ConiferInit.Editor.UI
                 
                 for (int i = start; i < end; i++)
                 {
-                    using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_scopeStyle);
+                    using EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_styles.Scope);
                     WindowElements.DrawListElementBackground(entryScope.rect, i);
                     elementDrawFunction?.Invoke(list[i]);
                 }
@@ -89,7 +82,7 @@ namespace ConiferInit.Editor.UI
                 return;
             }
             
-            using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_scopeStyle);
+            using GUILayout.HorizontalScope navigationScope = new GUILayout.HorizontalScope(_styles.Scope);
             GUILayout.FlexibleSpace();
 
             using (new EditorGUI.DisabledGroupScope(_page <= 1))
@@ -102,7 +95,7 @@ namespace ConiferInit.Editor.UI
 
             int maxPages =
                 Mathf.CeilToInt(totalElements / (float) MAX_ENTRIES_PER_PAGE);
-            GUILayout.Label($"{_page}/{maxPages}", _labelStyle);
+            GUILayout.Label($"{_page}/{maxPages}", _styles.Label);
 
             using (new EditorGUI.DisabledGroupScope(_page >= maxPages))
             {

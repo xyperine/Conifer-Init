@@ -10,17 +10,9 @@ namespace ConiferInit.Editor.UI
     internal sealed class FolderStructureUI
     {
         private readonly SetupConfiguration _configuration;
+        private readonly Styles _styles;
         
         private readonly Queue<FolderStructureEntry> _entriesToRemove = new Queue<FolderStructureEntry>();
-
-        private GUIStyle _titleStyle;
-        private GUIStyle _windowStyle;
-        private GUIStyle _buttonStyle;
-        private GUIStyle _labelStyle;
-        private GUIStyle _scopeStyle;
-        private GUIStyle _hoverableLabelStyle;
-        
-        private bool _stylesInitialized;
         
         private int _elementIndex;
         
@@ -33,9 +25,10 @@ namespace ConiferInit.Editor.UI
         private string _newEditedName;
 
 
-        public FolderStructureUI(SetupConfiguration configuration)
+        public FolderStructureUI(SetupConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
+            _styles = styles;
         }
 
 
@@ -52,40 +45,17 @@ namespace ConiferInit.Editor.UI
         
         public void Draw()
         {
-            if (!_stylesInitialized)
-            {
-                _titleStyle = new GUIStyle(EditorStyles.boldLabel);
-                _buttonStyle = new GUIStyle(GUI.skin.button);
-                _windowStyle = new GUIStyle(GUI.skin.window);
-                _scopeStyle = new GUIStyle();
-                _labelStyle = new GUIStyle(GUI.skin.label);
-
-#if UNITY_6000_1_OR_NEWER
-                Color hoveredLabelColor = Color.cornflowerBlue; 
-#else
-                Color hoveredLabelColor = new Color(0.3921569f, 0.5843138f, 0.9294118f, 1f);
-#endif
-                _hoverableLabelStyle = new GUIStyle(GUI.skin.label)
-                {
-                    hover = new GUIStyleState() {textColor = hoveredLabelColor},
-                    active = new GUIStyleState() {textColor = hoveredLabelColor},
-                };
-                
-                _stylesInitialized = true;
-            }
-            
-            GUILayout.Label("Folder Structure", _titleStyle);
-
+            GUILayout.Label("Folder Structure", _styles.SectionTitle);
             
             WindowElements.DrawSmallSpace();
 
             _elementIndex = -1;
-            using (new GUILayout.VerticalScope("Hierarchy", _windowStyle))
+            using (new GUILayout.VerticalScope("Hierarchy", _styles.List))
             {
                 DrawHierarchyRecursively(_configuration.GetAssetsFSE());
             }
             
-            if (GUILayout.Button("Reset", _buttonStyle, GUILayout.Width(128f)))
+            if (GUILayout.Button("Reset", _styles.Button, GUILayout.Width(128f)))
             {
                 _configuration.ResetFolderStructure();
             }
@@ -111,7 +81,7 @@ namespace ConiferInit.Editor.UI
             indentedName.Append(entry.Name);
                 
             // Draw the row
-            using (EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_scopeStyle))
+            using (EditorGUILayout.HorizontalScope entryScope = new EditorGUILayout.HorizontalScope(_styles.Scope))
             {
                 WindowElements.DrawListElementBackground(entryScope.rect, _elementIndex);
 
@@ -125,7 +95,7 @@ namespace ConiferInit.Editor.UI
 
                     const string textFieldName = "Rename_Text_Field";
                     GUI.SetNextControlName(textFieldName);
-                    GUILayout.Label(sb.ToString(), _labelStyle, GUILayout.ExpandWidth(false));
+                    GUILayout.Label(sb.ToString(), _styles.Label, GUILayout.ExpandWidth(false));
                     _newEditedName = GUILayout.TextField(_newEditedName, GUILayout.MaxWidth(256f),
                         GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT));
                     EditorGUI.FocusTextInControl(textFieldName);
@@ -152,7 +122,7 @@ namespace ConiferInit.Editor.UI
                 {
                     if (entry.FullName != "Assets")
                     {
-                        if (GUILayout.Button(indentedName.ToString(), _hoverableLabelStyle) && !_isAddingChild)
+                        if (GUILayout.Button(indentedName.ToString(), _styles.HoverableLabel) && !_isAddingChild)
                         {
                             _isEditingName = true;
                             _editingNameOf = entry.FullName;
@@ -161,10 +131,10 @@ namespace ConiferInit.Editor.UI
                     }
                     else
                     {
-                        GUILayout.Label(indentedName.ToString(), _labelStyle);
+                        GUILayout.Label(indentedName.ToString(), _styles.Label);
                     }
 
-                    if (GUILayout.Button("+", _buttonStyle, GUILayout.Width(16f), GUILayout.Height(16f)) && !_isEditingName)
+                    if (GUILayout.Button("+", _styles.Button, GUILayout.Width(16f), GUILayout.Height(16f)) && !_isEditingName)
                     {
                         _isAddingChild = true;
                         _newChildParentFullName = entry.FullName;
@@ -173,7 +143,7 @@ namespace ConiferInit.Editor.UI
 
                     if (entry.FullName != "Assets")
                     {
-                        if (GUILayout.Button("-", _buttonStyle, GUILayout.Width(16f), GUILayout.Height(16f)))
+                        if (GUILayout.Button("-", _styles.Button, GUILayout.Width(16f), GUILayout.Height(16f)))
                         {
                             _entriesToRemove.Enqueue(entry);
                         }
@@ -187,7 +157,7 @@ namespace ConiferInit.Editor.UI
                 _elementIndex++;
 
                 using (EditorGUILayout.HorizontalScope newFolderScope =
-                       new EditorGUILayout.HorizontalScope(_scopeStyle))
+                       new EditorGUILayout.HorizontalScope(_styles.Scope))
                 {
                     WindowElements.DrawListElementBackground(newFolderScope.rect, _elementIndex);
 
@@ -197,7 +167,7 @@ namespace ConiferInit.Editor.UI
                         sb.Append("|    ");
                     }
 
-                    GUILayout.Label(sb.ToString(), _labelStyle, GUILayout.ExpandWidth(false));
+                    GUILayout.Label(sb.ToString(), _styles.Label, GUILayout.ExpandWidth(false));
 
                     const string textFieldName = "New_Child_Name_Text_Field";
                     GUI.SetNextControlName(textFieldName);

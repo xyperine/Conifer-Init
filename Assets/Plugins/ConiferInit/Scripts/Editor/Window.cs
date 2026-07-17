@@ -20,9 +20,8 @@ namespace ConiferInit.Editor
     {
         private readonly SetupConfiguration _configuration = new SetupConfiguration();
         private readonly SetupExecution _execution = new SetupExecution();
-
-        private GUIStyle _entireWindowStyle;
-
+        private readonly Styles _styles = new Styles();
+        
         private HeaderUI _headerUI;
         private ProfileSettingsUI _profileSettingsUI;
         private FolderStructureUI _folderStructureUI;
@@ -35,7 +34,7 @@ namespace ConiferInit.Editor
         
         private Vector2 _scrollPosition;
         
-        
+        // TODO: Extract these menu options into a separate class
         [MenuItem("Tools/Conifer Init")]
         private static void ShowWindow()
         {
@@ -117,19 +116,16 @@ namespace ConiferInit.Editor
             
             _execution.Initialize();
 
-            _headerUI = new HeaderUI(_configuration, _execution);
+            _headerUI = new HeaderUI(_configuration, _execution, _styles);
             _headerUI.UninstallRequested += OnUninstallRequested;
-            _profileSettingsUI = new ProfileSettingsUI(_configuration);
-            _folderStructureUI = new FolderStructureUI(_configuration);
-            _packagesSettingsUI = new PackagesSettingsUI(_configuration);
-            _assetsSettingsUI = new AssetsSettingsUI(_configuration);
-            _projectSettingsUI = new ProjectSettingsUI(_configuration);
-            _miscSettingsUI = new MiscSettingsUI(_configuration);
-            _executeUI = new ExecuteUI(_execution);
-            _footerUI = new FooterUI();
-            
-            _entireWindowStyle = new GUIStyle();
-            _entireWindowStyle.padding = new RectOffset(16, 16, 16, 16);
+            _profileSettingsUI = new ProfileSettingsUI(_configuration, _styles);
+            _folderStructureUI = new FolderStructureUI(_configuration, _styles);
+            _packagesSettingsUI = new PackagesSettingsUI(_configuration, _styles);
+            _assetsSettingsUI = new AssetsSettingsUI(_configuration, _styles);
+            _projectSettingsUI = new ProjectSettingsUI(_configuration, _styles);
+            _miscSettingsUI = new MiscSettingsUI(_configuration, _styles);
+            _executeUI = new ExecuteUI(_execution, _styles);
+            _footerUI = new FooterUI(_styles);
         }
 
 
@@ -153,8 +149,13 @@ namespace ConiferInit.Editor
         
         private void OnGUI()
         {
+            if (!_styles.Initialized)
+            {
+                _styles.Initialize();
+            }
+            
             using GUILayout.ScrollViewScope scrollViewScope =
-                new GUILayout.ScrollViewScope(_scrollPosition, _entireWindowStyle);
+                new GUILayout.ScrollViewScope(_scrollPosition, _styles.EntireWindow);
             _scrollPosition = scrollViewScope.scrollPosition;
             
             _headerUI.Draw();

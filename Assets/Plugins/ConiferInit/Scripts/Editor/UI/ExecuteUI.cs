@@ -7,37 +7,23 @@ namespace ConiferInit.Editor.UI
     internal class ExecuteUI
     {
         private readonly SetupExecution _execution;
-        
-        private GUIStyle _scopeStyle;
-        private GUIStyle _executeButtonStyle;
-        
-        private bool _stylesInitialized;
+        private readonly Styles _styles;
 
 
-        public ExecuteUI(SetupExecution execution)
+        public ExecuteUI(SetupExecution execution, Styles styles)
         {
             _execution = execution;
+            _styles = styles;
         }
 
 
         public void Draw()
         {
-            if (!_stylesInitialized)
-            {
-                _scopeStyle = new GUIStyle();
-                _executeButtonStyle = new GUIStyle(GUI.skin.button)
-                {
-                    fontSize = 16,
-                };
-
-                _stylesInitialized = true;
-            }
-            
             using EditorGUI.DisabledGroupScope ds =
                 new EditorGUI.DisabledGroupScope(ExecutionCache.instance.SetupInProgress);
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
+            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_styles.Scope);
             
-            if (GUILayout.Button("Execute Setup", _executeButtonStyle, GUILayout.Height(32f)))
+            if (GUILayout.Button("Execute Setup", _styles.ExecuteButton, GUILayout.Height(32f)))
             {
                 _execution.ExecuteSetup();
             }
