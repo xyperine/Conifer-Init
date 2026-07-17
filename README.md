@@ -4,7 +4,7 @@
 
 </div>
 
-[![Version](https://img.shields.io/badge/version-0.1.0-blue?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/releases/latest)
+[![Version](https://img.shields.io/badge/version-0.1.1-blue?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/releases/latest)
 [![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/blob/main/LICENSE)
 [![Status](https://img.shields.io/badge/status-active-green?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/commits/main)
 [![Documentation](https://img.shields.io/badge/docs-partial-yellow?style=for-the-badge)](https://xyperine.github.io/Conifer-Init)
