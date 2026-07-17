@@ -122,18 +122,17 @@ namespace ConiferInit.Editor.UI
                 SettingsProfilePersistency.StoragePath, newName, "json");
             if (savedPath != string.Empty)
             {
-                _configuration.TrySaveProfileAt(savedPath,
-                    path => TrySaveAsProfile(Path.GetFileNameWithoutExtension(path)));
+                if (_configuration.IsValidProfilePath(savedPath))
+                {
+                    TrySaveAsProfile(Path.GetFileNameWithoutExtension(savedPath));
+                }
             }
         }
 
 
         private void TrySaveAsProfile(string newProfileName)
         {
-            if (newProfileName == string.Empty)
-            {
-                return;
-            }
+            Assert.IsFalse(string.IsNullOrWhiteSpace(newProfileName));
             
             SettingsProfile profile = new SettingsProfile()
             {
@@ -160,34 +159,28 @@ namespace ConiferInit.Editor.UI
                 SettingsProfilePersistency.StoragePath, newName, "json");
             if (savedPath != string.Empty)
             {
-                _configuration.TrySaveProfileAt(savedPath,
-                    path => TryCreateNewProfile(Path.GetFileNameWithoutExtension(path)));
+                if (_configuration.IsValidNewProfilePath(savedPath))
+                {
+                    CreateNewProfile(Path.GetFileNameWithoutExtension(savedPath));
+                }
             }
         }
         
 
-        private void TryCreateNewProfile(string newProfileName)
+        private void CreateNewProfile(string newProfileName)
         {
-            if (!_configuration.Profiles.Exists(p => p.Name == newProfileName))
-            {
-                if (newProfileName == string.Empty)
-                {
-                    return;
-                }
+            Assert.IsFalse(newProfileName == SetupConfiguration.DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(_configuration.Profiles.Exists(p => p.Name == newProfileName));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(newProfileName));
             
-                ApplyProfile(_configuration.DefaultProfile);
-                
-                SettingsProfile profile = new SettingsProfile()
-                {
-                    Name = newProfileName,
-                };
+            ApplyProfile(_configuration.DefaultProfile);
             
-                _configuration.SaveProfile(profile);
-            }
-            else
+            SettingsProfile profile = new SettingsProfile()
             {
-                Debug.LogError("Can't override profiles with the \"New\" option!");
-            }
+                Name = newProfileName,
+            };
+        
+            _configuration.SaveProfile(profile);
         }
     }
 }

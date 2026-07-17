@@ -165,29 +165,42 @@ namespace ConiferInit.Editor.Configuration
         }
 
 
-        public void TrySaveProfileAt(string path, Action<string> onSuccess)
+        public bool IsValidProfilePath(string path)
         {
             bool insideProfileStorage = Directory.GetParent(path).FullName == SettingsProfilePersistency.StoragePath;
             bool hasRightExtension = Path.GetExtension(path) == ".json";
             bool isNotDefaultProfile = Path.GetFileNameWithoutExtension(path) != DEFAULT_PROFILE_NAME;
-            bool valid = insideProfileStorage && hasRightExtension && isNotDefaultProfile;
-            if (valid)
-            {
-                onSuccess?.Invoke(path);
-            }
-            else if (!insideProfileStorage)
+            
+            if (!insideProfileStorage)
             {
                 Debug.LogError(
                     $"Must be inside the profiles storage directory!: {SettingsProfilePersistency.StoragePath}");
             }
-            else if (!hasRightExtension)
+            
+            if (!hasRightExtension)
             {
                 Debug.LogError("The profile file must have .json extension!");
             }
-            else if (!isNotDefaultProfile)
+            
+            if (!isNotDefaultProfile)
             {
                 Debug.LogError("Can't override the default profile!");
             }
+
+            bool valid = insideProfileStorage && hasRightExtension && isNotDefaultProfile;
+            return valid;
+        }
+
+
+        public bool IsValidNewProfilePath(string path)
+        {
+            if (File.Exists(path))
+            {
+                Debug.LogError("Can't override profiles with the \"New\" option!");
+                return false;
+            }
+            
+            return IsValidProfilePath(path);
         }
 
 
