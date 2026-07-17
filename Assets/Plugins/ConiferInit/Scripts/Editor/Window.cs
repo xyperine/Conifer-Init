@@ -30,14 +30,10 @@ namespace ConiferInit.Editor
         private AssetsSettingsUI _assetsSettingsUI;
         private ProjectSettingsUI _projectSettingsUI;
         private MiscSettingsUI _miscSettingsUI;
+        private ExecuteUI _executeUI;
         private FooterUI _footerUI;
         
         private Vector2 _scrollPosition;
-
-        private GUIStyle _scopeStyle;
-        private GUIStyle _executeButtonStyle;
-
-        private bool _stylesInitialized;
         
         
         [MenuItem("Tools/Conifer Init")]
@@ -129,6 +125,7 @@ namespace ConiferInit.Editor
             _assetsSettingsUI = new AssetsSettingsUI(_configuration);
             _projectSettingsUI = new ProjectSettingsUI(_configuration);
             _miscSettingsUI = new MiscSettingsUI(_configuration);
+            _executeUI = new ExecuteUI(_execution);
             _footerUI = new FooterUI();
             
             _entireWindowStyle = new GUIStyle();
@@ -156,17 +153,6 @@ namespace ConiferInit.Editor
         
         private void OnGUI()
         {
-            if (!_stylesInitialized)
-            {
-                _scopeStyle = new GUIStyle();
-                _executeButtonStyle = new GUIStyle(GUI.skin.button)
-                {
-                    fontSize = 16,
-                };
-
-                _stylesInitialized = true;
-            }
-            
             using GUILayout.ScrollViewScope scrollViewScope =
                 new GUILayout.ScrollViewScope(_scrollPosition, _entireWindowStyle);
             _scrollPosition = scrollViewScope.scrollPosition;
@@ -199,7 +185,7 @@ namespace ConiferInit.Editor
             
             WindowElements.DrawSectionSpace();
             
-            DrawExecuteSetup();
+            _executeUI.Draw();
             
             WindowElements.DrawSectionSeparator();
             
@@ -214,19 +200,6 @@ namespace ConiferInit.Editor
             _folderStructureUI.ResetTemporaryState();
             _packagesSettingsUI.ResetTemporaryState();
             _assetsSettingsUI.ResetTemporaryState();
-        }
-
-
-        private void DrawExecuteSetup()
-        {
-            using EditorGUI.DisabledGroupScope ds =
-                new EditorGUI.DisabledGroupScope(ExecutionCache.instance.SetupInProgress);
-            using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
-            
-            if (GUILayout.Button("Execute Setup", _executeButtonStyle, GUILayout.Height(32f)))
-            {
-                _execution.ExecuteSetup();
-            }
         }
         
         
