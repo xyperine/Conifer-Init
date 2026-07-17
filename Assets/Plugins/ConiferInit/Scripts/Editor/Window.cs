@@ -219,6 +219,8 @@ namespace ConiferInit.Editor
 
         private void DrawExecuteSetup()
         {
+            using EditorGUI.DisabledGroupScope ds =
+                new EditorGUI.DisabledGroupScope(ExecutionCache.instance.SetupInProgress);
             using GUILayout.HorizontalScope s = new GUILayout.HorizontalScope(_scopeStyle);
             
             if (GUILayout.Button("Execute Setup", _executeButtonStyle, GUILayout.Height(32f)))
