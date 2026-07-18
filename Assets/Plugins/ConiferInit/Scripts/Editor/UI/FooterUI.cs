@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ConiferInit.Editor.UI
 {
-    internal class FooterUI
+    internal sealed class FooterUI
     {
         private readonly Styles _styles;
 

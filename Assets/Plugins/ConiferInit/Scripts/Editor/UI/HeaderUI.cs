@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace ConiferInit.Editor.UI
 {
-    internal class HeaderUI
+    internal sealed class HeaderUI
     {
         private const string LOGO_PATH = "Assets/Plugins/ConiferInit/Textures/Logo.png";
         private const string TITLE_FONT_PATH = "Assets/Plugins/ConiferInit/Fonts/KodeMono-Regular.ttf";

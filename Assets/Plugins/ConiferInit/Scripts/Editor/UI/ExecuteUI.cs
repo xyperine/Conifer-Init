@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ConiferInit.Editor.UI
 {
-    internal class ExecuteUI
+    internal sealed class ExecuteUI
     {
         private readonly SetupExecution _execution;
         private readonly Styles _styles;
