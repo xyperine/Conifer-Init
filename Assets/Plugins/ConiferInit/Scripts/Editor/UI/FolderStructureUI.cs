@@ -52,7 +52,7 @@ namespace ConiferInit.Editor.UI
             _elementIndex = -1;
             using (new GUILayout.VerticalScope("Hierarchy", _styles.List))
             {
-                DrawHierarchyRecursively(_configuration.GetAssetsFSE());
+                DrawHierarchyRecursively(_configuration.GetAssetsFolder());
             }
             
             if (GUILayout.Button("Reset", _styles.Button, GUILayout.Width(128f)))
@@ -62,7 +62,7 @@ namespace ConiferInit.Editor.UI
 
             while (_entriesToRemove.Count > 0)
             {
-                _configuration.RemoveFolderStructureEntry(_entriesToRemove.Dequeue());
+                _configuration.RemoveFolder(_entriesToRemove.Dequeue());
             }
         }
 
@@ -103,7 +103,7 @@ namespace ConiferInit.Editor.UI
                     if ((GUILayout.Button("Accept", GUILayout.Width(64f), GUILayout.Height(WindowElements.REGULAR_ELEMENT_HEIGHT)) ||
                          Event.current.keyCode == KeyCode.Return) && IsValidFolderName(_newEditedName))
                     {
-                        _configuration.RenameFolderStructureEntry(entry, _newEditedName);
+                        _configuration.RenameFolder(entry, _newEditedName);
 
                         _isEditingName = false;
                         _editingNameOf = string.Empty;

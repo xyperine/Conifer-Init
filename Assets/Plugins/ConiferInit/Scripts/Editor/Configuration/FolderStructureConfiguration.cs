@@ -13,7 +13,7 @@
         }
         
         
-        public FolderStructureEntry GetAssetsFSE()
+        public FolderStructureEntry GetAssetsFolder()
         {
             return _configurationCache.AssetsFolderStructureEntry;
         }
@@ -26,13 +26,13 @@
         }
 
 
-        public void RemoveFolderStructureEntry(FolderStructureEntry entry)
+        public void RemoveFolder(FolderStructureEntry entry)
         { 
             entry.Parent.RemoveChild(entry);
         }
 
 
-        public void RenameFolderStructureEntry(FolderStructureEntry entry, string newName)
+        public void RenameFolder(FolderStructureEntry entry, string newName)
         {
             entry.Rename(newName);
         }
