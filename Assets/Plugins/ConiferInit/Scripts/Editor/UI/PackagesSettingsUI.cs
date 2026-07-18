@@ -75,7 +75,7 @@ namespace ConiferInit.Editor.UI
             WindowElements.DrawRegularSpace();
 
             // Queued list
-            List<PackageImportEntry> queuedPackages = _configuration.GetQueuedPackageIDs();
+            List<PackageImportEntry> queuedPackages = _configuration.GetQueuedPackages();
             _queuedListDrawer.Draw(queuedPackages, entry =>
             {
                 PackageInfo packageInfo = _configuration.GetPackageByID(entry.ShortID);

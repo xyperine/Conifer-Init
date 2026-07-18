@@ -31,7 +31,7 @@ namespace ConiferInit.Editor.Configuration
         }
         
         
-        public List<PackageImportEntry> GetQueuedPackageIDs()
+        public List<PackageImportEntry> GetQueuedPackages()
         {
             return _configurationCache.QueuedPackages;
         }
