@@ -9,7 +9,7 @@ namespace ConiferInit.Editor.UI
 {
     internal sealed class PackagesSettingsUI
     {
-        private readonly SetupConfiguration _configuration;
+        private readonly PackagesSettingsConfiguration _configuration;
         private readonly Styles _styles;
 
         private readonly ListDrawer _availableListDrawer;
@@ -18,7 +18,7 @@ namespace ConiferInit.Editor.UI
         private string _searchString;
 
 
-        public PackagesSettingsUI(SetupConfiguration configuration, Styles styles)
+        public PackagesSettingsUI(PackagesSettingsConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
             _styles = styles;

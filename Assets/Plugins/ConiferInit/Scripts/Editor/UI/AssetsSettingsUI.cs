@@ -7,7 +7,7 @@ namespace ConiferInit.Editor.UI
 {
     internal sealed class AssetsSettingsUI
     {
-        private readonly SetupConfiguration _configuration;
+        private readonly AssetsSettingsConfiguration _configuration;
         private readonly Styles _styles;
         
         private readonly ListDrawer _availableListDrawer;
@@ -16,7 +16,7 @@ namespace ConiferInit.Editor.UI
         private string _searchString;
         
 
-        public AssetsSettingsUI(SetupConfiguration configuration, Styles styles)
+        public AssetsSettingsUI(AssetsSettingsConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
             _styles = styles;

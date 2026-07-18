@@ -12,9 +12,17 @@ namespace ConiferInit.Editor
     /// </summary>
     internal sealed class Window : EditorWindow
     {
-        private readonly SetupConfiguration _configuration = new SetupConfiguration();
         private readonly SetupExecution _execution = new SetupExecution();
         private readonly Styles _styles = new Styles();
+        
+        private SetupConfiguration _configuration;
+        
+        private SettingsProfileConfiguration _settingsProfileConfiguration;
+        private FolderStructureConfiguration _folderStructureConfiguration;
+        private PackagesSettingsConfiguration _packagesSettingsConfiguration;
+        private AssetsSettingsConfiguration _assetsSettingsConfiguration;
+        private ProjectSettingsConfiguration _projectSettingsConfiguration;
+        private MiscSettingsConfiguration _miscSettingsConfiguration;
         
         private HeaderUI _headerUI;
         private ProfileSettingsUI _profileSettingsUI;
@@ -31,20 +39,53 @@ namespace ConiferInit.Editor
 
         private void OnEnable()
         {
-            _configuration.Initialize();
-            _configuration.ApplyingProfile += ResetTemporaryState;
+            InitializeConfiguration();
             
-            _execution.Initialize();
+            InitializeUI();
 
+            _execution.Initialize();
+        }
+
+
+        private void InitializeConfiguration()
+        {
+            _settingsProfileConfiguration = new SettingsProfileConfiguration(ConfigurationCache.instance);
+            _settingsProfileConfiguration.Initialize();
+            _settingsProfileConfiguration.ApplyingProfile += ResetTemporaryState;
+
+            _folderStructureConfiguration =
+                new FolderStructureConfiguration(_settingsProfileConfiguration, ConfigurationCache.instance);
+
+            _packagesSettingsConfiguration = new PackagesSettingsConfiguration(ConfigurationCache.instance);
+            _packagesSettingsConfiguration.Initialize();
+
+            _assetsSettingsConfiguration = new AssetsSettingsConfiguration(ConfigurationCache.instance);
+            _assetsSettingsConfiguration.Initialize();
+
+            _projectSettingsConfiguration = new ProjectSettingsConfiguration(ConfigurationCache.instance);
+
+            _miscSettingsConfiguration = new MiscSettingsConfiguration(ConfigurationCache.instance);
+            
+            _configuration = new SetupConfiguration(ConfigurationCache.instance, ExecutionCache.instance,
+                _settingsProfileConfiguration, _packagesSettingsConfiguration, _assetsSettingsConfiguration);
+            _configuration.Initialize();
+        }
+
+
+        private void InitializeUI()
+        {
             _headerUI = new HeaderUI(_configuration, _execution, _styles);
             _headerUI.UninstallRequested += OnUninstallRequested;
-            _profileSettingsUI = new ProfileSettingsUI(_configuration, _styles);
-            _folderStructureUI = new FolderStructureUI(_configuration, _styles);
-            _packagesSettingsUI = new PackagesSettingsUI(_configuration, _styles);
-            _assetsSettingsUI = new AssetsSettingsUI(_configuration, _styles);
-            _projectSettingsUI = new ProjectSettingsUI(_configuration, _styles);
-            _miscSettingsUI = new MiscSettingsUI(_configuration, _styles);
+            
+            _profileSettingsUI = new ProfileSettingsUI(_settingsProfileConfiguration, _styles);
+            _folderStructureUI = new FolderStructureUI(_folderStructureConfiguration, _styles);
+            _packagesSettingsUI = new PackagesSettingsUI(_packagesSettingsConfiguration, _styles);
+            _assetsSettingsUI = new AssetsSettingsUI(_assetsSettingsConfiguration, _styles);
+            _projectSettingsUI = new ProjectSettingsUI(_projectSettingsConfiguration, _styles);
+            _miscSettingsUI = new MiscSettingsUI(_miscSettingsConfiguration, _styles);
+            
             _executeUI = new ExecuteUI(_execution, _styles);
+            
             _footerUI = new FooterUI(_styles);
         }
 
@@ -133,7 +174,7 @@ namespace ConiferInit.Editor
 
         private void OnDisable()
         {
-            _configuration.ApplyingProfile -= ResetTemporaryState;
+            _settingsProfileConfiguration.ApplyingProfile -= ResetTemporaryState;
             _headerUI.UninstallRequested -= OnUninstallRequested;
         }
     }

@@ -9,7 +9,7 @@ namespace ConiferInit.Editor.UI
 {
     internal sealed class FolderStructureUI
     {
-        private readonly SetupConfiguration _configuration;
+        private readonly FolderStructureConfiguration _configuration;
         private readonly Styles _styles;
         
         private readonly Queue<FolderStructureEntry> _entriesToRemove = new Queue<FolderStructureEntry>();
@@ -25,7 +25,7 @@ namespace ConiferInit.Editor.UI
         private string _newEditedName;
 
 
-        public FolderStructureUI(SetupConfiguration configuration, Styles styles)
+        public FolderStructureUI(FolderStructureConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
             _styles = styles;

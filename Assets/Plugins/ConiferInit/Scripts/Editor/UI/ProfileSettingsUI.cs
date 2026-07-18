@@ -10,11 +10,11 @@ namespace ConiferInit.Editor.UI
 {
     internal sealed class ProfileSettingsUI
     {
-        private readonly SetupConfiguration _configuration;
+        private readonly SettingsProfileConfiguration _configuration;
         private readonly Styles _styles;
         
 
-        public ProfileSettingsUI(SetupConfiguration configuration, Styles styles)
+        public ProfileSettingsUI(SettingsProfileConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
             _styles = styles;
@@ -83,7 +83,7 @@ namespace ConiferInit.Editor.UI
 
         private void ConfirmSaveProfileDialog(SettingsProfile profile)
         {
-            Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(profile.Name == SettingsProfileConfiguration.DEFAULT_PROFILE_NAME);
             
             if (_configuration.Profiles.Exists(p => p.Name == profile.Name))
             {
@@ -104,7 +104,7 @@ namespace ConiferInit.Editor.UI
 
         private void ConfirmDeleteProfileDialog(SettingsProfile profile)
         {
-            Assert.IsFalse(profile.Name == SetupConfiguration.DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(profile.Name == SettingsProfileConfiguration.DEFAULT_PROFILE_NAME);
 
             bool wantToDeleteProfile = Dialog.DisplayDecisionDialog("Delete Profile?",
                 $"{profile.Name} profile will be irreversibly deleted. Proceed?",
@@ -171,7 +171,7 @@ namespace ConiferInit.Editor.UI
 
         private void CreateNewProfile(string newProfileName)
         {
-            Assert.IsFalse(newProfileName == SetupConfiguration.DEFAULT_PROFILE_NAME);
+            Assert.IsFalse(newProfileName == SettingsProfileConfiguration.DEFAULT_PROFILE_NAME);
             Assert.IsFalse(_configuration.Profiles.Exists(p => p.Name == newProfileName));
             Assert.IsFalse(string.IsNullOrWhiteSpace(newProfileName));
             

@@ -6,11 +6,11 @@ namespace ConiferInit.Editor.UI
 {
     internal sealed class MiscSettingsUI
     {
-        private readonly SetupConfiguration _configuration;
+        private readonly MiscSettingsConfiguration _configuration;
         private readonly Styles _styles;
         
 
-        public MiscSettingsUI(SetupConfiguration configuration, Styles styles)
+        public MiscSettingsUI(MiscSettingsConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
             _styles = styles;

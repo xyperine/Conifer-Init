@@ -6,11 +6,11 @@ namespace ConiferInit.Editor.UI
 {
     internal sealed class ProjectSettingsUI
     {
-        private readonly SetupConfiguration _configuration;
+        private readonly ProjectSettingsConfiguration _configuration;
         private readonly Styles _styles;
 
 
-        public ProjectSettingsUI(SetupConfiguration configuration, Styles styles)
+        public ProjectSettingsUI(ProjectSettingsConfiguration configuration, Styles styles)
         {
             _configuration = configuration;
             _styles = styles;
