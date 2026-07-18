@@ -32,11 +32,11 @@ namespace ConiferInit.Editor.Configuration
 
         public void Initialize()
         {
-            LoadSettingsProfiles();
+            LoadProfiles();
         }
         
         
-        public void LoadSettingsProfiles()
+        public void LoadProfiles()
         {
             if (!Directory.Exists(SettingsProfilePersistency.StoragePath))
             {
@@ -120,7 +120,7 @@ namespace ConiferInit.Editor.Configuration
             
             SettingsProfilePersistency.Save(profile);
             
-            LoadSettingsProfiles();
+            LoadProfiles();
             
             ApplyProfile(profile);
         }
@@ -132,7 +132,7 @@ namespace ConiferInit.Editor.Configuration
             
             SettingsProfilePersistency.Delete(profile.Name);
             
-            LoadSettingsProfiles();
+            LoadProfiles();
             
             ApplyProfile(DefaultProfile);
         }
