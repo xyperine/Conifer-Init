@@ -14,14 +14,14 @@ namespace ConiferInit.Editor.Execution
     /// </summary>
     internal sealed class SetupExecution
     {
-        private ExecutionCache _executionCache;
-        private ConfigurationCache _configurationCache;
-        
+        private readonly ExecutionCache _executionCache;
+        private readonly ConfigurationCache _configurationCache;
 
-        public void Initialize()
+
+        public SetupExecution(ExecutionCache executionCache, ConfigurationCache configurationCache)
         {
-            _executionCache = ExecutionCache.instance;
-            _configurationCache = ConfigurationCache.instance;
+            _executionCache = executionCache;
+            _configurationCache = configurationCache;
         }
         
         

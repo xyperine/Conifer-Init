@@ -16,14 +16,14 @@ namespace ConiferInit.Editor
         [MenuItem("Tools/Conifer Init")]
         private static void ShowWindow()
         {
-            Vector2 size = new Vector2(600f, 800f);
-            int width = Screen.currentResolution.width;
-            int height = Screen.currentResolution.height;
-            Vector2 center = new Vector2((width - size.x) * 0.5f, (height - size.y) * 0.5f);
-            Window window = EditorWindow.GetWindow<Window>(false, "Conifer Init", true);
-            window.position = new Rect(center, size);
-            window.minSize = size;
-            window.Show();
+            if (!EditorWindow.HasOpenInstances<Window>())
+            {
+                CompositionRoot.CreateWindow();
+            }
+            else
+            {
+                EditorWindow.FocusWindowIfItsOpen<Window>();
+            }
         }
 
 

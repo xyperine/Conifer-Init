@@ -8,21 +8,39 @@ using UnityEngine;
 namespace ConiferInit.Editor
 {
     /// <summary>
-    /// Coordinates draw logic and handling user inputs. Also acts as a composition root.
+    /// Coordinates draw logic and handling user inputs.
     /// </summary>
     internal sealed class Window : EditorWindow
     {
-        private readonly SetupExecution _execution = new SetupExecution();
-        private readonly Styles _styles = new Styles();
+        internal readonly struct Dependencies
+        {
+            public SetupExecution Execution { get; init; }
+            public Styles Styles { get; init; }
+            
+            public SetupConfiguration Configuration { get; init; }
+            public SettingsProfileConfiguration SettingsProfileConfiguration { get; init; }
+            public PackagesSettingsConfiguration PackagesSettingsConfiguration { get; init; }
+            public AssetsSettingsConfiguration AssetsSettingsConfiguration { get; init; }
+
+            public HeaderUI HeaderUI { get; init; }
+            public ProfileSettingsUI ProfileSettingsUI { get; init; }
+            public FolderStructureUI FolderStructureUI { get; init; }
+            public PackagesSettingsUI PackagesSettingsUI { get; init; }
+            public AssetsSettingsUI AssetsSettingsUI { get; init; }
+            public ProjectSettingsUI ProjectSettingsUI { get; init; }
+            public MiscSettingsUI MiscSettingsUI { get; init; }
+            public ExecuteUI ExecuteUI { get; init; }
+            public FooterUI FooterUI { get; init; }
+        }
+
+        private SetupExecution _execution;
+        private Styles _styles;
         
         private SetupConfiguration _configuration;
         
         private SettingsProfileConfiguration _settingsProfileConfiguration;
-        private FolderStructureConfiguration _folderStructureConfiguration;
         private PackagesSettingsConfiguration _packagesSettingsConfiguration;
         private AssetsSettingsConfiguration _assetsSettingsConfiguration;
-        private ProjectSettingsConfiguration _projectSettingsConfiguration;
-        private MiscSettingsConfiguration _miscSettingsConfiguration;
         
         private HeaderUI _headerUI;
         private ProfileSettingsUI _profileSettingsUI;
@@ -39,60 +57,49 @@ namespace ConiferInit.Editor
 
         private void OnEnable()
         {
-            InitializeConfiguration();
-            
-            InitializeUI();
-
-            _execution.Initialize();
+            CompositionRoot.ResolveWindowDependencies(this);
         }
 
 
-        private void InitializeConfiguration()
+        public void Construct(Dependencies dependencies)
         {
-            _settingsProfileConfiguration = new SettingsProfileConfiguration(ConfigurationCache.instance);
-            _settingsProfileConfiguration.Initialize();
+            _execution = dependencies.Execution;
+            _styles = dependencies.Styles;
+            
+            _configuration = dependencies.Configuration;
+            _settingsProfileConfiguration = dependencies.SettingsProfileConfiguration;
+            _packagesSettingsConfiguration = dependencies.PackagesSettingsConfiguration;
+            _assetsSettingsConfiguration = dependencies.AssetsSettingsConfiguration;
+
+            _headerUI = dependencies.HeaderUI;
+            _profileSettingsUI = dependencies.ProfileSettingsUI;
+            _folderStructureUI = dependencies.FolderStructureUI;
+            _packagesSettingsUI = dependencies.PackagesSettingsUI;
+            _packagesSettingsUI = dependencies.PackagesSettingsUI;
+            _assetsSettingsUI = dependencies.AssetsSettingsUI;
+            _projectSettingsUI = dependencies.ProjectSettingsUI;
+            _miscSettingsUI = dependencies.MiscSettingsUI;
+            _executeUI = dependencies.ExecuteUI;
+            _footerUI = dependencies.FooterUI;
+            
             _settingsProfileConfiguration.ApplyingProfile += ResetTemporaryState;
-
-            _folderStructureConfiguration =
-                new FolderStructureConfiguration(_settingsProfileConfiguration, ConfigurationCache.instance);
-
-            _packagesSettingsConfiguration = new PackagesSettingsConfiguration(ConfigurationCache.instance);
-            _packagesSettingsConfiguration.Initialize();
-
-            _assetsSettingsConfiguration = new AssetsSettingsConfiguration(ConfigurationCache.instance);
-            _assetsSettingsConfiguration.Initialize();
-
-            _projectSettingsConfiguration = new ProjectSettingsConfiguration(ConfigurationCache.instance);
-
-            _miscSettingsConfiguration = new MiscSettingsConfiguration(ConfigurationCache.instance);
-            
-            _configuration = new SetupConfiguration(ConfigurationCache.instance, ExecutionCache.instance,
-                _settingsProfileConfiguration, _packagesSettingsConfiguration, _assetsSettingsConfiguration);
-            _configuration.Initialize();
-        }
-
-
-        private void InitializeUI()
-        {
-            _headerUI = new HeaderUI(_configuration, _execution, _styles);
             _headerUI.UninstallRequested += OnUninstallRequested;
-            
-            _profileSettingsUI = new ProfileSettingsUI(_settingsProfileConfiguration, _styles);
-            _folderStructureUI = new FolderStructureUI(_folderStructureConfiguration, _styles);
-            _packagesSettingsUI = new PackagesSettingsUI(_packagesSettingsConfiguration, _styles);
-            _assetsSettingsUI = new AssetsSettingsUI(_assetsSettingsConfiguration, _styles);
-            _projectSettingsUI = new ProjectSettingsUI(_projectSettingsConfiguration, _styles);
-            _miscSettingsUI = new MiscSettingsUI(_miscSettingsConfiguration, _styles);
-            
-            _executeUI = new ExecuteUI(_execution, _styles);
-            
-            _footerUI = new FooterUI(_styles);
         }
 
 
-        private void OnInspectorUpdate()
+        public void Initialize()
         {
-            Repaint();
+            _settingsProfileConfiguration.Initialize();
+            _packagesSettingsConfiguration.Initialize();
+            _assetsSettingsConfiguration.Initialize();
+        }
+
+
+        private void ResetTemporaryState()
+        {
+            _folderStructureUI.ResetTemporaryState();
+            _packagesSettingsUI.ResetTemporaryState();
+            _assetsSettingsUI.ResetTemporaryState();
         }
 
 
@@ -107,7 +114,13 @@ namespace ConiferInit.Editor
             AssetDatabase.DeleteAsset("Assets/Editor/ICSharpCode.SharpZipLib.dll");
         }
 
-        
+
+        private void OnInspectorUpdate()
+        {
+            Repaint();
+        }
+
+
         private void OnGUI()
         {
             if (!_styles.Initialized)
@@ -155,16 +168,8 @@ namespace ConiferInit.Editor
             
             GUILayout.FlexibleSpace();
         }
-        
 
-        private void ResetTemporaryState()
-        {
-            _folderStructureUI.ResetTemporaryState();
-            _packagesSettingsUI.ResetTemporaryState();
-            _assetsSettingsUI.ResetTemporaryState();
-        }
-        
-        
+
         private void Update()
         {
             _configuration.Update();

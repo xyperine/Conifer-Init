@@ -25,14 +25,10 @@ namespace ConiferInit.Editor.Configuration
             _profileConfiguration = profileConfiguration;
             _packagesConfiguration = packagesConfiguration;
             _assetsConfiguration = assetsConfiguration;
-        }
-        
-        
-        public void Initialize()
-        {
+            
             _profileConfiguration.AppliedProfile += OnAppliedProfile;
         }
-
+        
 
         private void OnAppliedProfile()
         {
