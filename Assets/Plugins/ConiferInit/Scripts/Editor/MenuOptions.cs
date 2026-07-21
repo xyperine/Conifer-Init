@@ -38,58 +38,29 @@ namespace ConiferInit.Editor
 
 
 #if CONIFER_INIT_DEV
-        [MenuItem(EXPORT_MENU_PATH, false, 100)]
-        private static async void ExportPackage()
+        [Flags]
+        private enum ExportOptions
         {
-            string[] auxFileNames =
-                {"LICENSE", "CHANGELOG.md", "NOTICES", "User Guide.pdf"};
-            
-            // Move all auxiliary files in
-            foreach (string fileName in auxFileNames)
-            {
-                string path = Path.Combine(Environment.CurrentDirectory, fileName);
-                File.Copy(path, Path.Combine(Application.dataPath, fileName));
-
-                AssetDatabase.Refresh();
-                
-                string result = AssetDatabase.MoveAsset(Path.Combine("Assets", fileName),
-                    Path.Combine("Assets", "Plugins", "ConiferInit", fileName));
-                
-                Debug.Log(result);
-                
-                AssetDatabase.Refresh();
-            }
-            
-            AssetDatabase.Refresh();
-            
-            // Export
-            string pluginPath = Path.Combine(Application.dataPath, "Plugins", "ConiferInit");
-            string[] filesWithoutMetas = Directory.GetFileSystemEntries(pluginPath, "*", SearchOption.AllDirectories)
-                .Where(e => !e.EndsWith(".meta"))
-                .Select(e => e.Replace(Application.dataPath, "Assets"))
-                .ToArray();
-
-            List<string> pathsToExport = new List<string>();
-            pathsToExport.Add(Path.Combine("Assets", "Editor", "ICSharpCode.SharpZipLib.dll"));
-            pathsToExport.AddRange(filesWithoutMetas);
-            
-            AssetDatabase.ExportPackage(pathsToExport.ToArray(),
-                $"Conifer_Init_{PlayerSettings.bundleVersion}.unitypackage",
-                ExportPackageOptions.Default);
-
-            await Task.Delay(1000);
-            
-            // Delete auxiliary files
-            foreach (string fileName in auxFileNames)
-            {
-                string path = Path.Combine("Assets", "Plugins", "ConiferInit", fileName);
-                AssetDatabase.DeleteAsset(path);
-            }
+            Default = 0,
+            WithoutTests = 1,
+        }
+        
+        
+        [MenuItem(EXPORT_MENU_PATH, false, 100)]
+        private static void ExportPackageDefault()
+        {
+            ExportPackage(ExportOptions.Default);
         }
 
 
         [MenuItem(EXPORT_WITHOUT_TESTS_MENU_PATH, false, 101)]
-        private static async void ExportPackageWithoutTests()
+        private static void ExportPackageWithoutTests()
+        {
+            ExportPackage(ExportOptions.WithoutTests);
+        }
+
+
+        private static async void ExportPackage(ExportOptions options)
         {
             string[] auxFileNames =
                 {"LICENSE", "CHANGELOG.md", "NOTICES", "User Guide.pdf"};
@@ -104,8 +75,11 @@ namespace ConiferInit.Editor
                 
                 string result = AssetDatabase.MoveAsset(Path.Combine("Assets", fileName),
                     Path.Combine("Assets", "Plugins", "ConiferInit", fileName));
-                
-                Debug.Log(result);
+
+                if (!string.IsNullOrWhiteSpace(result))
+                {
+                    Debug.Log(result);
+                }
                 
                 AssetDatabase.Refresh();
             }
@@ -114,15 +88,19 @@ namespace ConiferInit.Editor
             
             // Export
             string pluginPath = Path.Combine(Application.dataPath, "Plugins", "ConiferInit");
-            string testsPath = Path.Combine(pluginPath, "Scripts", "Tests");
-            string[] filesWithoutTests = Directory.GetFileSystemEntries(pluginPath, "*", SearchOption.AllDirectories)
-                .Where(e => !e.EndsWith(".meta")).Where(e => !e.Contains(testsPath))
-                .Select(e => e.Replace(Application.dataPath, "Assets"))
-                .ToArray();
+            IEnumerable<string> potentialFiles = Directory.GetFileSystemEntries(pluginPath, "*", SearchOption.AllDirectories);
+            potentialFiles = potentialFiles.Where(e => !e.EndsWith(".meta"));
+            if (options.HasFlag(ExportOptions.WithoutTests))
+            {
+                string testsPath = Path.Combine(pluginPath, "Scripts", "Tests");
+                potentialFiles = potentialFiles.Where(e => !e.Contains(testsPath));
+            }
+            potentialFiles = potentialFiles.Select(e => e.Replace(Application.dataPath, "Assets"));
+            string[] files = potentialFiles.ToArray();
 
             List<string> pathsToExport = new List<string>();
             pathsToExport.Add(Path.Combine("Assets", "Editor", "ICSharpCode.SharpZipLib.dll"));
-            pathsToExport.AddRange(filesWithoutTests);
+            pathsToExport.AddRange(files);
             
             AssetDatabase.ExportPackage(pathsToExport.ToArray(),
                 $"Conifer_Init_{PlayerSettings.bundleVersion}.unitypackage",
