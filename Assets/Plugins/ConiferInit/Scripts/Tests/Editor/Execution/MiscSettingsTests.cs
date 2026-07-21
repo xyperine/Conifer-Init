@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 
-namespace ConiferInit.Editor.Tests
+namespace ConiferInit.Editor.Tests.Execution
 {
     internal sealed class MiscSettingsTests
     {

@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace ConiferInit.Editor.Tests
+namespace ConiferInit.Editor.Tests.Execution
 {
     internal sealed class AssetsTests
     {

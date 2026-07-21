@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Build;
 
-namespace ConiferInit.Editor.Tests
+namespace ConiferInit.Editor.Tests.Execution
 {
     internal sealed class ProjectSettingsTests
     {

@@ -3,7 +3,7 @@ using System.IO;
 using ConiferInit.Editor.Configuration;
 using NUnit.Framework;
 
-namespace ConiferInit.Editor.Tests
+namespace ConiferInit.Editor.Tests.Configuration
 {
     internal sealed class SettingsProfilePersistencyTests
     {

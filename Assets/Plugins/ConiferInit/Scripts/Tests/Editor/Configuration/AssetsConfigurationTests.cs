@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Linq;
 using ConiferInit.Editor.Configuration;
 using NUnit.Framework;
 using UnityEngine;
 
-namespace ConiferInit.Editor.Tests
+namespace ConiferInit.Editor.Tests.Configuration
 {
     internal sealed class AssetsConfigurationTests
     {

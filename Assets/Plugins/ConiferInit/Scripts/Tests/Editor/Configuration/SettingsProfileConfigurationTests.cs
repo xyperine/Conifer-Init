@@ -5,7 +5,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace ConiferInit.Editor.Tests
+namespace ConiferInit.Editor.Tests.Configuration
 {
     internal sealed class SettingsProfileConfigurationTests
     {
