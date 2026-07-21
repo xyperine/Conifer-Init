@@ -13,7 +13,17 @@ namespace ConiferInit.Editor
 {
     internal static class MenuOptions
     {
-        [MenuItem("Tools/Conifer Init")]
+#if CONIFER_INIT_DEV
+        private const string WINDOW_MENU_PATH = "Tools/Conifer Init/Window";
+        private const string EXPORT_MENU_PATH = "Tools/Conifer Init/Export";
+        private const string EXPORT_WITHOUT_TESTS_MENU_PATH = "Tools/Conifer Init/Export (no tests)";
+        private const string OPEN_PROFILE_STORAGE_MENU_PATH = "Tools/Conifer Init/Open profiles storage";
+#else
+        private const string WINDOW_MENU_PATH = "Tools/Conifer Init";
+#endif
+        
+        
+        [MenuItem(WINDOW_MENU_PATH, false, 0)]
         private static void ShowWindow()
         {
             if (!EditorWindow.HasOpenInstances<Window>())
@@ -28,15 +38,58 @@ namespace ConiferInit.Editor
 
 
 #if CONIFER_INIT_DEV
-        [MenuItem("Tools/Open Conifer Init profiles storage")]
-        private static void OpenProfilesStorage()
+        [MenuItem(EXPORT_MENU_PATH, false, 100)]
+        private static async void ExportPackage()
         {
-            Process.Start(SettingsProfilePersistency.StoragePath);
+            string[] auxFileNames =
+                {"LICENSE", "CHANGELOG.md", "NOTICES", "User Guide.pdf"};
+            
+            // Move all auxiliary files in
+            foreach (string fileName in auxFileNames)
+            {
+                string path = Path.Combine(Environment.CurrentDirectory, fileName);
+                File.Copy(path, Path.Combine(Application.dataPath, fileName));
+
+                AssetDatabase.Refresh();
+                
+                string result = AssetDatabase.MoveAsset(Path.Combine("Assets", fileName),
+                    Path.Combine("Assets", "Plugins", "ConiferInit", fileName));
+                
+                Debug.Log(result);
+                
+                AssetDatabase.Refresh();
+            }
+            
+            AssetDatabase.Refresh();
+            
+            // Export
+            string pluginPath = Path.Combine(Application.dataPath, "Plugins", "ConiferInit");
+            string[] filesWithoutMetas = Directory.GetFileSystemEntries(pluginPath, "*", SearchOption.AllDirectories)
+                .Where(e => !e.EndsWith(".meta"))
+                .Select(e => e.Replace(Application.dataPath, "Assets"))
+                .ToArray();
+
+            List<string> pathsToExport = new List<string>();
+            pathsToExport.Add(Path.Combine("Assets", "Editor", "ICSharpCode.SharpZipLib.dll"));
+            pathsToExport.AddRange(filesWithoutMetas);
+            
+            AssetDatabase.ExportPackage(pathsToExport.ToArray(),
+                $"Conifer_Init_{PlayerSettings.bundleVersion}.unitypackage",
+                ExportPackageOptions.Default);
+
+            await Task.Delay(1000);
+            
+            // Delete auxiliary files
+            foreach (string fileName in auxFileNames)
+            {
+                string path = Path.Combine("Assets", "Plugins", "ConiferInit", fileName);
+                AssetDatabase.DeleteAsset(path);
+            }
         }
 
 
-        [MenuItem("Tools/Export Conifer Init")]
-        private static async void ExportPackage()
+        [MenuItem(EXPORT_WITHOUT_TESTS_MENU_PATH, false, 101)]
+        private static async void ExportPackageWithoutTests()
         {
             string[] auxFileNames =
                 {"LICENSE", "CHANGELOG.md", "NOTICES", "User Guide.pdf"};
@@ -83,6 +136,13 @@ namespace ConiferInit.Editor
                 string path = Path.Combine("Assets", "Plugins", "ConiferInit", fileName);
                 AssetDatabase.DeleteAsset(path);
             }
+        }
+
+
+        [MenuItem(OPEN_PROFILE_STORAGE_MENU_PATH, false, 102)]
+        private static void OpenProfilesStorage()
+        {
+            Process.Start(SettingsProfilePersistency.StoragePath);
         }
 #endif
     }
