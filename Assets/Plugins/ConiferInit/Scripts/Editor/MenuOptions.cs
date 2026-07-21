@@ -104,7 +104,7 @@ namespace ConiferInit.Editor
             
             AssetDatabase.ExportPackage(pathsToExport.ToArray(),
                 $"Conifer_Init_{PlayerSettings.bundleVersion}.unitypackage",
-                ExportPackageOptions.Default);
+                ExportPackageOptions.Interactive);
 
             await Task.Delay(1000);
             
