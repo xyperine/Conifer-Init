@@ -21,14 +21,19 @@ namespace ConiferInit.Editor.Execution
         }
         
         
-        public static void SetupScene(string sceneName)
+        public static void SetupScene(string sceneName, string originalSceneName = "SampleScene")
         {
             if (!sceneName.EndsWith(".unity"))
             {
                 sceneName += ".unity";
             }
+
+            if (!originalSceneName.EndsWith(".unity"))
+            {
+                originalSceneName += ".unity";
+            }
             
-            const string sampleScenePath = "Assets/Scenes/SampleScene.unity";
+            string sampleScenePath = $"Assets/Scenes/{originalSceneName}";
             if (AssetDatabase.AssetPathExists(sampleScenePath))
             {
                 AssetDatabase.RenameAsset(sampleScenePath, sceneName);
@@ -40,7 +45,7 @@ namespace ConiferInit.Editor.Execution
             else
             {
                 Debug.LogWarning(
-                    "The default scene was not renamed. Couldn't find SampleScene. Either the scene was already renamed earlier, or the project was created with a different default scene.");
+                    $"The default scene was not renamed. Couldn't find {originalSceneName}. Either the scene was already renamed earlier, or the project was created with a different default scene.");
             }
         }
 
