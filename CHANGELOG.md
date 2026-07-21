@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Option to import tests along with other tool files.
+
 ## [0.1.1] - 2026-Jul-17
 
 ### Changed
