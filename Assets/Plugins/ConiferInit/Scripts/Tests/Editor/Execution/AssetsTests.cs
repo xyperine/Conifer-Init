@@ -38,7 +38,7 @@ namespace ConiferInit.Editor.Tests.Execution
                 Assets.Import(fullPath);
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(0.5f);
             
             // Assert
             foreach (string importedFile in _importedFiles)
@@ -62,7 +62,7 @@ namespace ConiferInit.Editor.Tests.Execution
                 Assets.Import(fullPath);
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSecondsRealtime(0.5f);
             
             // Assert
             foreach (string asset in assetsToImport)
