@@ -17,9 +17,9 @@
   <a href="https://dotnet.microsoft.com/en-us/languages/csharp"><img src="https://img.shields.io/badge/C%23-9179E4?style=for-the-badge&logo=csharp&logoColor=white" alt="C#"></a>
 </p>
 
-<p align="center" class="readme-image">
+<div align="center" class="readme-image">
   <img src="img/Demo.gif" alt="Demonstration GIF">
-</p>
+</div>
 
 ## Table of Contents 📋
 * [About ℹ️](#about-ℹ️)
