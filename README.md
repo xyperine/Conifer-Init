@@ -1,23 +1,25 @@
-<div class="readme-image">
+<h1 align="center">
+  <img src="img/Banner.png" alt="Conifer Init banner">
+</h1>
 
-![Banner](img/Banner.png)
+<h3 align="center">Unity plugin for automating project setup.</h3>
 
-</div>
+<p align="center">
+  <a href="https://github.com/xyperine/Conifer-Init/releases/latest"><img src="https://img.shields.io/badge/version-0.1.1-blue?style=for-the-badge" alt="Version"></a>
+  <a href="https://github.com/xyperine/Conifer-Init/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/xyperine/Conifer-Init/commits/main"><img src="https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge" alt="Status"></a>
+  <a href="https://github.com/xyperine/Conifer-Init/actions/workflows/testing.yml"><img src="https://img.shields.io/github/actions/workflow/status/xyperine/Conifer-Init/testing.yml?style=for-the-badge&label=tests&color=brightgreen" alt="Tests"></a>
+  <a href="https://xyperine.github.io/Conifer-Init"><img src="https://img.shields.io/badge/docs-partial-yellow?style=for-the-badge" alt="Documentation"></a>
+</p>
 
-[![Version](https://img.shields.io/badge/version-0.1.1-blue?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/releases/latest)
-[![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/blob/main/LICENSE)
-[![Status](https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/commits/main)
-[![Tests](https://img.shields.io/github/actions/workflow/status/xyperine/Conifer-Init/testing.yml?style=for-the-badge&label=tests&color=brightgreen)](https://github.com/xyperine/Conifer-Init/actions/workflows/testing.yml)
-[![Documentation](https://img.shields.io/badge/docs-partial-yellow?style=for-the-badge)](https://xyperine.github.io/Conifer-Init)
+<p align="center">
+  <a href="https://unity.com"><img src="https://img.shields.io/badge/Unity-100000?style=for-the-badge&logo=unity&logoColor=white" alt="Unity"></a>
+  <a href="https://dotnet.microsoft.com/en-us/languages/csharp"><img src="https://img.shields.io/badge/C%23-9179E4?style=for-the-badge&logo=csharp&logoColor=white" alt="C#"></a>
+</p>
 
-[![Unity](https://img.shields.io/badge/Unity-100000?style=for-the-badge&logo=unity&logoColor=white)](https://unity.com)
-[![C#](https://img.shields.io/badge/C%23-9179E4?style=for-the-badge&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/en-us/languages/csharp)
-
-<div class="readme-image">
- 
-![Demonstration GIF](img/Demo.gif)
-
-</div>
+<p align="center">
+  <img src="img/Demo.gif" alt="Demonstration GIF">
+</p>
 
 ## Table of Contents 📋
 * [About ℹ️](#about-ℹ️)
