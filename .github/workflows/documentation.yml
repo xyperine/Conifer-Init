@@ -1,4 +1,4 @@
-name: Build Doxygen Documentation
+name: Generate Documentation 📖
 
 on:
   push:
