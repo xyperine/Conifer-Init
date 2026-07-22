@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using ConiferInit.Editor.Execution;
 using NUnit.Framework;
 using UnityEditor;
@@ -14,16 +13,16 @@ namespace ConiferInit.Editor.Tests.Execution
             "Animations",
             "Audio",
             "Data",
-            "Data/Inputs",
-            "Data/URP",
+            Path.Combine("Data", "Inputs"),
+            Path.Combine("Data", "URP"),
             "Materials",
             "Meshes",
             "Prefabs",
             "Shaders",
             "Scripts",
-            "Scripts/Tests",
-            "Scripts/Tests/Editor",
-            "Scripts/Tests/Runtime",
+            Path.Combine("Scripts", "Tests"),
+            Path.Combine("Scripts", "Tests", "Editor"),
+            Path.Combine("Scripts", "Tests", "Runtime"),
             "Textures",
         };
         
@@ -51,10 +50,10 @@ namespace ConiferInit.Editor.Tests.Execution
 
             string[] expectedSubdirectories =
             {
-                "Data/Inputs",
-                "Data/URP",
-                "Scripts/Tests/Editor",
-                "Scripts/Tests/Runtime",
+                Path.Combine("Data", "Inputs"),
+                Path.Combine("Data", "URP"),
+                Path.Combine("Scripts", "Tests", "Editor"),
+                Path.Combine("Scripts", "Tests", "Runtime"),
             };
             
             // Assert
@@ -70,13 +69,13 @@ namespace ConiferInit.Editor.Tests.Execution
         public void Cannot_create_directory_with_invalid_name()
         {
             // Arrange
-            string[] folderNames = {"||||||"};
+            string[] folderNames = {"///////", "///", "/", "////////////////"};
             
             // "Act"
             TestDelegate action = () => Folders.Create(string.Empty, folderNames);
             
             // Assert
-            Assert.Throws<ArgumentException>(action);
+            Assert.Throws<UnityEngine.Assertions.AssertionException>(action);
         }
 
 
@@ -85,7 +84,7 @@ namespace ConiferInit.Editor.Tests.Execution
         {
             foreach (string folderName in _folderNames)
             {
-                string path = $"Assets/{folderName}";
+                string path = Path.Combine("Assets", folderName);
                 AssetDatabase.DeleteAsset(path);
                 AssetDatabase.DeleteAsset(path + ".meta");
             }

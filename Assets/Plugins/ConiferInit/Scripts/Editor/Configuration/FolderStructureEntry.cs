@@ -234,7 +234,7 @@ namespace ConiferInit.Editor.Configuration
         /// <returns>The topmost parent folder.</returns>
         public static void Create(FolderStructureEntry root, string path)
         {
-            string[] folders = path.Split('/');
+            string[] folders = path.Split(Path.DirectorySeparatorChar);
             FolderStructureEntry current = root;
 
             for (int i = 0; i < folders.Length; i++)

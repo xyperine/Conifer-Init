@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using ConiferInit.Editor.Configuration;
 using NUnit.Framework;
 
@@ -11,17 +12,17 @@ namespace ConiferInit.Editor.Tests.Configuration
             "Animations",
             "Audio",
             "Data",
-            "Data\\Inputs",
-            "Data\\URP",
+            Path.Combine("Data", "Inputs"),
+            Path.Combine("Data", "URP"),
             "Materials",
             "Meshes",
             "Plugins",
             "Prefabs",
             "Shaders",
             "Scripts",
-            "Scripts\\Tests",
-            "Scripts\\Tests\\Editor",
-            "Scripts\\Tests\\Runtime",
+            Path.Combine("Scripts", "Tests"),
+            Path.Combine("Scripts", "Tests", "Editor"),
+            Path.Combine("Scripts", "Tests", "Runtime"),
             "Textures",
         };
         
@@ -32,8 +33,8 @@ namespace ConiferInit.Editor.Tests.Configuration
             // Arrange
             string[] fullPaths =
             {
-                "A/B/C/D",
-                "E/F/G",
+                Path.Combine("A", "B", "C", "D"),
+                Path.Combine("E", "F", "G"),
             };
             
             // Act
@@ -43,12 +44,12 @@ namespace ConiferInit.Editor.Tests.Configuration
             string[] expectedFolderNames =
             {
                 "A",
-                @"A\B",
-                @"A\B\C",
-                @"A\B\C\D",
+                Path.Combine("A", "B"),
+                Path.Combine("A", "B", "C"),
+                Path.Combine("A", "B", "C", "D"),
                 "E",
-                @"E\F",
-                @"E\F\G",
+                Path.Combine("E", "F"),
+                Path.Combine("E", "F", "G"),
             };
             string[] actual = entry.ToFolderNames().OrderBy(n => n).ToArray();
             Assert.IsTrue(expectedFolderNames.SequenceEqual(actual));
