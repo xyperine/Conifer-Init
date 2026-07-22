@@ -1,4 +1,4 @@
-<h1 align="center">
+<h1 align="center" class="readme-image">
   <img src="img/Banner.png" alt="Conifer Init banner">
 </h1>
 
@@ -17,7 +17,7 @@
   <a href="https://dotnet.microsoft.com/en-us/languages/csharp"><img src="https://img.shields.io/badge/C%23-9179E4?style=for-the-badge&logo=csharp&logoColor=white" alt="C#"></a>
 </p>
 
-<p align="center">
+<p align="center" class="readme-image">
   <img src="img/Demo.gif" alt="Demonstration GIF">
 </p>
 
