@@ -5,11 +5,12 @@
 </div>
 
 [![Version](https://img.shields.io/badge/version-0.1.1-blue?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/releases/latest)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/blob/main/LICENSE)
-[![Status](https://img.shields.io/badge/status-active-green?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/commits/main)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/blob/main/LICENSE)
+[![Status](https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge)](https://github.com/xyperine/Conifer-Init/commits/main)
+[![Tests](https://img.shields.io/github/actions/workflow/status/xyperine/Conifer-Init/testing.yml?style=for-the-badge&label=tests&color=brightgreen)](https://github.com/xyperine/Conifer-Init/actions/workflows/testing.yml)
 [![Documentation](https://img.shields.io/badge/docs-partial-yellow?style=for-the-badge)](https://xyperine.github.io/Conifer-Init)
 [![Unity](https://img.shields.io/badge/Unity-100000?style=for-the-badge&logo=unity&logoColor=white)](https://unity.com)
-[![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/en-us/languages/csharp)
+[![C#](https://img.shields.io/badge/C%23-9179E4?style=for-the-badge&logo=csharp&logoColor=white)](https://dotnet.microsoft.com/en-us/languages/csharp)
 
 <div class="readme-image">
  
