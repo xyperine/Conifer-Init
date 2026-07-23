@@ -70,9 +70,8 @@ See the *Important Notes* section in the [User Guide](https://github.com/xyperin
 2. [Import](https://docs.unity3d.com/Manual/AssetPackagesImport.html) it in Unity
 
 ## Future 🔮
-I am planning to add a few more features. The project will be receiving occasional bug fixes, compatibility updates, and maybe QoL updates.
+The project will be receiving occasional bug fixes, compatibility updates, and maybe QoL updates. Most likely, there will be no new features, but I could add:
 
-Potential features:
 * Hooks - will allow users to write their own setup steps that will be executed during the setup.
 * Report generation - the tool will generate a nicely formatted log.
 * Delete packages - support for scheduling pre-installed packages for deletion.
