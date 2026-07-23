@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/xyperine/Conifer-Init/releases/latest"><img src="https://img.shields.io/badge/version-0.1.2-blue?style=for-the-badge" alt="Version"></a>
   <a href="https://github.com/xyperine/Conifer-Init/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge" alt="License"></a>
-  <a href="https://github.com/xyperine/Conifer-Init/commits/main"><img src="https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge" alt="Status"></a>
+  <a href="https://github.com/xyperine/Conifer-Init/commits/main"><img src="https://img.shields.io/badge/status-maintained-yellow?style=for-the-badge" alt="Status"></a>
   <a href="https://github.com/xyperine/Conifer-Init/actions/workflows/testing.yml"><img src="https://img.shields.io/github/actions/workflow/status/xyperine/Conifer-Init/testing.yml?style=for-the-badge&label=tests&color=brightgreen" alt="Tests"></a>
   <a href="https://xyperine.github.io/Conifer-Init"><img src="https://img.shields.io/badge/docs-partial-yellow?style=for-the-badge" alt="Documentation"></a>
 </p>
@@ -38,6 +38,11 @@
 * [Support 💝](#support-)
 
 ## About ℹ️
+
+> [!NOTE]
+> ### Maintenance policy
+> I am not actively working on this project. Sometimes I release updates in my spare time, especially when compatibility issues or serious bugs arise.
+
 Conifer Init automates some common Unity project setup tasks such as folder structure creation, package installation, asset import, and project configuration.
 
 The feature set is based solely on what I need to do to set up a Unity project. I made this tool to automate and standardize the setup process for my future Unity projects, saving time and resources that can be spent on more important tasks.
