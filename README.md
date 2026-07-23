@@ -5,7 +5,7 @@
 <h3 align="center">Unity plugin for automating project setup.</h3>
 
 <p align="center">
-  <a href="https://github.com/xyperine/Conifer-Init/releases/latest"><img src="https://img.shields.io/badge/version-0.1.1-blue?style=for-the-badge" alt="Version"></a>
+  <a href="https://github.com/xyperine/Conifer-Init/releases/latest"><img src="https://img.shields.io/badge/version-0.1.2-blue?style=for-the-badge" alt="Version"></a>
   <a href="https://github.com/xyperine/Conifer-Init/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-brightgreen?style=for-the-badge" alt="License"></a>
   <a href="https://github.com/xyperine/Conifer-Init/commits/main"><img src="https://img.shields.io/badge/status-active-brightgreen?style=for-the-badge" alt="Status"></a>
   <a href="https://github.com/xyperine/Conifer-Init/actions/workflows/testing.yml"><img src="https://img.shields.io/github/actions/workflow/status/xyperine/Conifer-Init/testing.yml?style=for-the-badge&label=tests&color=brightgreen" alt="Tests"></a>
